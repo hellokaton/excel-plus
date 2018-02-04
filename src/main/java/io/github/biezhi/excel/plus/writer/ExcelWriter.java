@@ -75,13 +75,9 @@ public interface ExcelWriter {
         }
         WritableCellFormat format = new WritableCellFormat(font);
         try {
-            //左右居中
             format.setAlignment(jxl.format.Alignment.CENTRE);
-            //上下居中
             format.setVerticalAlignment(jxl.format.VerticalAlignment.CENTRE);
-            //黑色边框
             format.setBorder(Border.ALL, BorderLineStyle.THIN, Colour.BLACK);
-            //黄色背景
             format.setBackground(Colour.GRAY_25);
         } catch (WriteException e) {
             e.printStackTrace();
