@@ -15,6 +15,12 @@
             <version>2.6.12</version>
         </dependency>
         <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>3.0.1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>io.github.benas</groupId>
             <artifactId>random-beans</artifactId>
             <version>3.7.0</version>

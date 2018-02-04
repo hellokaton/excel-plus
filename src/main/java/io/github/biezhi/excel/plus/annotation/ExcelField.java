@@ -1,5 +1,7 @@
 package io.github.biezhi.excel.plus.annotation;
 
+import io.github.biezhi.excel.plus.Constant;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -11,9 +13,13 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface ReadField {
+public @interface ExcelField {
 
-    int order();
+    int readOrder() default Constant.DEFAULT_ORDER;
+
+    int writeOrder() default Constant.DEFAULT_ORDER;
+
+    String title();
 
     String datePattern() default "yyyy-MM-dd";
 

@@ -13,7 +13,7 @@ Easier to read and generate an excel file, supports 2003 and 2007.
 - Easy to use
 - Annotation driven
 - Based java 8
-- Support `xls` and `xlsx`
+- Support `xls`、`xlsx`、`csv`
 
 # Usage
 
@@ -26,6 +26,43 @@ Add maven dependency
     <version>0.0.1</version>
 </dependency>
 ```
+
+`**Export as file**`
+
+```java
+ExcelPlus excelPlus = new ExcelPlus();
+List<Order> orders = queryData();
+
+excelPlus.exportor(orders).writeAsFile(new File("order-list.xls"));
+```
+
+`**Browser download**`
+
+```java
+ExcelPlus excelPlus = new ExcelPlus();
+List<Order> orders = queryData();
+
+excelPlus.exportor(orders)
+         .writeAsResponse(ResponseWrapper.create(HttpServletResponse, "order-list.xls"));
+```
+
+`**Read as file**`
+
+```java
+ExcelPlus excelPlus = new ExcelPlus();
+List<Order>  orders = excelPlus.readAsFile(new File("/Users/biezhi/Desktop/order.xls"), Order.class);
+```
+
+`**Read as stream**`
+
+```java
+ExcelPlus excelPlus = new ExcelPlus();
+List<Order>  orders = excelPlus.readAsStream(inputStream, Order.class);
+```
+
+# Advanced
+
+`**Custom exportor style**`
 
 # License
 

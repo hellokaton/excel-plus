@@ -9,4 +9,4 @@ notifications:
 sudo: false
 
 before_install:
-    - export TZ='Asia/Shanghai'
+    - writer TZ='Asia/Shanghai'

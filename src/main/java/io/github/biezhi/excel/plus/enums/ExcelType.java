@@ -5,5 +5,5 @@ package io.github.biezhi.excel.plus.enums;
  * @date 2018/2/4
  */
 public enum ExcelType {
-    XLS, XLSX
+    XLS, XLSX, CSV
 }

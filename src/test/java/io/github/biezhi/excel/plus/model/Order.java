@@ -1,6 +1,6 @@
 package io.github.biezhi.excel.plus.model;
 
-import io.github.biezhi.excel.plus.annotation.WriteField;
+import io.github.biezhi.excel.plus.annotation.ExcelField;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -12,20 +12,26 @@ import java.util.Date;
  */
 public class Order implements Serializable {
 
-    @WriteField(order = 0, title = "订单编号")
-    private Long       id;
-    @WriteField(order = 1, title = "商品名称")
-    private String     productName;
-    @WriteField(order = 2, title = "商品价格")
+    @ExcelField(writeOrder = 0, title = "订单编号")
+    private Long id;
+
+    @ExcelField(writeOrder = 1, title = "商品名称")
+    private String productName;
+
+    @ExcelField(writeOrder = 2, title = "商品价格")
     private BigDecimal price;
-    @WriteField(order = 3, title = "购买用户")
-    private String     buyUser;
-    @WriteField(order = 4, title = "用户手机号")
-    private String     userMobile;
-    @WriteField(order = 5, title = "购买数量")
-    private Integer    count;
-    @WriteField(order = 6, title = "下单时间")
-    private Date       createTime;
+
+    @ExcelField(writeOrder = 3, title = "购买用户")
+    private String buyUser;
+
+    @ExcelField(writeOrder = 4, title = "用户手机号")
+    private String userMobile;
+
+    @ExcelField(writeOrder = 5, title = "购买数量")
+    private Integer count;
+
+    @ExcelField(writeOrder = 6, title = "下单时间")
+    private Date createTime;
 
     public Long getId() {
         return id;

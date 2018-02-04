@@ -13,8 +13,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface ExcelSheet {
 
-    String value() default "Sheet1";
-
-    String exportSheet() default "Sheet0";
+    String value() default "Sheet0";
 
 }

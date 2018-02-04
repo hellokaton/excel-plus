@@ -1,10 +1,10 @@
 package io.github.biezhi.excel.plus;
 
 import io.github.biezhi.excel.plus.exception.ExcelException;
-import io.github.biezhi.excel.plus.export.Exporter;
 import io.github.biezhi.excel.plus.model.Order;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.List;
 
 /**
@@ -13,15 +13,17 @@ import java.util.List;
  */
 public class OrderExample {
 
-    public static void main(String[] args) throws ExcelException {
+    private static final ExcelPlus excelPlus = new ExcelPlus();
+
+    public static void main(String[] args) throws ExcelException, FileNotFoundException {
         List<Order> orders = BeanData.randOrders(10);
-        System.out.println(orders);
+        // System.out.println(orders);
 
-        ExcelPlus excelPlus = new ExcelPlus();
-        excelPlus.export(
-                Exporter.create(orders)
-                        .asFile(new File("订单列表.xls")));
+        excelPlus.export(orders)
+                .writeAsFile(new File("订单列表.xls"));
 
+        List<Order>      orders1     = excelPlus.readAsFile(new File(""), Order.class);
+//        List<CardSecret> cardSecrets = excelPlus.readAsStream(new FileInputStream(new File("")), CardSecret.class);
 
     }
 
