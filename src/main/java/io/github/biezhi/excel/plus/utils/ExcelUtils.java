@@ -48,7 +48,7 @@ public class ExcelUtils {
             return Integer.compare(order1, order2);
         });
 
-        return list.stream().map(ExcelField::title).collect(Collectors.toList());
+        return list.stream().map(ExcelField::columnName).collect(Collectors.toList());
     }
 
     public static String getColumnValue(Object item, int order) {
@@ -117,6 +117,12 @@ public class ExcelUtils {
     }
 
     private static Object asObject(Field field, String value) {
+        ExcelField excelField = field.getAnnotation(ExcelField.class);
+        if (!excelField.convertType().equals(Converter.class)) {
+            Converter converter = newInstance(excelField.convertType());
+            return converter.read(value);
+        }
+
         if (field.getType().equals(String.class)) {
             return value;
         }
@@ -140,11 +146,6 @@ public class ExcelUtils {
         }
         if (field.getType().equals(Byte.class)) {
             return Byte.valueOf(value);
-        }
-        ExcelField excelField = field.getAnnotation(ExcelField.class);
-        if (!excelField.convertType().equals(Converter.class)) {
-            Converter converter = newInstance(excelField.convertType());
-            return converter.read(value);
         }
         return value;
     }

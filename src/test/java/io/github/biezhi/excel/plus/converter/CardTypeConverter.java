@@ -1,11 +1,6 @@
-package io.github.biezhi.excel.plus.converters;
-
-import io.github.biezhi.excel.plus.converter.Converter;
+package io.github.biezhi.excel.plus.converter;
 
 public class CardTypeConverter implements Converter<Integer> {
-
-    public CardTypeConverter() {
-    }
 
     @Override
     public String write(Integer value) {

@@ -2,7 +2,7 @@ package io.github.biezhi.excel.plus.model;
 
 import io.github.biezhi.excel.plus.annotation.ExcelField;
 import io.github.biezhi.excel.plus.converter.DateChineseConverter;
-import io.github.biezhi.excel.plus.converters.CardTypeConverter;
+import io.github.biezhi.excel.plus.converter.CardTypeConverter;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -16,16 +16,16 @@ import java.util.Date;
  */
 public class CardSecret implements Serializable {
 
-    @ExcelField(order = 0, title = "卡密类型", convertType = CardTypeConverter.class)
+    @ExcelField(order = 0, columnName = "卡密类型", convertType = CardTypeConverter.class)
     private Integer cardType;
 
-    @ExcelField(order = 1, title = "卡密")
+    @ExcelField(order = 1, columnName = "卡密")
     private String secret;
 
-    @ExcelField(order = 2, title = "面额")
+    @ExcelField(order = 2, columnName = "面额")
     private BigDecimal amount;
 
-    @ExcelField(order = 3, title = "过期时间", convertType = DateChineseConverter.class)
+    @ExcelField(order = 3, columnName = "过期时间", convertType = DateChineseConverter.class)
     private Date expiredDate;
 
     public CardSecret() {

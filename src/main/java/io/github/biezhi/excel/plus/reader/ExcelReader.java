@@ -45,7 +45,7 @@ public class ExcelReader<T> {
                 Cell   cell  = sheet.getCell(col, row);
                 String value = cell.getContents();
                 if (null != value && !value.isEmpty()) {
-                    ExcelUtils.writeToField(item.getClass(), col, cell.getContents());
+                    ExcelUtils.writeToField(item, col, cell.getContents());
                 }
             }
             list.add(item);

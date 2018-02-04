@@ -45,7 +45,7 @@ public @interface ExcelField {
      *
      * @return excel header column title
      */
-    String title();
+    String columnName();
 
     /**
      * @return
