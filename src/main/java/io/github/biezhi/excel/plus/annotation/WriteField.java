@@ -10,11 +10,11 @@ import java.lang.annotation.Target;
  * @date 2018/2/4
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface ExcelSheet {
+@Target(ElementType.FIELD)
+public @interface WriteField {
 
-    String value() default "Sheet1";
+    int order();
 
-    String exportSheet() default "Sheet0";
+    String title();
 
 }
