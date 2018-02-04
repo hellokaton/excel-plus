@@ -27,7 +27,7 @@ Add maven dependency
 </dependency>
 ```
 
-`**Export as file**`
+**Export as file**
 
 ```java
 ExcelPlus excelPlus = new ExcelPlus();
@@ -36,7 +36,7 @@ List<Order> orders = queryData();
 excelPlus.exportor(orders).writeAsFile(new File("order-list.xls"));
 ```
 
-`**Browser download**`
+**Browser download**
 
 ```java
 ExcelPlus excelPlus = new ExcelPlus();
@@ -46,14 +46,14 @@ excelPlus.exportor(orders)
          .writeAsResponse(ResponseWrapper.create(HttpServletResponse, "order-list.xls"));
 ```
 
-`**Read as file**`
+**Read as file**
 
 ```java
 ExcelPlus excelPlus = new ExcelPlus();
 List<Order>  orders = excelPlus.readAsFile(new File("/Users/biezhi/Desktop/order.xls"), Order.class);
 ```
 
-`**Read as stream**`
+**Read as stream**
 
 ```java
 ExcelPlus excelPlus = new ExcelPlus();
@@ -62,7 +62,7 @@ List<Order>  orders = excelPlus.readAsStream(inputStream, Order.class);
 
 # Advanced
 
-`**Custom exportor style**`
+**Custom export style**
 
 # License
 
