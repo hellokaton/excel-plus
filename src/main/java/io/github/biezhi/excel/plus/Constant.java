@@ -8,7 +8,14 @@ package io.github.biezhi.excel.plus;
  */
 public interface Constant {
 
+    /**
+     * The default worksheet name.
+     */
     String DEFAULT_SHEET_NAME = "Sheet0";
-    int    DEFAULT_ORDER      = -1;
+
+    /**
+     * The default column order
+     */
+    int DEFAULT_ORDER = -1;
 
 }
