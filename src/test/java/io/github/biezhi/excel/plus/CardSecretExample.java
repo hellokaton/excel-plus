@@ -17,16 +17,19 @@ public class CardSecretExample {
 
     private static final ExcelPlus excelPlus = new ExcelPlus();
 
-    public static void main(String[] args) throws ExcelException, FileNotFoundException {
+    public static void main(String[] args) throws ExcelException {
         List<CardSecret> cardSecrets = new ArrayList<>();
-        cardSecrets.add(new CardSecret("vlfdzepjmlz2y43z7er4", new BigDecimal("20")));
-        cardSecrets.add(new CardSecret("rasefq2rzotsmx526z6g", new BigDecimal("10")));
-        cardSecrets.add(new CardSecret("2ru44qut6neykb2380wt", new BigDecimal("50")));
-        cardSecrets.add(new CardSecret("srcb4c9fdqzuykd6q4zl", new BigDecimal("15")));
+        cardSecrets.add(new CardSecret(1, "vlfdzepjmlz2y43z7er4", new BigDecimal("20")));
+        cardSecrets.add(new CardSecret(2, "rasefq2rzotsmx526z6g", new BigDecimal("10")));
+        cardSecrets.add(new CardSecret(2, "2ru44qut6neykb2380wt", new BigDecimal("50")));
+        cardSecrets.add(new CardSecret(1, "srcb4c9fdqzuykd6q4zl", new BigDecimal("15")));
 
         excelPlus.export(cardSecrets)
                 .writeAsFile(new File("卡密列表.xls"));
 
+
+//        List<CardSecret> readList = excelPlus.readAsFile(new File("卡密列表.xls"), CardSecret.class);
+//        System.out.println(readList);
     }
 
 }

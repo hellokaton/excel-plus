@@ -1,6 +1,7 @@
 package io.github.biezhi.excel.plus.annotation;
 
 import io.github.biezhi.excel.plus.Constant;
+import io.github.biezhi.excel.plus.converter.Converter;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -8,6 +9,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * Model excel field bind
+ *
  * @author biezhi
  * @date 2018/2/4
  */
@@ -15,12 +18,38 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 public @interface ExcelField {
 
+    /**
+     * When the same field sequential read and write fields of use, for most cleanup.
+     * start from 0
+     *
+     * @return field order
+     */
+    int order() default Constant.DEFAULT_ORDER;
+
+    /**
+     * Set the order to the read excel field, starting at 0.
+     *
+     * @return read order
+     */
     int readOrder() default Constant.DEFAULT_ORDER;
 
+    /**
+     * Set the order to the write excel field, starting at 0.
+     *
+     * @return write order
+     */
     int writeOrder() default Constant.DEFAULT_ORDER;
 
+    /**
+     * Set the field to write to the header name of Excel.
+     *
+     * @return excel header column title
+     */
     String title();
 
-    String datePattern() default "yyyy-MM-dd";
+    /**
+     * @return
+     */
+    Class<? extends Converter> convertType() default Converter.class;
 
 }

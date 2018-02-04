@@ -1,6 +1,8 @@
 package io.github.biezhi.excel.plus.model;
 
 import io.github.biezhi.excel.plus.annotation.ExcelField;
+import io.github.biezhi.excel.plus.converter.DateChineseConverter;
+import io.github.biezhi.excel.plus.converters.CardTypeConverter;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -14,33 +16,33 @@ import java.util.Date;
  */
 public class CardSecret implements Serializable {
 
-    @ExcelField(readOrder = 0, title = "卡密类型")
-    private String cardType;
+    @ExcelField(order = 0, title = "卡密类型", convertType = CardTypeConverter.class)
+    private Integer cardType;
 
-    @ExcelField(readOrder = 1, title = "卡密")
+    @ExcelField(order = 1, title = "卡密")
     private String secret;
 
-    @ExcelField(readOrder = 2, title = "面额")
+    @ExcelField(order = 2, title = "面额")
     private BigDecimal amount;
 
-    @ExcelField(readOrder = 3, title = "过期时间")
+    @ExcelField(order = 3, title = "过期时间", convertType = DateChineseConverter.class)
     private Date expiredDate;
 
     public CardSecret() {
     }
 
-    public CardSecret(String secret, BigDecimal amount) {
-        this.cardType = "联通";
+    public CardSecret(Integer cardType, String secret, BigDecimal amount) {
+        this.cardType = cardType;
         this.secret = secret;
         this.amount = amount;
         this.expiredDate = new Date();
     }
 
-    public String getCardType() {
+    public Integer getCardType() {
         return cardType;
     }
 
-    public void setCardType(String cardType) {
+    public void setCardType(Integer cardType) {
         this.cardType = cardType;
     }
 
@@ -68,4 +70,13 @@ public class CardSecret implements Serializable {
         this.expiredDate = expiredDate;
     }
 
+    @Override
+    public String toString() {
+        return "CardSecret{" +
+                "cardType='" + new CardTypeConverter().write(this.cardType) + '\'' +
+                ", secret='" + secret + '\'' +
+                ", amount=" + amount +
+                ", expiredDate=" + expiredDate +
+                '}';
+    }
 }
