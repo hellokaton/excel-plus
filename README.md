@@ -8,12 +8,16 @@ Easier to read and generate an excel file, supports 2003 and 2007.
 [![](https://img.shields.io/badge/license-Apache2-FF0080.svg)](https://github.com/biezhi/excel-plus/blob/master/LICENSE)
 [![](https://img.shields.io/github/followers/biezhi.svg?style=social&label=Follow%20Me)](https://github.com/biezhi)
 
+<a href="https://biezhi.github.io/excel-plus/" target="_blank">中文文档</a>
+
 # Feature
 
 - Easy to use
 - Annotation driven
 - Based java 8
 - Support `xls`、`xlsx`、`csv`
+- Support export by template
+- Support custom column style
 
 # Usage
 
@@ -50,14 +54,14 @@ excelPlus.exportor(orders)
 
 ```java
 ExcelPlus excelPlus = new ExcelPlus();
-List<Order>  orders = excelPlus.readAsFile(new File("/Users/biezhi/Desktop/order.xls"), Order.class);
+List<Order>  orders = excelPlus.read(new File("/Users/biezhi/Desktop/order.xls"), Order.class).asList();
 ```
 
 **Read as stream**
 
 ```java
 ExcelPlus excelPlus = new ExcelPlus();
-List<Order>  orders = excelPlus.readAsStream(inputStream, Order.class);
+List<Order>  orders = excelPlus.read(inputStream, Order.class).asList();
 ```
 
 # Examples

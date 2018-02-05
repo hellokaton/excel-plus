@@ -12,7 +12,6 @@ import jxl.Workbook;
 import java.io.File;
 import java.io.InputStream;
 import java.util.Collection;
-import java.util.List;
 
 /**
  * Excel Plus
@@ -97,9 +96,9 @@ public class ExcelPlus {
      * @return read the Excel rows
      * @throws ExcelException
      */
-    public <T> List<T> readAsFile(File file, Class<T> type) throws ExcelException {
+    public <T> ExcelReader<T> read(File file, Class<T> type) throws ExcelException {
         try {
-            return new ExcelReader<>(Workbook.getWorkbook(file), type).read();
+            return new ExcelReader<>(Workbook.getWorkbook(file), type);
         } catch (Exception e) {
             throw new ExcelException(e);
         }
@@ -114,11 +113,12 @@ public class ExcelPlus {
      * @return read the Excel rows
      * @throws ExcelException
      */
-    public <T> List<T> readAsStream(InputStream inputStream, Class<T> type) throws ExcelException {
+    public <T> ExcelReader<T> read(InputStream inputStream, Class<T> type) throws ExcelException {
         try {
-            return new ExcelReader<>(Workbook.getWorkbook(inputStream), type).read();
+            return new ExcelReader<>(Workbook.getWorkbook(inputStream), type);
         } catch (Exception e) {
             throw new ExcelException(e);
         }
     }
+
 }
