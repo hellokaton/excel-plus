@@ -1,7 +1,7 @@
 package io.github.biezhi.excel.plus.writer;
 
 import io.github.biezhi.excel.plus.enums.ExcelType;
-import io.github.biezhi.excel.plus.style.ExcelStyle;
+import org.apache.poi.ss.usermodel.CellStyle;
 
 import java.util.Collection;
 
@@ -15,21 +15,31 @@ public class Exporter<T> {
 
     private Collection<T> data;
     private ExcelType     excelType;
-    private ExcelStyle    excelStyle;
+    private CellStyle     headerStyle;
+    private String        templatePath;
 
-    public static <T> Exporter<T> create(Collection<T> data, ExcelStyle style) {
+    public static <T> Exporter<T> create(Collection<T> data, CellStyle headerStyle) {
         Exporter<T> exporter = new Exporter<>();
         exporter.data = data;
-        exporter.excelStyle = style;
+        exporter.headerStyle = headerStyle;
         return exporter;
+    }
+
+    public Exporter<T> byTemplate(String templatePath) {
+        this.templatePath = templatePath;
+        return this;
+    }
+
+    public String getTemplatePath() {
+        return templatePath;
     }
 
     public Collection<T> getData() {
         return data;
     }
 
-    public ExcelStyle getStyle() {
-        return excelStyle;
+    public CellStyle getHeaderStyle() {
+        return headerStyle;
     }
 
     public void setExcelType(ExcelType excelType) {
@@ -37,9 +47,10 @@ public class Exporter<T> {
     }
 
     public ExcelType getExcelType() {
-        if(null == excelType){
+        if (null == excelType) {
             return ExcelType.XLS;
         }
         return excelType;
     }
+
 }

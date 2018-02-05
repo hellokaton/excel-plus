@@ -1,11 +1,7 @@
 package io.github.biezhi.excel.plus.reader;
 
 import io.github.biezhi.excel.plus.utils.ExcelUtils;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,12 +21,12 @@ import java.util.stream.Collectors;
  */
 public class ExcelReader<T> {
 
-    private HSSFWorkbook workbook;
+    private Workbook workbook;
     private Class<T>     type;
     private Predicate<T> filter;
     private int          startRowIndex = 1;
 
-    public ExcelReader(HSSFWorkbook workbook, Class<T> type) {
+    public ExcelReader(Workbook workbook, Class<T> type) {
         this.workbook = workbook;
         this.type = type;
     }
@@ -91,7 +87,7 @@ public class ExcelReader<T> {
         int lastCellNum  = row.getPhysicalNumberOfCells();
         for (int cellNum = firstCellNum; cellNum < lastCellNum; cellNum++) {
             Cell   cell  = row.getCell(cellNum);
-            String value = getCellValue(cell);
+            String value = this.getCellValue(cell);
             ExcelUtils.writeToField(item, cellNum, value);
         }
         return item;

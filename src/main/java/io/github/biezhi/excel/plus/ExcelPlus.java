@@ -2,12 +2,13 @@ package io.github.biezhi.excel.plus;
 
 import io.github.biezhi.excel.plus.exception.ExcelException;
 import io.github.biezhi.excel.plus.reader.ExcelReader;
-import io.github.biezhi.excel.plus.style.ExcelStyle;
 import io.github.biezhi.excel.plus.writer.Exporter;
 import io.github.biezhi.excel.plus.writer.FileExcelWriter;
 import io.github.biezhi.excel.plus.writer.ResponseExcelWriter;
 import io.github.biezhi.excel.plus.writer.ResponseWrapper;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -48,7 +49,7 @@ public class ExcelPlus {
      * @param <T>   Java Type
      * @return self, aspect follow-up
      */
-    public <T> ExcelPlus export(Collection<T> data, ExcelStyle style) {
+    public <T> ExcelPlus export(Collection<T> data, CellStyle style) {
         this.exporter = Exporter.create(data, style);
         return this;
     }
@@ -116,7 +117,7 @@ public class ExcelPlus {
      */
     public <T> ExcelReader<T> read(InputStream inputStream, Class<T> type) throws ExcelException {
         try {
-            HSSFWorkbook workbook = new HSSFWorkbook(inputStream);
+            Workbook workbook = WorkbookFactory.create(inputStream);
             return new ExcelReader<>(workbook, type);
         } catch (Exception e) {
             throw new ExcelException(e);

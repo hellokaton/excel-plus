@@ -8,6 +8,7 @@ import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import java.io.File;
 import java.io.OutputStream;
 import java.util.Collection;
 import java.util.Iterator;
@@ -35,8 +36,12 @@ public interface ExcelWriter {
             throw new ExcelException("Export excel data is empty.");
         }
         try {
-            Workbook workbook = exporter.getExcelType().equals(ExcelType.XLSX) ? new XSSFWorkbook() : new HSSFWorkbook();
-
+            Workbook workbook;
+            if (null != exporter.getTemplatePath()) {
+                workbook = WorkbookFactory.create(new File(exporter.getTemplatePath()));
+            } else {
+                workbook = exporter.getExcelType().equals(ExcelType.XLSX) ? new XSSFWorkbook() : new HSSFWorkbook();
+            }
 
             T     data0 = data.iterator().next();
             Sheet sheet = workbook.createSheet(ExcelUtils.getSheetName(data0));
@@ -49,7 +54,7 @@ public interface ExcelWriter {
 
             Row rowHead = sheet.createRow(0);
 
-            CellStyle headerStyle = headerStyle(workbook);
+            CellStyle headerStyle = exporter.getHeaderStyle() != null ? exporter.getHeaderStyle() : defaultHeaderStyle(workbook);
             for (int col = 0; col < cols; col++) {
                 Cell cell = rowHead.createCell(col);
                 cell.setCellStyle(headerStyle);
@@ -76,7 +81,14 @@ public interface ExcelWriter {
         }
     }
 
-    default CellStyle headerStyle(Workbook workbook) {
+    /**
+     * The default Excel header style.
+     *
+     * @param workbook
+     * @return
+     */
+    default CellStyle defaultHeaderStyle(Workbook workbook) {
+
         // 表头样式
         CellStyle headerStyle = workbook.createCellStyle();
 
