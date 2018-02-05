@@ -36,7 +36,10 @@ public interface ExcelWriter {
             throw new ExcelException("Export excel data is empty.");
         }
         try {
-            Workbook workbook;
+            Workbook  workbook;
+            CellStyle headerStyle;
+            CellStyle columnStyle;
+
             if (null != exporter.getTemplatePath()) {
                 workbook = WorkbookFactory.create(new File(exporter.getTemplatePath()));
             } else {
@@ -46,20 +49,30 @@ public interface ExcelWriter {
             T     data0 = data.iterator().next();
             Sheet sheet = workbook.createSheet(ExcelUtils.getSheetName(data0));
 
-            // Set Excel header
-            int          rows       = data.size();
-            Iterator<T>  iterator   = data.iterator();
-            List<String> fieldNames = ExcelUtils.getWriteFieldNames(data0.getClass());
-            int          cols       = fieldNames.size();
-
             Row rowHead = sheet.createRow(0);
 
-            CellStyle headerStyle = exporter.getHeaderStyle() != null ? exporter.getHeaderStyle() : defaultHeaderStyle(workbook);
+            // Set Excel header
+            Iterator<T>  iterator   = data.iterator();
+            List<String> fieldNames = ExcelUtils.getWriteFieldNames(data0.getClass());
+            int          rows       = data.size();
+            int          cols       = fieldNames.size();
+
+            if (null != exporter.getHeaderStyle()) {
+                headerStyle = exporter.getHeaderStyle().apply(workbook);
+            } else {
+                headerStyle = defaultHeaderStyle(workbook);
+            }
+
+            if (null != exporter.getColumnStyle()) {
+                columnStyle = exporter.getColumnStyle().apply(workbook);
+            } else {
+                columnStyle = defaultColumnStyle(workbook);
+            }
+
             for (int col = 0; col < cols; col++) {
                 Cell cell = rowHead.createCell(col);
                 cell.setCellStyle(headerStyle);
                 cell.setCellValue(fieldNames.get(col));
-
                 sheet.autoSizeColumn(col);
             }
 
@@ -69,7 +82,9 @@ public interface ExcelWriter {
                 for (int col = 0; col < cols; col++) {
                     Cell   cell  = row.createCell(col);
                     String value = ExcelUtils.getColumnValue(item, col);
+                    cell.setCellStyle(columnStyle);
                     cell.setCellValue(value);
+                    sheet.autoSizeColumn(col);
                 }
             }
 
@@ -88,21 +103,15 @@ public interface ExcelWriter {
      * @return
      */
     default CellStyle defaultHeaderStyle(Workbook workbook) {
-
-        // 表头样式
         CellStyle headerStyle = workbook.createCellStyle();
 
-        //水平居中
         headerStyle.setAlignment(HorizontalAlignment.CENTER);
-        //垂直居中
         headerStyle.setVerticalAlignment(VerticalAlignment.CENTER);
-        //设置边框
         headerStyle.setBorderTop(BorderStyle.THIN);
         headerStyle.setBorderRight(BorderStyle.THIN);
         headerStyle.setBorderBottom(BorderStyle.THIN);
         headerStyle.setBorderLeft(BorderStyle.THIN);
 
-        //设置颜色
         headerStyle.setFillForegroundColor(HSSFColor.HSSFColorPredefined.WHITE.getIndex());
         headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 
@@ -111,6 +120,27 @@ public interface ExcelWriter {
         headerFont.setBold(true);
         headerStyle.setFont(headerFont);
         return headerStyle;
+    }
+
+    /**
+     * The default Excel column style.
+     *
+     * @param workbook
+     * @return
+     */
+    default CellStyle defaultColumnStyle(Workbook workbook) {
+        CellStyle cellStyle = workbook.createCellStyle();
+        cellStyle.setAlignment(HorizontalAlignment.CENTER);
+        cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        cellStyle.setBorderTop(BorderStyle.THIN);
+        cellStyle.setBorderRight(BorderStyle.THIN);
+        cellStyle.setBorderBottom(BorderStyle.THIN);
+        cellStyle.setBorderLeft(BorderStyle.THIN);
+        cellStyle.setWrapText(true);
+
+        Font cellFont = workbook.createFont();
+        cellStyle.setFont(cellFont);
+        return cellStyle;
     }
 
     /**

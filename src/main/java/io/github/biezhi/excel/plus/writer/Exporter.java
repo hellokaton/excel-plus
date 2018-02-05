@@ -2,8 +2,10 @@ package io.github.biezhi.excel.plus.writer;
 
 import io.github.biezhi.excel.plus.enums.ExcelType;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Workbook;
 
 import java.util.Collection;
+import java.util.function.Function;
 
 /**
  * Excel exporter
@@ -13,21 +15,40 @@ import java.util.Collection;
  */
 public class Exporter<T> {
 
-    private Collection<T> data;
-    private ExcelType     excelType;
-    private CellStyle     headerStyle;
     private String        templatePath;
+    private ExcelType     excelType;
+    private Collection<T> data;
 
-    public static <T> Exporter<T> create(Collection<T> data, CellStyle headerStyle) {
+    private Function<Workbook, CellStyle> headerStyle;
+    private Function<Workbook, CellStyle> columnStyle;
+
+    public static <T> Exporter<T> create(Collection<T> data) {
         Exporter<T> exporter = new Exporter<>();
         exporter.data = data;
-        exporter.headerStyle = headerStyle;
         return exporter;
+    }
+
+    public Exporter<T> headerStyle(Function<Workbook, CellStyle> function) {
+        this.headerStyle = function;
+        return this;
+    }
+
+    public Exporter<T> columnStyle(Function<Workbook, CellStyle> function) {
+        this.columnStyle = function;
+        return this;
     }
 
     public Exporter<T> byTemplate(String templatePath) {
         this.templatePath = templatePath;
         return this;
+    }
+
+    public Function<Workbook, CellStyle> getHeaderStyle() {
+        return headerStyle;
+    }
+
+    public Function<Workbook, CellStyle> getColumnStyle() {
+        return columnStyle;
     }
 
     public String getTemplatePath() {
@@ -36,10 +57,6 @@ public class Exporter<T> {
 
     public Collection<T> getData() {
         return data;
-    }
-
-    public CellStyle getHeaderStyle() {
-        return headerStyle;
     }
 
     public void setExcelType(ExcelType excelType) {

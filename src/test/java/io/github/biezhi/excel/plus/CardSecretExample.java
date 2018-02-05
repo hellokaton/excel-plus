@@ -23,8 +23,8 @@ public class CardSecretExample {
         cardSecrets.add(new CardSecret(2, "2ru44qut6neykb2380wt", new BigDecimal("50")));
         cardSecrets.add(new CardSecret(1, "srcb4c9fdqzuykd6q4zl", new BigDecimal("15")));
 
-//        excelPlus.export(cardSecrets)
-//                .writeAsFile(new File("卡密列表.xlsx"));
+        excelPlus.export(cardSecrets)
+                .writeAsFile(new File("卡密列表.xlsx"));
 
         List<CardSecret> readList = excelPlus.read(new File("卡密列表.xls"), CardSecret.class)
                 .startRow(1)

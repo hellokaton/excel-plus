@@ -6,7 +6,6 @@ import io.github.biezhi.excel.plus.writer.Exporter;
 import io.github.biezhi.excel.plus.writer.FileExcelWriter;
 import io.github.biezhi.excel.plus.writer.ResponseExcelWriter;
 import io.github.biezhi.excel.plus.writer.ResponseWrapper;
-import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 
@@ -38,20 +37,7 @@ public class ExcelPlus {
      * @return self, aspect follow-up
      */
     public <T> ExcelPlus export(Collection<T> data) {
-        return this.export(data, null);
-    }
-
-    /**
-     * Sets the data for exporting a collection container.
-     *
-     * @param data  collection data
-     * @param style set the export Excel style, including colors, fonts, and so on
-     * @param <T>   Java Type
-     * @return self, aspect follow-up
-     */
-    public <T> ExcelPlus export(Collection<T> data, CellStyle style) {
-        this.exporter = Exporter.create(data, style);
-        return this;
+        return this.export(Exporter.create(data));
     }
 
     /**
