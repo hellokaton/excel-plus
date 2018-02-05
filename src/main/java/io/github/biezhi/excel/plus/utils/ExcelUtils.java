@@ -3,12 +3,17 @@ package io.github.biezhi.excel.plus.utils;
 import io.github.biezhi.excel.plus.Constant;
 import io.github.biezhi.excel.plus.annotation.ExcelField;
 import io.github.biezhi.excel.plus.annotation.ExcelSheet;
+import io.github.biezhi.excel.plus.annotation.ReadField;
+import io.github.biezhi.excel.plus.annotation.WriteField;
 import io.github.biezhi.excel.plus.converter.Converter;
+import io.github.biezhi.excel.plus.converter.EmptyConverter;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static io.github.biezhi.excel.plus.Constant.TIP_MSG;
 
 /**
  * Excel utils
@@ -29,26 +34,29 @@ public class ExcelUtils {
     }
 
     public static List<String> getWriteFieldNames(Class<?> type) {
-        List<Field>      fields = getAndSaveFields(type);
-        List<ExcelField> list   = new ArrayList<>(fields.size());
+        List<Field>                 fields = getAndSaveFields(type);
+        List<Pair<String, Integer>> pairs  = new ArrayList<>(fields.size());
 
         for (Field field : fields) {
             ExcelField excelField = field.getAnnotation(ExcelField.class);
             if (null != excelField) {
-                if (excelField.writeOrder() == excelField.order() && excelField.order() == Constant.DEFAULT_ORDER) {
-                    System.err.println("[" + type.getName() + "." + field.getName() + "] order config error.");
+                Pair<String, Integer> pair = new Pair<>();
+                pair.setK(excelField.columnName());
+
+                WriteField writeField = field.getAnnotation(WriteField.class);
+                if (null != writeField && writeField.order() != Constant.DEFAULT_ORDER) {
+                    pair.setV(writeField.order());
+                } else {
+                    if (excelField.order() != Constant.DEFAULT_ORDER) {
+                        pair.setV(excelField.order());
+                    } else {
+                        System.err.println(String.format("[%s.%s] order config error, %s", type.getName(), field.getName(), TIP_MSG));
+                    }
                 }
-                list.add(excelField);
             }
         }
-
-        list.sort((o1, o2) -> {
-            int order1 = o1.writeOrder() != Constant.DEFAULT_ORDER ? o1.writeOrder() : o1.order();
-            int order2 = o2.writeOrder() != Constant.DEFAULT_ORDER ? o2.writeOrder() : o2.order();
-            return Integer.compare(order1, order2);
-        });
-
-        return list.stream().map(ExcelField::columnName).collect(Collectors.toList());
+        pairs.sort(Comparator.comparingInt(Pair::getV));
+        return pairs.stream().map(Pair::getK).collect(Collectors.toList());
     }
 
     public static String getColumnValue(Object item, int order) {
@@ -58,14 +66,21 @@ public class ExcelUtils {
             if (null == excelField) {
                 continue;
             }
-            if (excelField.readOrder() == order || excelField.order() == order) {
-                try {
+            ReadField readField = field.getAnnotation(ReadField.class);
+            try {
+                if (null != readField && readField.order() == order) {
                     field.setAccessible(true);
                     Object value = field.get(item);
                     return asString(field, value);
-                } catch (IllegalAccessException e) {
-                    return "";
+                } else {
+                    if (excelField.order() == order) {
+                        field.setAccessible(true);
+                        Object value = field.get(item);
+                        return asString(field, value);
+                    }
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
         return "";
@@ -80,7 +95,6 @@ public class ExcelUtils {
 
     public static <T> T newInstance(Class<T> type) {
         try {
-//            T obj = type.getConstructor().newInstance();
             return type.newInstance();
         } catch (Exception e) {
             e.printStackTrace();
@@ -96,8 +110,13 @@ public class ExcelUtils {
             if (null == excelField) {
                 continue;
             }
-            if (excelField.readOrder() == col || excelField.order() == col) {
+            ReadField readField = field.getAnnotation(ReadField.class);
+            if (null != readField && readField.order() == col) {
                 return field;
+            } else {
+                if (excelField.order() == col) {
+                    return field;
+                }
             }
         }
         return null;
@@ -118,34 +137,42 @@ public class ExcelUtils {
 
     private static Object asObject(Field field, String value) {
         ExcelField excelField = field.getAnnotation(ExcelField.class);
-        if (!excelField.convertType().equals(Converter.class)) {
+        if (!excelField.convertType().equals(EmptyConverter.class)) {
             Converter converter = newInstance(excelField.convertType());
-            return converter.read(value);
+            if (null != converter) {
+                return converter.read(value);
+            }
         }
+        if (field.getType().equals(Date.class) && !"".equals(excelField.datePattern())) {
 
+            return value;
+        }
         if (field.getType().equals(String.class)) {
             return value;
         }
         if (field.getType().equals(BigDecimal.class)) {
             return new BigDecimal(value);
         }
-        if (field.getType().equals(Long.class)) {
+        if (field.getType().equals(Long.class) || field.getType().equals(long.class)) {
             return Long.valueOf(value);
         }
-        if (field.getType().equals(Integer.class)) {
+        if (field.getType().equals(Integer.class) || field.getType().equals(int.class)) {
             return Integer.valueOf(value);
         }
-        if (field.getType().equals(Double.class)) {
+        if (field.getType().equals(Double.class) || field.getType().equals(double.class)) {
             return Double.valueOf(value);
         }
-        if (field.getType().equals(Float.class)) {
+        if (field.getType().equals(Float.class) || field.getType().equals(float.class)) {
             return Float.valueOf(value);
         }
-        if (field.getType().equals(Short.class)) {
+        if (field.getType().equals(Short.class) || field.getType().equals(short.class)) {
             return Short.valueOf(value);
         }
-        if (field.getType().equals(Byte.class)) {
+        if (field.getType().equals(Byte.class) || field.getType().equals(byte.class)) {
             return Byte.valueOf(value);
+        }
+        if (field.getType().equals(Boolean.class) || field.getType().equals(boolean.class)) {
+            return Boolean.valueOf(value);
         }
         return value;
     }
@@ -155,7 +182,7 @@ public class ExcelUtils {
             return "";
         }
         ExcelField excelField = field.getAnnotation(ExcelField.class);
-        if (!excelField.convertType().equals(Converter.class)) {
+        if (!excelField.convertType().equals(EmptyConverter.class)) {
             Converter converter = newInstance(excelField.convertType());
             return converter.write(value);
         }

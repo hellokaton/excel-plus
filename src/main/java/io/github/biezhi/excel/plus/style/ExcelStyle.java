@@ -1,5 +1,9 @@
 package io.github.biezhi.excel.plus.style;
 
+import jxl.format.Alignment;
+import jxl.format.Border;
+import jxl.format.Colour;
+
 /**
  * Export excel style
  *
@@ -8,5 +12,10 @@ package io.github.biezhi.excel.plus.style;
  */
 public class ExcelStyle {
 
+    private int       fontSize;
+    private Colour    color;
+    private Alignment alignment;
+    private Colour    background;
+    private Border    border;
 
 }

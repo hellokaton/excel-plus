@@ -4,7 +4,6 @@ import io.github.biezhi.excel.plus.exception.ExcelException;
 import io.github.biezhi.excel.plus.model.CardSecret;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,12 +23,12 @@ public class CardSecretExample {
         cardSecrets.add(new CardSecret(2, "2ru44qut6neykb2380wt", new BigDecimal("50")));
         cardSecrets.add(new CardSecret(1, "srcb4c9fdqzuykd6q4zl", new BigDecimal("15")));
 
-//        excelPlus.export(cardSecrets)
-//                .writeAsFile(new File("卡密列表.xls"));
-
+        excelPlus.export(cardSecrets)
+                .writeAsFile(new File("卡密列表.xls"));
 
         List<CardSecret> readList = excelPlus.readAsFile(new File("卡密列表.xls"), CardSecret.class);
         System.out.println(readList);
+
     }
 
 }
