@@ -5,6 +5,7 @@ import io.github.biezhi.excel.plus.model.CardSecret;
 import io.github.biezhi.excel.plus.reader.ExcelResult;
 import io.github.biezhi.excel.plus.reader.ValidRow;
 import io.github.biezhi.excel.plus.writer.Exporter;
+import io.github.biezhi.excel.plus.writer.ResponseWrapper;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.FillPatternType;
@@ -91,6 +92,18 @@ public class Examples {
             headerStyle.setFont(headerFont);
             return headerStyle;
         })).writeAsFile(new File("卡密列表.xls"));
+    }
+
+    @Test
+    public void testExportByTpl() throws ExcelException {
+        List<CardSecret> cardSecrets = this.buildCardSecrets();
+        excelPlus.export(Exporter.create(cardSecrets).byTemplate("")).writeAsFile(new File("template_rows.xls"));
+    }
+
+    @Test
+    public void testDownload() throws ExcelException {
+        List<CardSecret> cardSecrets = this.buildCardSecrets();
+        excelPlus.export(cardSecrets).writeAsResponse(ResponseWrapper.create(null, "xxx表格.xls"));
     }
 
 }

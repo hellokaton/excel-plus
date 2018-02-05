@@ -2,7 +2,7 @@
 
 ## 它是什么?
 
-`excel-plus` 是基于 [Apache POI]() 框架的一款扩展封装小库，让我们在开发中更快速的完成导入导出的需求。
+`excel-plus` 是基于 [Apache POI](https://poi.apache.org/) 框架的一款扩展封装小库，让我们在开发中更快速的完成导入导出的需求。
 尽管很多人会提出 `poi` 能干这事儿为什么还要封装一层呢？
 
 `excel-plus`很大程度上简化了代码、让使用者更轻松的
@@ -44,6 +44,7 @@
 下面是我们的 Java 模型类，用于存储 Excel 的行数据。
 
 ```java
+// 卡密 Model
 public class CardSecret {
 
     @ExcelField(order = 0, columnName = "运营商类型", 
@@ -82,6 +83,8 @@ public class CardTypeConverter implements Converter<Integer> {
 }
 ```
 
+使用 `ExcelPlus` 导出卡密列表。
+
 ```java
 ExcelPlus excelPlus = new ExcelPlus();
 List<CardSecret> cardSecrets = new ArrayList<>();
@@ -93,8 +96,8 @@ cardSecrets.add(new CardSecret(1, "srcb4c9fdqzuykd6q4zl", new BigDecimal("15")))
 excelPlus.export(cardSecrets).writeAsFile(new File("卡密列表.xlsx"));
 ```
 
-这样就完成了一个列表数据导出为 Excel 的例子，通常我们的数据都是从数据库查询出来的。下面我们编写一个从
-Excel 中读取数据到 Java List 的例子。
+这样就完成了一个列表数据导出为 Excel 的例子，通常我们的数据都是从数据库查询出来的。
+下面这个例子是从Excel 中读取数据到 Java List 容器，如果你想存储在 Set 里我相信你可以做到。
 
 ```java
 List<CardSecret> cardList = excelPlus.read(
@@ -119,26 +122,33 @@ List<CardSecret> readList = excelPlus.read(new File("卡密列表.xls"), CardSec
 ## 读取校验
 
 有一种场景是当 Excel 中的某一行或者几行数据不满足条件时候，我们记录下这些异常数据，并提示给调用方（比如 Web 浏览器）。
-下面这个示例校验每行数据中的 `amount` 是否 `< 20`，如果满足则返回一个校验失败的错误信息，当然你可以将 `valid` 校验
-的代码块封装一下看起来更流畅。
+下面这个示例校验每行数据中的 `amount` 是否 `< 20`，如果满足则返回一个校验失败的错误信息，然后我们将错误内容输出到控制台，
+实际工作中你可能将它们交由前端处理。
 
 ```java
-ExcelResult<CardSecret> excelResult = excelPlus.read(new File("卡密列表.xls"), CardSecret.class)
-                                                .valid(cardSecret -> {
-                                                    if (cardSecret.getAmount().doubleValue() < 20) {
-                                                        return ValidRow.fail("最小金额为20");
-                                                    }
-                                                    return ValidRow.ok();
-                                                }).asResult();
+ExcelResult<CardSecret> result = excelPlus
+                        .read(new File("卡密列表.xls"), CardSecret.class)
+                        .valid(cardSecret -> {
+                            if (cardSecret.getAmount().doubleValue() < 20) {
+                                return ValidRow.fail("最小金额为20");
+                            }
+                            return ValidRow.ok();
+                        }).asResult();
 
-if (!excelResult.isValid()) {
-    excelResult.errors().forEach(System.out::println);
+if (!result.isValid()) {
+    result.errors().forEach(System.out::println);
 } else {
-    System.out.println(excelResult.rows().size());
+    System.out.println(result.rows().size());
 }
 ```
 
+> 当然你可以将 `valid` 校验代码块封装一下看起来更流畅 :P
+
 ## 导出样式
+
+大多数情况下我们是无需设置样式的，在 `excel-plus` 中提供了设置表头和列的样式 API。
+在某些需求下可能需要设置字体大小、颜色、居中等，你可以像下面的代码这样干。
+如果你对样式的操作不熟悉可以参考 POI 的列设置[文档](https://poi.apache.org/spreadsheet/quick-guide.html#Creating+Date+Cells)。
 
 ```java
 List<CardSecret> cardSecrets = this.buildCardSecrets();
@@ -157,7 +167,29 @@ excelPlus.export(Exporter.create(cardSecrets).headerStyle(workbook -> {
 })).writeAsFile(new File("卡密列表.xls"));
 ```
 
+## 浏览器下载
+
+为了方便我们将数据库查询的数据直接输出到浏览器弹出下载，`excel-plus` 也做了一点 _手脚_ 让你一行代码就可以搞定。
+
+```java
+excelPlus.export(data).writeAsResponse(ResponseWrapper.create(servletResponse, "xxx表格.xls"));
+```
+
+只需要将 `HttpServletResponse` 对象传入，并输入导出的文件名称，其他的都见鬼去吧。
+
 ## 模板导出
+
+<b>该功能尚未实现</b>
+
+有时候我们需要导出的 Excel 表格样式比较复杂，可以事先设置好一个模板表格，数据为空，
+由程序向模板中填入数据，然后导出即可，这样就满足了美观的需求。
+
+```java
+List<CardSecret> cardSecrets = this.buildCardSecrets();
+excelPlus.export(Exporter.create(cardSecrets).byTemplate("tpl.xls")).writeAsFile(new File("template_rows.xls"));
+```
+
+> 需要注意的是这里的 `tpl.xls` 位于 `classpath` 路径下。
 
 # API 介绍
 
@@ -173,8 +205,27 @@ excelPlus.export(Exporter.create(cardSecrets).headerStyle(workbook -> {
 该项目中有 4 个注解，分别是 `ExcelField`、`ExcelSheet`、`ReadField`、`WriteField`。
 正常情况下你只会用到第一个注解，下面先来解释一下 `@ExcelField`。
 
+<b>@ExcelField 注解</b>
 
+| 选项        | 默认值               | 描述                                                               |
+|-------------|----------------------|--------------------------------------------------------------------|
+| order       | -1                   | 用于标识 Excel 中的列索引，从0开始，该选项适用于读取或写入Excel    |
+| columnName  | 必选                 | 导出Excel时的列名称，如：状态、姓名、手机号                        |
+| datePattern | 空                   | 日期格式化的pattern，对 Date、LocalDate、LocalDateTime 生效        |
+| convertType | EmptyConverter.class | 数据类型转换的类Class，实现自Converter接口，实现类需有无参构造函数 |
 
-## 
+> `@ReadField` 和 `@WriteField` 是针对读取和写入的顺序不一致、日期格式不一致时的覆盖型注解，一般用不到。
+
+<b>@ExcelSheet 注解</b>
+
+用于标识导出的工作表名称，默认是 `Sheet0`，无特殊需求用不到。
+
+# 常见问题
+
+等你有了我就写上来行不？
 
 # 版本更新
+
+<b>v0.0.1</b>
+
+- 发布第一个版本
