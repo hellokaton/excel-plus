@@ -7,9 +7,10 @@ import io.github.biezhi.excel.plus.writer.Exporter;
 import io.github.biezhi.excel.plus.writer.FileExcelWriter;
 import io.github.biezhi.excel.plus.writer.ResponseExcelWriter;
 import io.github.biezhi.excel.plus.writer.ResponseWrapper;
-import jxl.Workbook;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Collection;
 
@@ -98,7 +99,7 @@ public class ExcelPlus {
      */
     public <T> ExcelReader<T> read(File file, Class<T> type) throws ExcelException {
         try {
-            return new ExcelReader<>(Workbook.getWorkbook(file), type);
+            return this.read(new FileInputStream(file), type);
         } catch (Exception e) {
             throw new ExcelException(e);
         }
@@ -115,7 +116,8 @@ public class ExcelPlus {
      */
     public <T> ExcelReader<T> read(InputStream inputStream, Class<T> type) throws ExcelException {
         try {
-            return new ExcelReader<>(Workbook.getWorkbook(inputStream), type);
+            HSSFWorkbook workbook = new HSSFWorkbook(inputStream);
+            return new ExcelReader<>(workbook, type);
         } catch (Exception e) {
             throw new ExcelException(e);
         }

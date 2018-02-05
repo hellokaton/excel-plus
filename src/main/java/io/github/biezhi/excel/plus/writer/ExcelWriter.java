@@ -1,13 +1,14 @@
 package io.github.biezhi.excel.plus.writer;
 
+import io.github.biezhi.excel.plus.enums.ExcelType;
 import io.github.biezhi.excel.plus.exception.ExcelException;
 import io.github.biezhi.excel.plus.utils.ExcelUtils;
-import jxl.CellView;
-import jxl.format.Border;
-import jxl.format.BorderLineStyle;
-import jxl.format.Colour;
-import jxl.write.*;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.util.HSSFColor;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import java.io.OutputStream;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -24,65 +25,80 @@ public interface ExcelWriter {
      * Default Export method
      *
      * @param exporter
-     * @param workbook
+     * @param outputStream
      * @param <T>
      * @throws ExcelException
      */
-    default <T> void export(Exporter<T> exporter, WritableWorkbook workbook) throws ExcelException {
+    default <T> void export(Exporter<T> exporter, OutputStream outputStream) throws ExcelException {
         Collection<T> data = exporter.getData();
         if (null == data || data.size() == 0) {
             throw new ExcelException("Export excel data is empty.");
         }
         try {
-            T             data0    = data.iterator().next();
-            WritableSheet sheet    = workbook.createSheet(ExcelUtils.getSheetName(data0), 0);
-            CellView      cellView = new CellView();
-            cellView.setAutosize(true);
-            sheet.setColumnView(1, cellView);
+            Workbook workbook = exporter.getExcelType().equals(ExcelType.XLSX) ? new XSSFWorkbook() : new HSSFWorkbook();
+
+
+            T     data0 = data.iterator().next();
+            Sheet sheet = workbook.createSheet(ExcelUtils.getSheetName(data0));
 
             // Set Excel header
+            int          rows       = data.size();
             Iterator<T>  iterator   = data.iterator();
             List<String> fieldNames = ExcelUtils.getWriteFieldNames(data0.getClass());
             int          cols       = fieldNames.size();
 
-            for (int i = 0; i < cols; i++) {
-                sheet.addCell(new Label(i, 0, fieldNames.get(i), getHeader()));
+            Row rowHead = sheet.createRow(0);
+
+            CellStyle headerStyle = headerStyle(workbook);
+            for (int col = 0; col < cols; col++) {
+                Cell cell = rowHead.createCell(col);
+                cell.setCellStyle(headerStyle);
+                cell.setCellValue(fieldNames.get(col));
+
+                sheet.autoSizeColumn(col);
             }
 
-            for (int row = 1; iterator.hasNext(); row++) {
-                T item = iterator.next();
+            for (int rowNum = 1; iterator.hasNext() && rowNum < rows; rowNum++) {
+                T   item = iterator.next();
+                Row row  = sheet.createRow(rowNum);
                 for (int col = 0; col < cols; col++) {
-                    sheet.addCell(new Label(col, row, ExcelUtils.getColumnValue(item, col)));
+                    Cell   cell  = row.createCell(col);
+                    String value = ExcelUtils.getColumnValue(item, col);
+                    cell.setCellValue(value);
                 }
             }
-            workbook.write();
+
+            workbook.write(outputStream);
+            outputStream.flush();
+            outputStream.close();
         } catch (Exception e) {
             throw new ExcelException(e);
-        } finally {
-            try {
-                workbook.close();
-            } catch (Exception ignored) {
-            }
         }
     }
 
-    default WritableCellFormat getHeader() {
-        WritableFont font = new WritableFont(WritableFont.ARIAL, 12, WritableFont.BOLD);
-        try {
-            font.setColour(Colour.BLACK);
-        } catch (WriteException e1) {
-            e1.printStackTrace();
-        }
-        WritableCellFormat format = new WritableCellFormat(font);
-        try {
-            format.setAlignment(jxl.format.Alignment.CENTRE);
-            format.setVerticalAlignment(jxl.format.VerticalAlignment.CENTRE);
-            format.setBorder(Border.ALL, BorderLineStyle.THIN, Colour.BLACK);
-            format.setBackground(Colour.GRAY_25);
-        } catch (WriteException e) {
-            e.printStackTrace();
-        }
-        return format;
+    default CellStyle headerStyle(Workbook workbook) {
+        // 表头样式
+        CellStyle headerStyle = workbook.createCellStyle();
+
+        //水平居中
+        headerStyle.setAlignment(HorizontalAlignment.CENTER);
+        //垂直居中
+        headerStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        //设置边框
+        headerStyle.setBorderTop(BorderStyle.THIN);
+        headerStyle.setBorderRight(BorderStyle.THIN);
+        headerStyle.setBorderBottom(BorderStyle.THIN);
+        headerStyle.setBorderLeft(BorderStyle.THIN);
+
+        //设置颜色
+        headerStyle.setFillForegroundColor(HSSFColor.HSSFColorPredefined.WHITE.getIndex());
+        headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+
+        Font headerFont = workbook.createFont();
+        headerFont.setFontHeightInPoints((short) 12);
+        headerFont.setBold(true);
+        headerStyle.setFont(headerFont);
+        return headerStyle;
     }
 
     /**

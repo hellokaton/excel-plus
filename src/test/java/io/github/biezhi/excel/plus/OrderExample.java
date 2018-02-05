@@ -22,8 +22,9 @@ public class OrderExample {
         excelPlus.export(orders)
                 .writeAsFile(new File("订单列表.xls"));
 
-        List<Order>      orders1     = excelPlus.readAsFile(new File(""), Order.class);
-//        List<CardSecret> cardSecrets = excelPlus.readAsStream(new FileInputStream(new File("")), CardSecret.class);
+        List<Order> orders1 = excelPlus.read(new File(""), Order.class).asList();
+//        List<CardSecret> cardSecrets = excelPlus.read(new FileInputStream(new File("")), CardSecret.class);
+
 
     }
 

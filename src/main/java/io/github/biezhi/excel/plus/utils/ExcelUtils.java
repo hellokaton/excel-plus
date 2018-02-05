@@ -246,11 +246,4 @@ public class ExcelUtils {
         return value.toString();
     }
 
-
-    public static long getReadFieldOrders(Class<?> type) {
-        return getAndSaveFields(type).stream()
-                .map(field -> field.getAnnotation(ExcelField.class))
-                .filter(Objects::nonNull)
-                .count();
-    }
 }

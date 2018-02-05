@@ -1,9 +1,11 @@
 package io.github.biezhi.excel.plus.reader;
 
 import io.github.biezhi.excel.plus.utils.ExcelUtils;
-import jxl.Cell;
-import jxl.Sheet;
-import jxl.Workbook;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,12 +25,12 @@ import java.util.stream.Collectors;
  */
 public class ExcelReader<T> {
 
-    private Workbook     workbook;
+    private HSSFWorkbook workbook;
     private Class<T>     type;
     private Predicate<T> filter;
     private int          startRowIndex = 1;
 
-    public ExcelReader(Workbook workbook, Class<T> type) {
+    public ExcelReader(HSSFWorkbook workbook, Class<T> type) {
         this.workbook = workbook;
         this.type = type;
     }
@@ -48,45 +50,85 @@ public class ExcelReader<T> {
         String sheetName = ExcelUtils.getSheetName(type);
         Sheet  sheet     = workbook.getSheet(sheetName);
         if (null == sheet) {
-            sheet = workbook.getSheet(0);
+            sheet = workbook.getSheetAt(0);
         }
-        int     rows = sheet.getRows();
-        List<T> list = new ArrayList<>(rows);
-        long    cols = ExcelUtils.getReadFieldOrders(type);
+
+        int firstRowNum = sheet.getFirstRowNum();
+        int lastRowNum  = sheet.getLastRowNum();
+
+        List<T> list = new ArrayList<>(lastRowNum);
 
         // traverse excel row
-        for (int row = this.startRowIndex; row < rows; row++) {
-            T item = this.buildItem(sheet, cols, row);
+        for (int rowNum = firstRowNum + this.startRowIndex; rowNum <= lastRowNum; rowNum++) {
+            Row row = sheet.getRow(rowNum);
+            if (row == null) {
+                continue;
+            }
+            T item = this.buildItem(row);
             if (null != item) {
                 list.add(item);
             }
         }
+
         if (null != this.filter) {
             list = list.stream().filter(this.filter).collect(Collectors.toList());
         }
+
         return list;
     }
 
     /**
      * Set the Excel row data to the item object.
      *
-     * @param sheet excel sheet
-     * @param cols  the number of columns
-     * @param row   row index
+     * @param row row index
      */
-    private T buildItem(Sheet sheet, long cols, int row) {
+    private T buildItem(Row row) {
         T item = ExcelUtils.newInstance(type);
         if (null == item) {
             return null;
         }
-        for (int col = 0; col < cols; col++) {
-            Cell   cell  = sheet.getCell(col, row);
-            String value = cell.getContents();
-            if (null != value && !value.isEmpty()) {
-                ExcelUtils.writeToField(item, col, cell.getContents());
-            }
+        int firstCellNum = row.getFirstCellNum();
+        int lastCellNum  = row.getPhysicalNumberOfCells();
+        for (int cellNum = firstCellNum; cellNum < lastCellNum; cellNum++) {
+            Cell   cell  = row.getCell(cellNum);
+            String value = getCellValue(cell);
+            ExcelUtils.writeToField(item, cellNum, value);
         }
         return item;
+    }
+
+    private String getCellValue(Cell cell) {
+        String cellValue = "";
+        if (cell == null) {
+            return cellValue;
+        }
+        if (cell.getCellTypeEnum().equals(CellType.NUMERIC)) {
+            cell.setCellType(CellType.STRING);
+        }
+        switch (cell.getCellTypeEnum()) {
+            case NUMERIC:
+                cellValue = String.valueOf(cell.getNumericCellValue());
+                break;
+            case STRING:
+                cellValue = String.valueOf(cell.getStringCellValue());
+                break;
+            case BOOLEAN:
+                cellValue = String.valueOf(cell.getBooleanCellValue());
+                break;
+            case FORMULA:
+                cellValue = String.valueOf(cell.getCellFormula());
+                break;
+            case BLANK:
+                cellValue = "";
+                break;
+            case ERROR:
+                cellValue = "illegal character";
+                break;
+            default:
+                cellValue = "Unknown type";
+                break;
+        }
+        return cellValue;
     }
 
     /**

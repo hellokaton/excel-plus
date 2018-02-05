@@ -1,7 +1,6 @@
 package io.github.biezhi.excel.plus.writer;
 
 import io.github.biezhi.excel.plus.exception.ExcelException;
-import jxl.Workbook;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -20,7 +19,7 @@ public class ResponseExcelWriter implements ExcelWriter {
     }
 
     @Override
-    public <T> void export(Exporter<T> exportor) throws ExcelException {
+    public <T> void export(Exporter<T> exporter) throws ExcelException {
         HttpServletResponse servletResponse = this.wrapper.getServletResponse();
         try {
             String fileName = wrapper.getFileName();
@@ -28,7 +27,7 @@ public class ResponseExcelWriter implements ExcelWriter {
             servletResponse.setContentType("application/x-xls");
             fileName = new String(fileName.getBytes("UTF-8"), "ISO8859-1");
             servletResponse.setHeader("Content-Disposition", "attachment; filename=" + fileName);
-            this.export(exportor, Workbook.createWorkbook(servletResponse.getOutputStream()));
+            this.export(exporter, servletResponse.getOutputStream());
         } catch (Exception e) {
             throw new ExcelException(e);
         }

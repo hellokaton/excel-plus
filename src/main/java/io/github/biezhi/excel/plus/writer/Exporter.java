@@ -1,5 +1,6 @@
 package io.github.biezhi.excel.plus.writer;
 
+import io.github.biezhi.excel.plus.enums.ExcelType;
 import io.github.biezhi.excel.plus.style.ExcelStyle;
 
 import java.util.Collection;
@@ -13,6 +14,7 @@ import java.util.Collection;
 public class Exporter<T> {
 
     private Collection<T> data;
+    private ExcelType     excelType;
     private ExcelStyle    excelStyle;
 
     public static <T> Exporter<T> create(Collection<T> data, ExcelStyle style) {
@@ -30,4 +32,14 @@ public class Exporter<T> {
         return excelStyle;
     }
 
+    public void setExcelType(ExcelType excelType) {
+        this.excelType = excelType;
+    }
+
+    public ExcelType getExcelType() {
+        if(null == excelType){
+            return ExcelType.XLS;
+        }
+        return excelType;
+    }
 }
