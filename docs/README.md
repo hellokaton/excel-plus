@@ -181,8 +181,6 @@ excelPlus.export(data).writeAsResponse(ResponseWrapper.create(servletResponse, "
 
 ## 模板导出
 
-<b>该功能尚未实现</b>
-
 有时候我们需要导出的 Excel 表格样式比较复杂，可以事先设置好一个模板表格，数据为空，
 由程序向模板中填入数据，然后导出即可，这样就满足了美观的需求。
 

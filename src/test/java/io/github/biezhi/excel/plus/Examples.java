@@ -97,7 +97,9 @@ public class Examples {
     @Test
     public void testExportByTpl() throws ExcelException {
         List<CardSecret> cardSecrets = this.buildCardSecrets();
-        excelPlus.export(Exporter.create(cardSecrets).byTemplate("")).writeAsFile(new File("template_rows.xls"));
+        excelPlus.export(
+                Exporter.create(cardSecrets).byTemplate("tpl.xls").startRow(2)
+        ).writeAsFile(new File("template_rows.xls"));
     }
 
     @Test

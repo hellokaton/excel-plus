@@ -18,6 +18,7 @@ public class Exporter<T> {
     private String        templatePath;
     private ExcelType     excelType;
     private Collection<T> data;
+    private int startRow = 1;
 
     private Function<Workbook, CellStyle> headerStyle;
     private Function<Workbook, CellStyle> columnStyle;
@@ -41,6 +42,15 @@ public class Exporter<T> {
     public Exporter<T> byTemplate(String templatePath) {
         this.templatePath = templatePath;
         return this;
+    }
+
+    public Exporter<T> startRow(int startRow) {
+        this.startRow = startRow;
+        return this;
+    }
+
+    public int startRow(){
+        return this.startRow;
     }
 
     public Function<Workbook, CellStyle> getHeaderStyle() {

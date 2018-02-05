@@ -15,7 +15,7 @@ import java.util.Date;
  */
 public class CardSecret implements Serializable {
 
-    @ExcelField(order = 0, columnName = "卡密类型", convertType = CardTypeConverter.class)
+    @ExcelField(order = 0, columnName = "运营商", convertType = CardTypeConverter.class)
     private Integer cardType;
 
     @ExcelField(order = 1, columnName = "卡密")

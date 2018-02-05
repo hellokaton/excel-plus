@@ -8,7 +8,7 @@ import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import java.io.File;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Collection;
 import java.util.Iterator;
@@ -36,63 +36,81 @@ public interface ExcelWriter {
             throw new ExcelException("Export excel data is empty.");
         }
         try {
+
+            Sheet     sheet;
             Workbook  workbook;
             CellStyle headerStyle;
-            CellStyle columnStyle;
+            CellStyle columnStyle = null;
+            CellStyle rowStyle    = null;
 
-            if (null != exporter.getTemplatePath()) {
-                workbook = WorkbookFactory.create(new File(exporter.getTemplatePath()));
-            } else {
-                workbook = exporter.getExcelType().equals(ExcelType.XLSX) ? new XSSFWorkbook() : new HSSFWorkbook();
-            }
-
-            T     data0 = data.iterator().next();
-            Sheet sheet = workbook.createSheet(ExcelUtils.getSheetName(data0));
-
-            Row rowHead = sheet.createRow(0);
-
+            T data0 = data.iterator().next();
             // Set Excel header
             Iterator<T>  iterator   = data.iterator();
             List<String> fieldNames = ExcelUtils.getWriteFieldNames(data0.getClass());
-            int          rows       = data.size();
             int          cols       = fieldNames.size();
+            int          startRow   = exporter.startRow();
 
-            if (null != exporter.getHeaderStyle()) {
-                headerStyle = exporter.getHeaderStyle().apply(workbook);
+            if (null != exporter.getTemplatePath()) {
+                InputStream in = ExcelWriter.class.getClassLoader().getResourceAsStream(exporter.getTemplatePath());
+                workbook = WorkbookFactory.create(in);
+                sheet = workbook.getSheetAt(0);
             } else {
-                headerStyle = defaultHeaderStyle(workbook);
-            }
+                workbook = exporter.getExcelType().equals(ExcelType.XLSX) ? new XSSFWorkbook() : new HSSFWorkbook();
+                sheet = workbook.createSheet(ExcelUtils.getSheetName(data0));
 
-            if (null != exporter.getColumnStyle()) {
-                columnStyle = exporter.getColumnStyle().apply(workbook);
-            } else {
-                columnStyle = defaultColumnStyle(workbook);
-            }
-
-            for (int col = 0; col < cols; col++) {
-                Cell cell = rowHead.createCell(col);
-                cell.setCellStyle(headerStyle);
-                cell.setCellValue(fieldNames.get(col));
-                sheet.autoSizeColumn(col);
-            }
-
-            for (int rowNum = 1; iterator.hasNext() && rowNum <= rows; rowNum++) {
-                T   item = iterator.next();
-                Row row  = sheet.createRow(rowNum);
-                for (int col = 0; col < cols; col++) {
-                    Cell   cell  = row.createCell(col);
-                    String value = ExcelUtils.getColumnValue(item, col);
-                    cell.setCellStyle(columnStyle);
-                    cell.setCellValue(value);
-                    sheet.autoSizeColumn(col);
+                if (null != exporter.getHeaderStyle()) {
+                    headerStyle = exporter.getHeaderStyle().apply(workbook);
+                } else {
+                    headerStyle = defaultHeaderStyle(workbook);
                 }
+
+                if (null != exporter.getColumnStyle()) {
+                    columnStyle = exporter.getColumnStyle().apply(workbook);
+                } else {
+                    columnStyle = defaultColumnStyle(workbook);
+                }
+
+                this.writeRowHead(headerStyle, sheet, fieldNames, cols);
             }
+
+            this.writeRows(sheet, columnStyle, rowStyle, iterator, cols, startRow);
 
             workbook.write(outputStream);
             outputStream.flush();
             outputStream.close();
         } catch (Exception e) {
             throw new ExcelException(e);
+        }
+    }
+
+    default void writeRowHead(CellStyle headerStyle, Sheet sheet, List<String> fieldNames, int cols) {
+        Row rowHead = sheet.createRow(0);
+        for (int col = 0; col < cols; col++) {
+            Cell cell = rowHead.createCell(col);
+            if (null != headerStyle) {
+                cell.setCellStyle(headerStyle);
+            }
+            cell.setCellValue(fieldNames.get(col));
+            sheet.autoSizeColumn(col);
+        }
+    }
+
+    default <T> void writeRows(Sheet sheet, CellStyle columnStyle, CellStyle rowStyle, Iterator<T> iterator, int cols, int startRow) {
+        for (int rowNum = startRow; iterator.hasNext(); rowNum++) {
+            T   item = iterator.next();
+            Row row  = sheet.createRow(rowNum);
+            if (null != rowStyle) {
+                row.setRowStyle(rowStyle);
+            }
+            for (int col = 0; col < cols; col++) {
+                Cell   cell  = row.createCell(col);
+                String value = ExcelUtils.getColumnValue(item, col);
+                if (null != columnStyle) {
+                    cell.setCellStyle(columnStyle);
+                }
+                cell.setCellValue(value);
+                sheet.autoSizeColumn(col);
+            }
         }
     }
 
