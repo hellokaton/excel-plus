@@ -1,0 +1,180 @@
+# Excel Plus
+
+## 它是什么?
+
+`excel-plus` 是基于 [Apache POI]() 框架的一款扩展封装小库，让我们在开发中更快速的完成导入导出的需求。
+尽管很多人会提出 `poi` 能干这事儿为什么还要封装一层呢？
+
+`excel-plus`很大程度上简化了代码、让使用者更轻松的
+读、写 Excel 文档，也不用去关心格式兼容等问题，很多时候我们在代码中会写很多的 `for` 循环，各种 `getXXXIndex`
+来获取行或列让代码变的更臃肿。如果你也在开发中遇到类似的问题，那么 `excel-plus` 是你值得一试的工具。
+
+## 特性
+
+- 基于 Java 8 开发
+- 简洁的 API 操作
+- 注解驱动
+- 可配置列顺序
+- 支持按模板导出
+- 支持过滤行数据
+- 支持校验行数据
+- 支持自定义列样式
+- 支持 Excel 2003、2007、CSV 格式
+- 支持数据类型转换
+
+# 快速开始
+
+## 引入依赖
+
+加入以下 `maven` 依赖到你的 `pom.xml` 文件中，该项目使用的 `poi` 版本是 **3.17**，
+如果你的项目已经存在，请注意删除或者排除依赖。
+
+```xml
+<dependency>
+    <groupId>io.github.biezhi</groupId>
+    <artifactId>excel-plus</artifactId>
+    <version>0.0.1</version>
+</dependency>
+```
+
+> **注意**：这里的版本号请使用 `maven` 仓库较新版本，可在 Github 的 README 中看到。
+
+## 导入导出
+
+下面是我们的 Java 模型类，用于存储 Excel 的行数据。
+
+```java
+public class CardSecret {
+
+    @ExcelField(order = 0, columnName = "运营商类型", 
+                convertType = CardTypeConverter.class)
+    private Integer cardType;
+
+    @ExcelField(order = 1, columnName = "卡密")
+    private String secret;
+
+    @ExcelField(order = 2, columnName = "面额")
+    private BigDecimal amount;
+
+    @ExcelField(order = 3, columnName = "过期时间", datePattern = "yyyy年MM月dd日")
+    private Date expiredDate;
+
+    // getter setter 省略
+}
+```
+
+这里的 `cardType` 是数据库中存储的运营商类型，1对应的是**移动**，其他对应的是**联通**。
+这时候我们需要编写一个转换器将数字类型的结果转换为Excel中语义化的中文。
+
+```java
+// 运营商类型转换器
+public class CardTypeConverter implements Converter<Integer> {
+
+    @Override
+    public String write(Integer value) {
+        return value.equals(1) ? "联通" : "移动";
+    }
+
+    @Override
+    public Integer read(String value) {
+        return value.equals("联通") ? 1 : 2;
+    }
+}
+```
+
+```java
+ExcelPlus excelPlus = new ExcelPlus();
+List<CardSecret> cardSecrets = new ArrayList<>();
+cardSecrets.add(new CardSecret(1, "vlfdzepjmlz2y43z7er4", new BigDecimal("20")));
+cardSecrets.add(new CardSecret(2, "rasefq2rzotsmx526z6g", new BigDecimal("10")));
+cardSecrets.add(new CardSecret(2, "2ru44qut6neykb2380wt", new BigDecimal("50")));
+cardSecrets.add(new CardSecret(1, "srcb4c9fdqzuykd6q4zl", new BigDecimal("15")));
+
+excelPlus.export(cardSecrets).writeAsFile(new File("卡密列表.xlsx"));
+```
+
+这样就完成了一个列表数据导出为 Excel 的例子，通常我们的数据都是从数据库查询出来的。下面我们编写一个从
+Excel 中读取数据到 Java List 的例子。
+
+```java
+List<CardSecret> cardList = excelPlus.read(
+                                new File("卡密列表.xls"), 
+                                CardSecret.class).asList();
+```
+
+没错，就是这么简单！如果有更加复杂或自定义的需求可以看下面的进阶使用。
+
+# 进阶使用
+
+## 读取过滤
+
+有时候我们需要对读取的行数据做一下过滤，这时候就可以使用 `filter` 函数来筛选出合适的数据项。
+
+```java
+List<CardSecret> readList = excelPlus.read(new File("卡密列表.xls"), CardSecret.class)
+                                     .filter(cardSecret -> !cardSecret.getSecret().isEmpty())
+                                     .asList();
+```
+
+## 读取校验
+
+有一种场景是当 Excel 中的某一行或者几行数据不满足条件时候，我们记录下这些异常数据，并提示给调用方（比如 Web 浏览器）。
+下面这个示例校验每行数据中的 `amount` 是否 `< 20`，如果满足则返回一个校验失败的错误信息，当然你可以将 `valid` 校验
+的代码块封装一下看起来更流畅。
+
+```java
+ExcelResult<CardSecret> excelResult = excelPlus.read(new File("卡密列表.xls"), CardSecret.class)
+                                                .valid(cardSecret -> {
+                                                    if (cardSecret.getAmount().doubleValue() < 20) {
+                                                        return ValidRow.fail("最小金额为20");
+                                                    }
+                                                    return ValidRow.ok();
+                                                }).asResult();
+
+if (!excelResult.isValid()) {
+    excelResult.errors().forEach(System.out::println);
+} else {
+    System.out.println(excelResult.rows().size());
+}
+```
+
+## 导出样式
+
+```java
+List<CardSecret> cardSecrets = this.buildCardSecrets();
+excelPlus.export(Exporter.create(cardSecrets).headerStyle(workbook -> {
+    CellStyle headerStyle = workbook.createCellStyle();
+    headerStyle.setAlignment(HorizontalAlignment.LEFT);
+
+    headerStyle.setFillForegroundColor(HSSFColor.HSSFColorPredefined.WHITE.getIndex());
+    headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+
+    Font headerFont = workbook.createFont();
+    headerFont.setFontHeightInPoints((short) 12);
+    headerFont.setBold(true);
+    headerStyle.setFont(headerFont);
+    return headerStyle;
+})).writeAsFile(new File("卡密列表.xls"));
+```
+
+## 模板导出
+
+# API 介绍
+
+## 核心对象
+
+- `ExcelPlus`: 用于操作读取或导出 Excel 文档的类
+- `Converter`: 数据类型转换的顶层接口
+- `ExcelResult`: 当校验数据时候用于存储返回的错误消息和 `List` 数据
+- `Exporter`: 用于存储导出 Excel 文档时的配置，如样式、模板位置等
+
+## 注解使用
+
+该项目中有 4 个注解，分别是 `ExcelField`、`ExcelSheet`、`ReadField`、`WriteField`。
+正常情况下你只会用到第一个注解，下面先来解释一下 `@ExcelField`。
+
+
+
+## 
+
+# 版本更新

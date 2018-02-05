@@ -1,12 +1,15 @@
 package io.github.biezhi.excel.plus.reader;
 
 import io.github.biezhi.excel.plus.utils.ExcelUtils;
+import io.github.biezhi.excel.plus.utils.Pair;
 import org.apache.poi.ss.usermodel.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Excel read to list
@@ -21,14 +24,43 @@ import java.util.stream.Collectors;
  */
 public class ExcelReader<T> {
 
-    private Workbook workbook;
-    private Class<T>     type;
-    private Predicate<T> filter;
-    private int          startRowIndex = 1;
+    private Workbook              workbook;
+    private Class<T>              type;
+    private Predicate<T>          filter;
+    private Function<T, ValidRow> validFunction;
+    private int                   startRowIndex = 1;
 
     public ExcelReader(Workbook workbook, Class<T> type) {
         this.workbook = workbook;
         this.type = type;
+    }
+
+    public ExcelResult<T> asResult() {
+        ExcelResult<T> excelResult = new ExcelResult<>();
+
+        Stream<Pair<Integer, T>> stream = this.asStream();
+
+        if (null != this.validFunction) {
+
+            stream = stream.filter(pair -> {
+                Integer  rowNum   = pair.getK();
+                T        item     = pair.getV();
+                ValidRow validRow = validFunction.apply(item);
+                if (!validRow.valid()) {
+                    validRow.rowNum(rowNum);
+                    excelResult.addError(validRow);
+                    return false;
+                }
+                return true;
+            });
+        }
+
+        Stream<T> listStream = stream.map(Pair::getV);
+        if (null != this.filter) {
+            listStream = listStream.filter(this.filter);
+        }
+        excelResult.rows(listStream.collect(Collectors.toList()));
+        return excelResult;
     }
 
     /**
@@ -43,6 +75,14 @@ public class ExcelReader<T> {
      * @return excel rows
      */
     public List<T> asList() {
+        Stream<T> stream = this.asStream().map(Pair::getV);
+        if (null != this.filter) {
+            return stream.filter(this.filter).collect(Collectors.toList());
+        }
+        return stream.collect(Collectors.toList());
+    }
+
+    private Stream<Pair<Integer, T>> asStream() {
         String sheetName = ExcelUtils.getSheetName(type);
         Sheet  sheet     = workbook.getSheet(sheetName);
         if (null == sheet) {
@@ -52,7 +92,7 @@ public class ExcelReader<T> {
         int firstRowNum = sheet.getFirstRowNum();
         int lastRowNum  = sheet.getLastRowNum();
 
-        List<T> list = new ArrayList<>(lastRowNum);
+        List<Pair<Integer, T>> list = new ArrayList<>(lastRowNum);
 
         // traverse excel row
         for (int rowNum = firstRowNum + this.startRowIndex; rowNum <= lastRowNum; rowNum++) {
@@ -62,15 +102,10 @@ public class ExcelReader<T> {
             }
             T item = this.buildItem(row);
             if (null != item) {
-                list.add(item);
+                list.add(new Pair<>(rowNum, item));
             }
         }
-
-        if (null != this.filter) {
-            list = list.stream().filter(this.filter).collect(Collectors.toList());
-        }
-
-        return list;
+        return list.stream();
     }
 
     /**
@@ -135,6 +170,11 @@ public class ExcelReader<T> {
      */
     public ExcelReader<T> filter(Predicate<T> predicate) {
         this.filter = predicate;
+        return this;
+    }
+
+    public ExcelReader<T> valid(Function<T, ValidRow> validFunction) {
+        this.validFunction = validFunction;
         return this;
     }
 

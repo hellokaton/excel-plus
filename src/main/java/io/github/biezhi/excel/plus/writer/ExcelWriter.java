@@ -76,7 +76,7 @@ public interface ExcelWriter {
                 sheet.autoSizeColumn(col);
             }
 
-            for (int rowNum = 1; iterator.hasNext() && rowNum < rows; rowNum++) {
+            for (int rowNum = 1; iterator.hasNext() && rowNum <= rows; rowNum++) {
                 T   item = iterator.next();
                 Row row  = sheet.createRow(rowNum);
                 for (int col = 0; col < cols; col++) {
