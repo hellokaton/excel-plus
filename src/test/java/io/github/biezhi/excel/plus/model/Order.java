@@ -12,25 +12,25 @@ import java.util.Date;
  */
 public class Order implements Serializable {
 
-    @ExcelField(writeOrder = 0, columnName = "订单编号")
+    @ExcelField(order = 0, columnName = "订单编号")
     private Long id;
 
-    @ExcelField(writeOrder = 1, columnName = "商品名称")
+    @ExcelField(order = 1, columnName = "商品名称")
     private String productName;
 
-    @ExcelField(writeOrder = 2, columnName = "商品价格")
+    @ExcelField(order = 2, columnName = "商品价格")
     private BigDecimal price;
 
-    @ExcelField(writeOrder = 3, columnName = "购买用户")
+    @ExcelField(order = 3, columnName = "购买用户")
     private String buyUser;
 
-    @ExcelField(writeOrder = 4, columnName = "用户手机号")
+    @ExcelField(order = 4, columnName = "用户手机号")
     private String userMobile;
 
-    @ExcelField(writeOrder = 5, columnName = "购买数量")
+    @ExcelField(order = 5, columnName = "购买数量")
     private Integer count;
 
-    @ExcelField(writeOrder = 6, columnName = "下单时间")
+    @ExcelField(order = 6, columnName = "下单时间")
     private Date createTime;
 
     public Long getId() {
