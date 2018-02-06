@@ -63,6 +63,25 @@ public class Examples {
     }
 
     @Test
+    public void testReadCounter() throws ExcelException {
+        ExcelResult<CardSecret> excelResult = excelPlus.read(new File("卡密列表.xls"), CardSecret.class)
+                .startRow(2)
+                .valid(cardSecret -> {
+                    if(cardSecret.getCardType().equals(1)){
+                        return ValidRow.ok().addCounter("CARD_TYPE_1");
+                    }
+                    return ValidRow.ok();
+                })
+                .asResult();
+
+        if (!excelResult.isValid()) {
+            excelResult.errors().forEach(System.out::println);
+        } else {
+            System.out.println(excelResult.rows().size());
+        }
+    }
+
+    @Test
     public void testExport() throws ExcelException {
         List<CardSecret> cardSecrets = this.buildCardSecrets();
         excelPlus.export(cardSecrets).writeAsFile(new File("卡密列表.xls"));

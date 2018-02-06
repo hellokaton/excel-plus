@@ -2,7 +2,10 @@ package io.github.biezhi.excel.plus.reader;
 
 import io.github.biezhi.excel.plus.utils.ExcelUtils;
 import io.github.biezhi.excel.plus.utils.Pair;
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +38,13 @@ public class ExcelReader<T> {
         this.type = type;
     }
 
+    /**
+     * Will read to Excel row data into Excel the Result generally when check will use this method,
+     * otherwise, it is recommended to use this method returns the as List of ExcelResult will store the information
+     * of calibration failure and success, as well as some custom statistics
+     *
+     * @return ExcelResult
+     */
     public ExcelResult<T> asResult() {
         ExcelResult<T> excelResult = new ExcelResult<>();
 
@@ -82,7 +92,14 @@ public class ExcelReader<T> {
         return stream.collect(Collectors.toList());
     }
 
-    private Stream<Pair<Integer, T>> asStream() {
+    /**
+     * The result that will be read is returned as a Stream, and in most cases you will not call this method.
+     * <p>
+     * The structure in the Pair store is the line number and row data, and the line number starts at 1.
+     *
+     * @return Stream<Pair                               <                               Integer                               ,                                                               T>>
+     */
+    public Stream<Pair<Integer, T>> asStream() {
         String sheetName = ExcelUtils.getSheetName(type);
         Sheet  sheet     = workbook.getSheet(sheetName);
         if (null == sheet) {
@@ -111,7 +128,8 @@ public class ExcelReader<T> {
     /**
      * Set the Excel row data to the item object.
      *
-     * @param row row index
+     * @param row excel row
+     * @return return java instance
      */
     private T buildItem(Row row) {
         T item = ExcelUtils.newInstance(type);
@@ -122,44 +140,10 @@ public class ExcelReader<T> {
         int lastCellNum  = row.getPhysicalNumberOfCells();
         for (int cellNum = firstCellNum; cellNum < lastCellNum; cellNum++) {
             Cell   cell  = row.getCell(cellNum);
-            String value = this.getCellValue(cell);
+            String value = ExcelUtils.getCellValue(cell);
             ExcelUtils.writeToField(item, cellNum, value);
         }
         return item;
-    }
-
-    private String getCellValue(Cell cell) {
-        String cellValue = "";
-        if (cell == null) {
-            return cellValue;
-        }
-        if (cell.getCellTypeEnum().equals(CellType.NUMERIC)) {
-            cell.setCellType(CellType.STRING);
-        }
-        switch (cell.getCellTypeEnum()) {
-            case NUMERIC:
-                cellValue = String.valueOf(cell.getNumericCellValue());
-                break;
-            case STRING:
-                cellValue = String.valueOf(cell.getStringCellValue());
-                break;
-            case BOOLEAN:
-                cellValue = String.valueOf(cell.getBooleanCellValue());
-                break;
-            case FORMULA:
-                cellValue = String.valueOf(cell.getCellFormula());
-                break;
-            case BLANK:
-                cellValue = "";
-                break;
-            case ERROR:
-                cellValue = "illegal character";
-                break;
-            default:
-                cellValue = "Unknown type";
-                break;
-        }
-        return cellValue;
     }
 
     /**
@@ -173,6 +157,30 @@ public class ExcelReader<T> {
         return this;
     }
 
+    /**
+     * By passing a functional lambda interface to verify the correctness of the row data,
+     * you might write it like this in your code:
+     * <p>
+     * valid(cardSecret -> {
+     * BigDecimal amount = cardSecret.getAmount();
+     * if (amount.doubleValue() < 20) {
+     * return ValidRow.fail("The minimum amount is 20");
+     * }
+     * return ValidRow.ok();
+     * })
+     * <p>
+     * You can also do statistics in this function, such as recording all the empty rows, and you can do that.
+     * <p>
+     * .valid(cardSecret -> {
+     * if(cardSecret.getCardType().equals(1)){
+     * return ValidRow.ok().addCounter("CARD_TYPE_1");
+     * }
+     * return ValidRow.ok();
+     * })
+     *
+     * @param validFunction valid the lambda implementation of the row data
+     * @return self
+     */
     public ExcelReader<T> valid(Function<T, ValidRow> validFunction) {
         this.validFunction = validFunction;
         return this;

@@ -3,6 +3,8 @@ package io.github.biezhi.excel.plus.writer;
 import javax.servlet.http.HttpServletResponse;
 
 /**
+ * Used to wrap the HttpServletResponse and download file name
+ *
  * @author biezhi
  * @date 2018/2/4
  */

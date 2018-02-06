@@ -7,6 +7,8 @@ import io.github.biezhi.excel.plus.annotation.ReadField;
 import io.github.biezhi.excel.plus.annotation.WriteField;
 import io.github.biezhi.excel.plus.converter.Converter;
 import io.github.biezhi.excel.plus.converter.EmptyConverter;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
@@ -58,8 +60,6 @@ public class ExcelUtils {
                 pairs.add(pair);
             }
         }
-//        pairs.sort(Comparator.comparingInt(Pair::getV));
-//        return pairs.stream().map(Pair::getK).collect(Collectors.toList());
         return pairs;
     }
 
@@ -248,6 +248,40 @@ public class ExcelUtils {
         }
 
         return value.toString();
+    }
+
+    public static String getCellValue(Cell cell) {
+        String cellValue = "";
+        if (cell == null) {
+            return cellValue;
+        }
+        if (cell.getCellTypeEnum().equals(CellType.NUMERIC)) {
+            cell.setCellType(CellType.STRING);
+        }
+        switch (cell.getCellTypeEnum()) {
+            case NUMERIC:
+                cellValue = String.valueOf(cell.getNumericCellValue());
+                break;
+            case STRING:
+                cellValue = String.valueOf(cell.getStringCellValue());
+                break;
+            case BOOLEAN:
+                cellValue = String.valueOf(cell.getBooleanCellValue());
+                break;
+            case FORMULA:
+                cellValue = String.valueOf(cell.getCellFormula());
+                break;
+            case BLANK:
+                cellValue = "";
+                break;
+            case ERROR:
+                cellValue = "illegal character";
+                break;
+            default:
+                cellValue = "Unknown type";
+                break;
+        }
+        return cellValue;
     }
 
 }
