@@ -1,6 +1,6 @@
 <img src="media/logo.svg" alt="excel-plus" title="excel-plus" />
 
-> 更方便的导入、导出 Excel 文档
+> 提高生产力的 Excel 操作库
 
 - 支持按模板导出
 - 支持自定义导出样式
