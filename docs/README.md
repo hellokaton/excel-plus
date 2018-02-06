@@ -35,7 +35,7 @@
 <dependency>
     <groupId>io.github.biezhi</groupId>
     <artifactId>excel-plus</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.2</version>
 </dependency>
 ```
 
@@ -225,6 +225,13 @@ excelPlus.export(Exporter.create(cardSecrets).byTemplate("tpl.xls")).writeAsFile
 等你有了我就写上来行不？
 
 # 版本更新
+
+<b>v0.0.2</b>
+
+- 1. 添加验证行记录各项指标
+- 2. 区分验证成功和失败行
+- 3. 可配置是否添加到验证成功行
+- 4. 取消 `columnName` 选项为必选
 
 <b>v0.0.1</b>
 

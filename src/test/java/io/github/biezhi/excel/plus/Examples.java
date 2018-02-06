@@ -45,6 +45,7 @@ public class Examples {
     @Test
     public void testReadValid() throws ExcelException {
         ExcelResult<CardSecret> excelResult = excelPlus.read(new File("卡密列表.xls"), CardSecret.class)
+                .startRow(2)
                 .valid(cardSecret -> {
                     BigDecimal amount = cardSecret.getAmount();
                     if (amount.doubleValue() < 20) {

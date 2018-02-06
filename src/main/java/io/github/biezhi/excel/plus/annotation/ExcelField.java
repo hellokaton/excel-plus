@@ -32,7 +32,7 @@ public @interface ExcelField {
      *
      * @return excel header column title
      */
-    String columnName();
+    String columnName() default "";
 
     /**
      * When a field is a Date or a Time type,

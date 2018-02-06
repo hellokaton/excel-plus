@@ -140,6 +140,9 @@ public class ExcelUtils {
     }
 
     private static Object asObject(Field field, String value) {
+        if(null == value || "".equals(value)){
+            return null;
+        }
         ExcelField excelField = field.getAnnotation(ExcelField.class);
         if (null != excelField && !excelField.convertType().equals(EmptyConverter.class)) {
             Converter converter = newInstance(excelField.convertType());

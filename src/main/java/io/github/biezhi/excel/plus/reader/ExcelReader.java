@@ -28,7 +28,7 @@ public class ExcelReader<T> {
     private Class<T>              type;
     private Predicate<T>          filter;
     private Function<T, ValidRow> validFunction;
-    private int                   startRowIndex = 1;
+    private int startRowIndex = 1;
 
     public ExcelReader(Workbook workbook, Class<T> type) {
         this.workbook = workbook;
@@ -38,28 +38,28 @@ public class ExcelReader<T> {
     public ExcelResult<T> asResult() {
         ExcelResult<T> excelResult = new ExcelResult<>();
 
-        Stream<Pair<Integer, T>> stream = this.asStream();
+        List<Pair<Integer, T>> collect    = this.asStream().collect(Collectors.toList());
+        Stream<T>              listStream = collect.stream().map(Pair::getV);
 
-        if (null != this.validFunction) {
-
-            stream = stream.filter(pair -> {
-                Integer  rowNum   = pair.getK();
-                T        item     = pair.getV();
-                ValidRow validRow = validFunction.apply(item);
-                if (!validRow.valid()) {
-                    validRow.rowNum(rowNum);
-                    excelResult.addError(validRow);
-                    return false;
-                }
-                return true;
-            });
-        }
-
-        Stream<T> listStream = stream.map(Pair::getV);
         if (null != this.filter) {
             listStream = listStream.filter(this.filter);
         }
-        excelResult.rows(listStream.collect(Collectors.toList()));
+
+        List<T> rows = listStream.collect(Collectors.toList());
+        excelResult.rows(rows);
+
+        if (null != this.validFunction) {
+            collect.forEach(pair -> {
+                Integer  rowNum   = pair.getK();
+                T        item     = pair.getV();
+                ValidRow validRow = validFunction.apply(item);
+                validRow.rowNum(rowNum);
+                if (validRow.isValid() && validRow.allowAdd()) {
+                    excelResult.addSuccessRow(item);
+                }
+                excelResult.addValidRow(validRow);
+            });
+        }
         return excelResult;
     }
 

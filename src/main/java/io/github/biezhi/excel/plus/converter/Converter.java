@@ -22,6 +22,8 @@ public interface Converter<T> {
      * @param value
      * @return
      */
-    T read(String value);
+    default T read(String value) {
+        return null;
+    }
 
 }
