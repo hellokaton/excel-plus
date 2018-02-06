@@ -3,6 +3,7 @@ package io.github.biezhi.excel.plus.writer;
 import io.github.biezhi.excel.plus.enums.ExcelType;
 import io.github.biezhi.excel.plus.exception.ExcelException;
 import io.github.biezhi.excel.plus.utils.ExcelUtils;
+import io.github.biezhi.excel.plus.utils.Pair;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
@@ -13,6 +14,7 @@ import java.io.OutputStream;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Exporter interface
@@ -25,10 +27,10 @@ public interface ExcelWriter {
     /**
      * Default Export method
      *
-     * @param exporter
-     * @param outputStream
-     * @param <T>
-     * @throws ExcelException
+     * @param exporter     Exporter Object
+     * @param outputStream OutputStream
+     * @param <T>          Java Type
+     * @throws ExcelException thrown when exporting Excel to an exception
      */
     default <T> void export(Exporter<T> exporter, OutputStream outputStream) throws ExcelException {
         Collection<T> data = exporter.getData();
@@ -41,14 +43,14 @@ public interface ExcelWriter {
             Workbook  workbook;
             CellStyle headerStyle;
             CellStyle columnStyle = null;
-            CellStyle rowStyle    = null;
 
             T data0 = data.iterator().next();
             // Set Excel header
-            Iterator<T>  iterator   = data.iterator();
-            List<String> fieldNames = ExcelUtils.getWriteFieldNames(data0.getClass());
-            int          cols       = fieldNames.size();
-            int          startRow   = exporter.startRow();
+            Iterator<T> iterator = data.iterator();
+
+            List<Pair<Integer, String>> writeFieldNames = ExcelUtils.getWriteFieldNames(data0.getClass());
+
+            int startRow = exporter.startRow();
 
             if (null != exporter.getTemplatePath()) {
                 InputStream in = ExcelWriter.class.getClassLoader().getResourceAsStream(exporter.getTemplatePath());
@@ -63,17 +65,18 @@ public interface ExcelWriter {
                 } else {
                     headerStyle = defaultHeaderStyle(workbook);
                 }
-
                 if (null != exporter.getColumnStyle()) {
                     columnStyle = exporter.getColumnStyle().apply(workbook);
                 } else {
                     columnStyle = defaultColumnStyle(workbook);
                 }
 
-                this.writeRowHead(headerStyle, sheet, fieldNames, cols);
+                this.writeRowHead(headerStyle, sheet, writeFieldNames);
             }
 
-            this.writeRows(sheet, columnStyle, rowStyle, iterator, cols, startRow);
+            List<Integer> columnIndexes = writeFieldNames.stream().map(Pair::getK).collect(Collectors.toList());
+
+            this.writeRows(sheet, columnStyle, null, iterator, startRow, columnIndexes);
 
             workbook.write(outputStream);
             outputStream.flush();
@@ -83,26 +86,46 @@ public interface ExcelWriter {
         }
     }
 
-    default void writeRowHead(CellStyle headerStyle, Sheet sheet, List<String> fieldNames, int cols) {
+    /**
+     * Write the header row to Sheet.
+     *
+     * @param headerStyle header row cell style
+     * @param sheet       work sheet
+     * @param columnNames column names
+     */
+    default void writeRowHead(CellStyle headerStyle, Sheet sheet, List<Pair<Integer, String>> columnNames) {
         Row rowHead = sheet.createRow(0);
-        for (int col = 0; col < cols; col++) {
-            Cell cell = rowHead.createCell(col);
+        columnNames.forEach(pair -> {
+            Integer colIndex   = pair.getK();
+            String  columnName = pair.getV();
+            Cell    cell       = rowHead.createCell(colIndex);
             if (null != headerStyle) {
                 cell.setCellStyle(headerStyle);
             }
-            cell.setCellValue(fieldNames.get(col));
-            sheet.autoSizeColumn(col);
-        }
+            cell.setCellValue(columnName);
+        });
     }
 
-    default <T> void writeRows(Sheet sheet, CellStyle columnStyle, CellStyle rowStyle, Iterator<T> iterator, int cols, int startRow) {
+    /**
+     * Write line data
+     *
+     * @param sheet       work sheet
+     * @param columnStyle each column style in the row.
+     * @param rowStyle    row style
+     * @param iterator    row data iterator
+     * @param startRow    from the beginning of the line, the default is 1
+     * @param <T>         Java Type
+     */
+    default <T> void writeRows(Sheet sheet, CellStyle columnStyle, CellStyle rowStyle, Iterator<T> iterator, int startRow, List<Integer> columnIndexes) {
         for (int rowNum = startRow; iterator.hasNext(); rowNum++) {
             T   item = iterator.next();
             Row row  = sheet.createRow(rowNum);
             if (null != rowStyle) {
                 row.setRowStyle(rowStyle);
             }
-            for (int col = 0; col < cols; col++) {
+            Iterator<Integer> colIt = columnIndexes.iterator();
+            while (colIt.hasNext()) {
+                int    col   = colIt.next();
                 Cell   cell  = row.createCell(col);
                 String value = ExcelUtils.getColumnValue(item, col);
                 if (null != columnStyle) {
@@ -117,8 +140,8 @@ public interface ExcelWriter {
     /**
      * The default Excel header style.
      *
-     * @param workbook
-     * @return
+     * @param workbook Excel workbook
+     * @return header row cell style
      */
     default CellStyle defaultHeaderStyle(Workbook workbook) {
         CellStyle headerStyle = workbook.createCellStyle();
@@ -143,8 +166,8 @@ public interface ExcelWriter {
     /**
      * The default Excel column style.
      *
-     * @param workbook
-     * @return
+     * @param workbook Excel workbook
+     * @return row column cell style
      */
     default CellStyle defaultColumnStyle(Workbook workbook) {
         CellStyle cellStyle = workbook.createCellStyle();
@@ -164,9 +187,9 @@ public interface ExcelWriter {
     /**
      * Export excel
      *
-     * @param exporter
-     * @param <T>
-     * @throws ExcelException
+     * @param exporter Exporter Object
+     * @param <T>      Java Type
+     * @throws ExcelException thrown when exporting Excel to an exception
      */
     <T> void export(Exporter<T> exporter) throws ExcelException;
 

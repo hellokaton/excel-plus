@@ -2,6 +2,7 @@ package io.github.biezhi.excel.plus.model;
 
 import io.github.biezhi.excel.plus.annotation.ExcelField;
 import io.github.biezhi.excel.plus.converter.CardTypeConverter;
+import io.github.biezhi.excel.plus.converter.UsedTypeConverter;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -27,14 +28,18 @@ public class CardSecret implements Serializable {
     @ExcelField(order = 3, columnName = "过期时间", datePattern = "yyyy年MM月dd日")
     private Date expiredDate;
 
+    @ExcelField(order = 5, columnName = "使用情况", convertType = UsedTypeConverter.class)
+    private Boolean used;
+
     public CardSecret() {
     }
 
-    public CardSecret(Integer cardType, String secret, BigDecimal amount) {
+    public CardSecret(Integer cardType, String secret, BigDecimal amount, boolean used) {
         this.cardType = cardType;
         this.secret = secret;
         this.amount = amount;
         this.expiredDate = new Date();
+        this.used = used;
     }
 
     public Integer getCardType() {
@@ -69,6 +74,14 @@ public class CardSecret implements Serializable {
         this.expiredDate = expiredDate;
     }
 
+    public Boolean getUsed() {
+        return used;
+    }
+
+    public void setUsed(Boolean used) {
+        this.used = used;
+    }
+
     @Override
     public String toString() {
         return "CardSecret{" +
@@ -76,6 +89,7 @@ public class CardSecret implements Serializable {
                 ", secret='" + secret + '\'' +
                 ", amount=" + amount +
                 ", expiredDate=" + expiredDate +
+                ", used='" + new UsedTypeConverter().write(this.used) + '\'' +
                 '}';
     }
 }

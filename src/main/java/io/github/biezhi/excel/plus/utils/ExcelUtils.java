@@ -35,22 +35,22 @@ public class ExcelUtils {
         return excelSheet.value();
     }
 
-    public static List<String> getWriteFieldNames(Class<?> type) {
+    public static List<Pair<Integer, String>> getWriteFieldNames(Class<?> type) {
         List<Field>                 fields = getAndSaveFields(type);
-        List<Pair<String, Integer>> pairs  = new ArrayList<>(fields.size());
+        List<Pair<Integer, String>> pairs  = new ArrayList<>(fields.size());
 
         for (Field field : fields) {
             ExcelField excelField = field.getAnnotation(ExcelField.class);
             if (null != excelField) {
-                Pair<String, Integer> pair = new Pair<>();
-                pair.setK(excelField.columnName());
+                Pair<Integer, String> pair = new Pair<>();
+                pair.setV(excelField.columnName());
 
                 WriteField writeField = field.getAnnotation(WriteField.class);
                 if (null != writeField && writeField.order() != Constant.DEFAULT_ORDER) {
-                    pair.setV(writeField.order());
+                    pair.setK(writeField.order());
                 } else {
                     if (excelField.order() != Constant.DEFAULT_ORDER) {
-                        pair.setV(excelField.order());
+                        pair.setK(excelField.order());
                     } else {
                         System.err.println(String.format("[%s.%s] order config error, %s", type.getName(), field.getName(), TIP_MSG));
                     }
@@ -58,8 +58,9 @@ public class ExcelUtils {
                 pairs.add(pair);
             }
         }
-        pairs.sort(Comparator.comparingInt(Pair::getV));
-        return pairs.stream().map(Pair::getK).collect(Collectors.toList());
+//        pairs.sort(Comparator.comparingInt(Pair::getV));
+//        return pairs.stream().map(Pair::getK).collect(Collectors.toList());
+        return pairs;
     }
 
     public static String getColumnValue(Object item, int order) {
