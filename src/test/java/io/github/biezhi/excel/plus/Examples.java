@@ -67,6 +67,12 @@ public class Examples {
         excelPlus.export(cardSecrets).writeAsFile(new File("卡密列表.xls"));
     }
 
+    @Test
+    public void testExportTitle() throws ExcelException {
+        List<CardSecret> cardSecrets = this.buildCardSecrets();
+        excelPlus.export(Exporter.create(cardSecrets).title("卡密列表第一季数据")).writeAsFile(new File("卡密列表.xls"));
+    }
+
     private List<CardSecret> buildCardSecrets() {
         List<CardSecret> cardSecrets = new ArrayList<>();
         cardSecrets.add(new CardSecret(1, "vlfdzepjmlz2y43z7er4", new BigDecimal("20"), true));

@@ -1,17 +1,19 @@
 package io.github.biezhi.excel.plus.writer;
 
+import io.github.biezhi.excel.plus.Constant;
 import io.github.biezhi.excel.plus.enums.ExcelType;
 import io.github.biezhi.excel.plus.exception.ExcelException;
 import io.github.biezhi.excel.plus.utils.ExcelUtils;
 import io.github.biezhi.excel.plus.utils.Pair;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,7 +24,7 @@ import java.util.stream.Collectors;
  * @author biezhi
  * @date 2018/2/4
  */
-public interface ExcelWriter {
+public interface ExcelWriter extends Constant {
 
     /**
      * Default Export method
@@ -43,6 +45,7 @@ public interface ExcelWriter {
             Workbook  workbook;
             CellStyle headerStyle;
             CellStyle columnStyle = null;
+            CellStyle titleStyle  = null;
 
             T data0 = data.iterator().next();
             // Set Excel header
@@ -50,31 +53,48 @@ public interface ExcelWriter {
 
             List<Pair<Integer, String>> writeFieldNames = ExcelUtils.getWriteFieldNames(data0.getClass());
 
+            List<Integer> columnIndexes = writeFieldNames.stream().map(Pair::getK).collect(Collectors.toList());
+
             int startRow = exporter.startRow();
 
             if (null != exporter.getTemplatePath()) {
                 InputStream in = ExcelWriter.class.getClassLoader().getResourceAsStream(exporter.getTemplatePath());
                 workbook = WorkbookFactory.create(in);
                 sheet = workbook.getSheetAt(0);
+
             } else {
                 workbook = exporter.getExcelType().equals(ExcelType.XLSX) ? new XSSFWorkbook() : new HSSFWorkbook();
                 sheet = workbook.createSheet(ExcelUtils.getSheetName(data0));
 
+                if (null != exporter.getTitleStyle()) {
+                    titleStyle = exporter.getTitleStyle().apply(workbook);
+                } else {
+                    titleStyle = this.defaultTitleStyle(workbook);
+                }
+
                 if (null != exporter.getHeaderStyle()) {
                     headerStyle = exporter.getHeaderStyle().apply(workbook);
                 } else {
-                    headerStyle = defaultHeaderStyle(workbook);
+                    headerStyle = this.defaultHeaderStyle(workbook);
                 }
+
                 if (null != exporter.getColumnStyle()) {
                     columnStyle = exporter.getColumnStyle().apply(workbook);
                 } else {
-                    columnStyle = defaultColumnStyle(workbook);
+                    columnStyle = this.defaultColumnStyle(workbook);
                 }
 
-                this.writeRowHead(headerStyle, sheet, writeFieldNames);
-            }
+                String headerTitle = exporter.getHeaderTitle();
+                int    colIndex    = 0;
+                if (null != headerTitle) {
+                    colIndex = 1;
+                    int maxColIndex = columnIndexes.stream().max(Comparator.comparingInt(Integer::intValue)).get();
+                    this.writeTitleRow(titleStyle, sheet, headerTitle, maxColIndex);
+                }
+                this.writeColumnNames(colIndex, headerStyle, sheet, writeFieldNames);
+                startRow += colIndex;
 
-            List<Integer> columnIndexes = writeFieldNames.stream().map(Pair::getK).collect(Collectors.toList());
+            }
 
             this.writeRows(sheet, columnStyle, null, iterator, startRow, columnIndexes);
 
@@ -86,15 +106,28 @@ public interface ExcelWriter {
         }
     }
 
+    default void writeTitleRow(CellStyle cellStyle, Sheet sheet, String title, int maxColIndex) {
+        Row titleRow = sheet.createRow(0);
+        for (int i = 0; i <= maxColIndex; i++) {
+            Cell cell = titleRow.createCell(i);
+            if (i == 0) {
+                cell.setCellValue(title);
+            }
+            cell.setCellStyle(cellStyle);
+        }
+        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, maxColIndex));
+    }
+
     /**
      * Write the header row to Sheet.
      *
+     * @param rowIndex    start row index
      * @param headerStyle header row cell style
      * @param sheet       work sheet
      * @param columnNames column names
      */
-    default void writeRowHead(CellStyle headerStyle, Sheet sheet, List<Pair<Integer, String>> columnNames) {
-        Row rowHead = sheet.createRow(0);
+    default void writeColumnNames(int rowIndex, CellStyle headerStyle, Sheet sheet, List<Pair<Integer, String>> columnNames) {
+        Row rowHead = sheet.createRow(rowIndex);
         columnNames.forEach(pair -> {
             Integer colIndex   = pair.getK();
             String  columnName = pair.getV();
@@ -135,53 +168,6 @@ public interface ExcelWriter {
                 sheet.autoSizeColumn(col);
             }
         }
-    }
-
-    /**
-     * The default Excel header style.
-     *
-     * @param workbook Excel workbook
-     * @return header row cell style
-     */
-    default CellStyle defaultHeaderStyle(Workbook workbook) {
-        CellStyle headerStyle = workbook.createCellStyle();
-
-        headerStyle.setAlignment(HorizontalAlignment.CENTER);
-        headerStyle.setVerticalAlignment(VerticalAlignment.CENTER);
-        headerStyle.setBorderTop(BorderStyle.THIN);
-        headerStyle.setBorderRight(BorderStyle.THIN);
-        headerStyle.setBorderBottom(BorderStyle.THIN);
-        headerStyle.setBorderLeft(BorderStyle.THIN);
-
-        headerStyle.setFillForegroundColor(HSSFColor.HSSFColorPredefined.WHITE.getIndex());
-        headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-
-        Font headerFont = workbook.createFont();
-        headerFont.setFontHeightInPoints((short) 12);
-        headerFont.setBold(true);
-        headerStyle.setFont(headerFont);
-        return headerStyle;
-    }
-
-    /**
-     * The default Excel column style.
-     *
-     * @param workbook Excel workbook
-     * @return row column cell style
-     */
-    default CellStyle defaultColumnStyle(Workbook workbook) {
-        CellStyle cellStyle = workbook.createCellStyle();
-        cellStyle.setAlignment(HorizontalAlignment.CENTER);
-        cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
-        cellStyle.setBorderTop(BorderStyle.THIN);
-        cellStyle.setBorderRight(BorderStyle.THIN);
-        cellStyle.setBorderBottom(BorderStyle.THIN);
-        cellStyle.setBorderLeft(BorderStyle.THIN);
-        cellStyle.setWrapText(true);
-
-        Font cellFont = workbook.createFont();
-        cellStyle.setFont(cellFont);
-        return cellStyle;
     }
 
     /**
