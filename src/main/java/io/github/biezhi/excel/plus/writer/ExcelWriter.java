@@ -1,14 +1,17 @@
 package io.github.biezhi.excel.plus.writer;
 
 import io.github.biezhi.excel.plus.Constant;
-import io.github.biezhi.excel.plus.enums.ExcelType;
 import io.github.biezhi.excel.plus.exception.ExcelException;
 import io.github.biezhi.excel.plus.utils.ExcelUtils;
 import io.github.biezhi.excel.plus.utils.Pair;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.*;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -63,7 +66,7 @@ public interface ExcelWriter extends Constant {
                 sheet = workbook.getSheetAt(0);
 
             } else {
-                workbook = exporter.getExcelType().equals(ExcelType.XLSX) ? new XSSFWorkbook() : new HSSFWorkbook();
+                workbook = exporter.createWorkbook();
                 sheet = workbook.createSheet(ExcelUtils.getSheetName(data0));
 
                 if (null != exporter.getTitleStyle()) {
