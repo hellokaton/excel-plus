@@ -21,7 +21,7 @@ Easier to read and generate an excel file, supports 2003 and 2007.
 
 # Usage
 
-Add maven dependency
+As maven dependency
 
 ```xml
 <dependency>
