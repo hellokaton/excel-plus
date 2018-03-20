@@ -11,9 +11,11 @@ import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,23 +30,31 @@ public class Examples {
 
     private ExcelPlus excelPlus = new ExcelPlus();
 
+    private InputStream getCardStream() {
+        return Examples.class.getResourceAsStream("/卡密列表.xlsx");
+    }
+
     @Test
     public void testReadExcel() throws ExcelException {
-        List<CardSecret> cardSecrets = excelPlus.read(new File("卡密列表.xls"), CardSecret.class).asList();
-        System.out.println(cardSecrets);
+
+        List<CardSecret> cardSecrets = excelPlus.read(getCardStream(), CardSecret.class).asList();
+        Assert.assertNotNull(cardSecrets);
+        Assert.assertEquals(4, cardSecrets.size());
     }
 
     @Test
     public void testReadFilter() throws ExcelException {
-        List<CardSecret> cardSecrets = excelPlus.read(new File("卡密列表.xls"), CardSecret.class)
-                .filter(cardSecret -> cardSecret.getAmount().doubleValue() > 10)
+        List<CardSecret> cardSecrets = excelPlus.read(getCardStream(), CardSecret.class)
+                .filter(cardSecret -> cardSecret.getAmount().doubleValue() > 50)
                 .asList();
-        System.out.println(cardSecrets);
+
+        Assert.assertNotNull(cardSecrets);
+        Assert.assertEquals(3, cardSecrets.size());
     }
 
     @Test
     public void testReadValid() throws ExcelException {
-        ExcelResult<CardSecret> excelResult = excelPlus.read(new File("卡密列表.xls"), CardSecret.class)
+        ExcelResult<CardSecret> excelResult = excelPlus.read(getCardStream(), CardSecret.class)
                 .startRow(2)
                 .valid(cardSecret -> {
                     BigDecimal amount = cardSecret.getAmount();
@@ -58,16 +68,16 @@ public class Examples {
         if (!excelResult.isValid()) {
             excelResult.errors().forEach(System.out::println);
         } else {
-            System.out.println(excelResult.rows().size());
+            Assert.assertEquals(3, excelResult.rows().size());
         }
     }
 
     @Test
     public void testReadCounter() throws ExcelException {
-        ExcelResult<CardSecret> excelResult = excelPlus.read(new File("卡密列表.xls"), CardSecret.class)
+        ExcelResult<CardSecret> excelResult = excelPlus.read(getCardStream(), CardSecret.class)
                 .startRow(2)
                 .valid(cardSecret -> {
-                    if(cardSecret.getCardType().equals(1)){
+                    if (cardSecret.getCardType().equals(1)) {
                         return ValidRow.ok().addCounter("CARD_TYPE_1");
                     }
                     return ValidRow.ok();
@@ -77,14 +87,14 @@ public class Examples {
         if (!excelResult.isValid()) {
             excelResult.errors().forEach(System.out::println);
         } else {
-            System.out.println(excelResult.rows().size());
+            Assert.assertEquals(3, excelResult.rows().size());
         }
     }
 
     @Test
     public void testExport() throws ExcelException {
         List<CardSecret> cardSecrets = this.buildCardSecrets();
-        excelPlus.export(cardSecrets).writeAsFile(new File("卡密列表.xls"));
+        excelPlus.export(cardSecrets).writeAsFile(new File("export.xls"));
     }
 
     @Test
@@ -128,7 +138,7 @@ public class Examples {
         ).writeAsFile(new File("template_rows.xls"));
     }
 
-    @Test
+//    @Test
     public void testDownload() throws ExcelException {
         List<CardSecret> cardSecrets = this.buildCardSecrets();
         excelPlus.export(cardSecrets).writeAsResponse(ResponseWrapper.create(null, "xxx表格.xls"));
