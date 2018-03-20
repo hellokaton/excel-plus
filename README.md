@@ -21,13 +21,13 @@ Easier to read and generate an excel file, supports 2003 and 2007.
 
 # Usage
 
-Add maven dependency
+As maven dependency
 
 ```xml
 <dependency>
     <groupId>io.github.biezhi</groupId>
     <artifactId>excel-plus</artifactId>
-    <version>0.0.2</version>
+    <version>0.0.3</version>
 </dependency>
 ```
 
