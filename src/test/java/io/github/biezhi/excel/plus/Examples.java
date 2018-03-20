@@ -2,6 +2,7 @@ package io.github.biezhi.excel.plus;
 
 import io.github.biezhi.excel.plus.exception.ExcelException;
 import io.github.biezhi.excel.plus.model.CardSecret;
+import io.github.biezhi.excel.plus.model.Station;
 import io.github.biezhi.excel.plus.reader.ExcelResult;
 import io.github.biezhi.excel.plus.reader.ValidRow;
 import io.github.biezhi.excel.plus.writer.Exporter;
@@ -142,6 +143,15 @@ public class Examples {
     public void testDownload() throws ExcelException {
         List<CardSecret> cardSecrets = this.buildCardSecrets();
         excelPlus.export(cardSecrets).writeAsResponse(ResponseWrapper.create(null, "xxx表格.xls"));
+    }
+
+    public static void main(String[] args) throws ExcelException {
+        long start = System.currentTimeMillis();
+        List<Station> stations = new ExcelPlus().read(new File("test_data.xlsx"), Station.class)
+                .sheetName("北京")
+                .asList();
+        System.out.println(stations.size());
+        System.out.println( (System.currentTimeMillis() - start) + "ms" );
     }
 
 }

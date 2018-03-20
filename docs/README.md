@@ -236,6 +236,11 @@ excelPlus.export(Exporter.create(cardSecrets).byTemplate("tpl.xls")).writeAsFile
 
 # 版本更新
 
+<b>v0.0.4</b>
+
+1. 添加 `sheetName` 方法在运行时读取工作表
+2. 添加 `sheetIndex` 方法在运行时读取工作表
+
 <b>v0.0.3</b>
 
 1. 修复自定义 `SheetName` 读取失败
