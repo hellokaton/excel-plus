@@ -10,6 +10,7 @@ import io.github.biezhi.excel.plus.converter.EmptyConverter;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -29,8 +30,8 @@ public class ExcelUtils {
 
     private static final Map<String, List<Field>> FIELD_CACHE = new HashMap<>(8);
 
-    public static String getSheetName(Object item) {
-        ExcelSheet excelSheet = item.getClass().getAnnotation(ExcelSheet.class);
+    public static String getSheetName(Class<?> type) {
+        ExcelSheet excelSheet = type.getAnnotation(ExcelSheet.class);
         if (null == excelSheet) {
             return Constant.DEFAULT_SHEET_NAME;
         }

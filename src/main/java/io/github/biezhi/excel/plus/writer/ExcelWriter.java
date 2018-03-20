@@ -45,7 +45,7 @@ public interface ExcelWriter extends Constant {
             Workbook  workbook;
             CellStyle headerStyle;
             CellStyle columnStyle = null;
-            CellStyle titleStyle  = null;
+            CellStyle titleStyle;
 
             T data0 = data.iterator().next();
             // Set Excel header
@@ -64,7 +64,7 @@ public interface ExcelWriter extends Constant {
 
             } else {
                 workbook = exporter.getExcelType().equals(ExcelType.XLSX) ? new XSSFWorkbook() : new HSSFWorkbook();
-                sheet = workbook.createSheet(ExcelUtils.getSheetName(data0));
+                sheet = workbook.createSheet(ExcelUtils.getSheetName(data0.getClass()));
 
                 if (null != exporter.getTitleStyle()) {
                     titleStyle = exporter.getTitleStyle().apply(workbook);

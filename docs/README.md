@@ -43,7 +43,7 @@
 <dependency>
     <groupId>io.github.biezhi</groupId>
     <artifactId>excel-plus</artifactId>
-    <version>0.0.2</version>
+    <version>0.0.3</version>
 </dependency>
 ```
 
@@ -235,6 +235,10 @@ excelPlus.export(Exporter.create(cardSecrets).byTemplate("tpl.xls")).writeAsFile
 在使用过程中遇到什么问题或者建议可以发一个 [issue](https://github.com/biezhi/excel-plus/issues/new)
 
 # 版本更新
+
+<b>v0.0.3</b>
+
+1. 修复自定义 `SheetName` 读取失败
 
 <b>v0.0.2</b>
 
