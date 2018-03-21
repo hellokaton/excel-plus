@@ -15,7 +15,7 @@
  */
 package io.github.biezhi.excel.plus.handler;
 
-import io.github.biezhi.excel.plus.exception.ParseException;
+import io.github.biezhi.excel.plus.exception.ExcelException;
 import io.github.biezhi.excel.plus.utils.Pair;
 
 import java.util.List;
@@ -28,6 +28,6 @@ import java.util.List;
  */
 public interface ExcelHandler<T> {
 
-    List<Pair<Integer, T>> parse() throws ParseException;
+    List<Pair<Integer, T>> parse() throws ExcelException;
 
 }

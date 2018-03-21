@@ -42,7 +42,7 @@ public class ExcelPlusTest {
     }
 
     @Test
-    public void testReadByDOM() throws ParseException {
+    public void testReadByDOM() throws ExcelException {
         Reader reader = Reader.create().excelFile(getCardExcelFile());
 
         List<CardSecret> cardSecrets = excelPlus.read(CardSecret.class, reader).asList();
@@ -53,7 +53,7 @@ public class ExcelPlusTest {
     }
 
     @Test
-    public void testReadBySAX() throws ParseException {
+    public void testReadBySAX() throws ExcelException {
 
         Reader reader = Reader.create().parseType(ParseType.SAX).excelFile(getCardExcelFile());
 
@@ -65,10 +65,9 @@ public class ExcelPlusTest {
     }
 
     @Test
-    public void testReadBySheetName() throws ParseException {
-
-        Reader reader = Reader.create().parseType(ParseType.SAX)
-                .sheetName("工作表1")
+    public void testReadBySheetName() throws ExcelException {
+        Reader reader = Reader.create().parseType(ParseType.DOM)
+                .sheetName("工作表 1")
                 .excelFile(getCardExcelFile());
 
         List<CardSecret> cardSecrets = excelPlus.read(CardSecret.class, reader).asList();
@@ -79,7 +78,7 @@ public class ExcelPlusTest {
     }
 
     @Test
-    public void testReadAndFilter() throws ParseException {
+    public void testReadAndFilter() throws ExcelException {
         Reader reader = Reader.create().parseType(ParseType.SAX).excelFile(getCardExcelFile());
 
         List<CardSecret> cardSecrets = excelPlus.read(CardSecret.class, reader)
@@ -92,7 +91,7 @@ public class ExcelPlusTest {
     }
 
     @Test
-    public void testReadAndMap() throws ParseException {
+    public void testReadAndMap() throws ExcelException {
         Reader reader = Reader.create().parseType(ParseType.SAX).excelFile(getCardExcelFile());
 
         List<String> cardSecrets = excelPlus.read(CardSecret.class, reader)

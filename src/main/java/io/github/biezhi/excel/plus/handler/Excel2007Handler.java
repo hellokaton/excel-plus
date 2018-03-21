@@ -1,17 +1,17 @@
 /**
- *  Copyright (c) 2018, biezhi 王爵 (biezhi.me@gmail.com)
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *  http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Copyright (c) 2018, biezhi 王爵 (biezhi.me@gmail.com)
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package io.github.biezhi.excel.plus.handler;
 
@@ -43,6 +43,8 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static io.github.biezhi.excel.plus.utils.ExcelUtils.isNumber;
+
 /**
  * Excel 2007 Parser handle
  *
@@ -52,83 +54,47 @@ import java.util.stream.Collectors;
 @Slf4j
 public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler {
 
-
     private Class<T> type;
     private Reader   reader;
+
+    private SharedStringsTable sst;
+    private String             lastContents;
+    private boolean            nextIsString;
+    private int sheetIndex = 0;
+
+    private       List<String>  rows         = new ArrayList<>();
+    private       CellDataType  nextDataType = CellDataType.SSTINDEX;
+    private final DataFormatter formatter    = new DataFormatter();
+
+    private List<Pair<Integer, List<String>>> data = new ArrayList<>();
+
+    private int curRow = 0;
+    private int curCol = 0;
+    private boolean isTElement;
+    private short   formatIndex;
+    private String  formatString;
+
+    private StylesTable stylesTable;
+
+    private Map<Integer, Field> result = new HashMap<>();
+
+    /**
+     * Defines the position of the previous element and the current element,
+     * used to calculate the number of empty cells, such as A6 to A8
+     */
+    private String preRef = null, ref = null;
+
+    /**
+     * Defines the maximum number of cells in a row of the document,
+     * used to fill in the last row of cells that may be missing
+     */
+    private String maxRef = null;
 
     public Excel2007Handler(Class<T> type, Reader reader) {
         this.type = type;
         this.reader = reader;
     }
 
-    /**
-     * 共享字符串表
-     */
-    private SharedStringsTable sst;
-
-    /**
-     * 上一次的内容
-     */
-    private String lastContents;
-
-    /**
-     * 字符串标识
-     */
-    private boolean nextIsString;
-
-    /**
-     * 工作表索引
-     */
-    private int sheetIndex = 0;
-
-    /**
-     * 行集合
-     */
-    private List<String> rowlist = new ArrayList<>();
-
-    private List<Pair<Integer, List<String>>> data = new ArrayList<>();
-
-    /**
-     * 当前行
-     */
-    private int curRow = 0;
-
-    /**
-     * 当前列
-     */
-    private int curCol = 0;
-
-    /**
-     * T元素标识
-     */
-    private boolean isTElement;
-
-
-    /**
-     * 单元格数据类型，默认为字符串类型
-     */
-    private CellDataType nextDataType = CellDataType.SSTINDEX;
-
-    private final DataFormatter formatter = new DataFormatter();
-
-    private short formatIndex;
-
-    private String formatString;
-
-    // 定义前一个元素和当前元素的位置，用来计算其中空的单元格数量，如A6和A8等
-    private String preRef = null, ref = null;
-
-    // 定义该文档一行最大的单元格数，用来补全一行最后可能缺失的单元格
-    private String maxRef = null;
-
-    /**
-     * 单元格
-     */
-    private StylesTable stylesTable;
-
-    /**
-     * 解析
-     */
     @Override
     public List<Pair<Integer, T>> parse() {
         try {
@@ -162,17 +128,12 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
         return np;
     }
 
-    Map<Integer, Field> result = new HashMap<>();
-
-    public Map<Integer, Field> mapField() {
-
+    private Map<Integer, Field> mapField() {
         if (!result.isEmpty()) {
             return result;
         }
-
         List<Field>         fields = ExcelUtils.getAndSaveFields(type);
         Map<Integer, Field> map    = new HashMap<>();
-
         for (Field field : fields) {
             ExcelField excelField = field.getAnnotation(ExcelField.class);
             if (null == excelField) {
@@ -185,11 +146,8 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
                 map.put(excelField.order(), field);
             }
         }
-
         AtomicInteger index = new AtomicInteger();
-        map.keySet().stream().sorted(Integer::compareTo).forEach(order -> {
-            result.put(index.getAndIncrement(), map.get(order));
-        });
+        map.keySet().stream().sorted(Integer::compareTo).forEach(order -> result.put(index.getAndIncrement(), map.get(order)));
         return result;
     }
 
@@ -206,58 +164,47 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
         return item;
     }
 
-    public XMLReader fetchSheetParser(SharedStringsTable sst) throws SAXException {
+    private XMLReader fetchSheetParser(SharedStringsTable sst) throws SAXException {
         XMLReader parser = XMLReaderFactory.createXMLReader("org.apache.xerces.parsers.SAXParser");
         this.sst = sst;
         parser.setContentHandler(this);
         return parser;
     }
 
-    public void startElement(String uri, String localName, String name, Attributes attributes) throws SAXException {
+    public void startElement(String uri, String localName, String name, Attributes attributes) {
 
-        // c => 单元格
+        // c => cell
         if ("c".equals(name)) {
-            // 前一个单元格的位置
+            // previous cell position
             if (preRef == null) {
                 preRef = attributes.getValue("r");
             } else {
                 preRef = ref;
             }
-            // 当前单元格的位置
+            // current cell position
             ref = attributes.getValue("r");
-            // 设定单元格类型
+            // set cell type
             this.setNextDataType(attributes);
             // Figure out if the value is an index in the SST
             String cellType = attributes.getValue("t");
-            if (cellType != null && cellType.equals("s")) {
-                nextIsString = true;
-            } else {
-                nextIsString = false;
-            }
+            nextIsString = cellType != null && cellType.equals("s");
         }
 
-        // 当元素为t时
-        if ("t".equals(name)) {
-            isTElement = true;
-        } else {
-            isTElement = false;
-        }
-        // 置空
+        // when the element is t
+        isTElement = "t".equals(name);
         lastContents = "";
     }
 
     /**
-     * 处理数据类型
-     *
-     * @param attributes
+     * Processing data types
      */
-    public void setNextDataType(Attributes attributes) {
+    private void setNextDataType(Attributes attributes) {
         nextDataType = CellDataType.NUMBER;
         formatIndex = -1;
         formatString = null;
         String cellType     = attributes.getValue("t");
         String cellStyleStr = attributes.getValue("s");
-        String columData    = attributes.getValue("r");
+        attributes.getValue("r");
 
         if ("b".equals(cellType)) {
             nextDataType = CellDataType.BOOL;
@@ -279,7 +226,6 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
 
             if ("m/d/yy" == formatString) {
                 nextDataType = CellDataType.DATE;
-                formatString = "yyyy-MM-dd hh:mm:ss.SSS";
             }
 
             if (formatString == null) {
@@ -290,41 +236,37 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
     }
 
     /**
-     * 对解析出来的数据进行类型处理
-     *
-     * @param value   单元格的值（这时候是一串数字）
-     * @param thisStr 一个空字符串
-     * @return
+     * Type processing of parsed data
      */
     @SuppressWarnings("deprecation")
-    public String getDataValue(String value, String thisStr) {
+    private String getDataValue(String value) {
+        String thisStr;
         switch (nextDataType) {
-            // 这几个的顺序不能随便交换，交换了很可能会导致数据错误
+            // The sequence of these few can not be exchanged easily,
+            // and exchanges are likely to result in data errors
             case BOOL:
                 char first = value.charAt(0);
                 thisStr = first == '0' ? "FALSE" : "TRUE";
                 break;
             case ERROR:
-                thisStr = "\"ERROR:" + value.toString() + '"';
+                thisStr = "\"ERROR:" + value + '"';
                 break;
             case FORMULA:
-                thisStr = '"' + value.toString() + '"';
+                thisStr = '"' + value + '"';
                 break;
             case INLINESTR:
-                XSSFRichTextString rtsi = new XSSFRichTextString(value.toString());
-
+                XSSFRichTextString rtsi = new XSSFRichTextString(value);
                 thisStr = rtsi.toString();
                 rtsi = null;
                 break;
             case SSTINDEX:
-                String sstIndex = value.toString();
                 try {
-                    int                idx  = Integer.parseInt(sstIndex);
+                    int                idx  = Integer.parseInt(value);
                     XSSFRichTextString rtss = new XSSFRichTextString(sst.getEntryAt(idx));
                     thisStr = rtss.toString();
                     rtss = null;
                 } catch (NumberFormatException ex) {
-                    thisStr = value.toString();
+                    thisStr = value;
                 }
                 break;
             case NUMBER:
@@ -333,87 +275,72 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
                 } else {
                     thisStr = value;
                 }
-
                 thisStr = thisStr.replace("_", "").trim();
                 break;
             case DATE:
                 thisStr = formatter.formatRawCellContents(Double.parseDouble(value), formatIndex, formatString);
-
-                // 对日期字符串作特殊处理
+                // special handling of date strings
                 thisStr = thisStr.replace(" ", "T");
                 break;
             default:
                 thisStr = " ";
-
                 break;
         }
-
         return thisStr;
-    }
-
-    private boolean isNumber(String str) {
-        try {
-            Double.parseDouble(str);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
     }
 
     @Override
     public void endElement(String uri, String localName, String name) {
-        // 根据SST的索引值的到单元格的真正要存储的字符串
-        // 这时characters()方法可能会被调用多次
+        // The string to be actually stored in the cell according to the SST index value
+        // The characters() method may be called multiple times
         if (nextIsString && (null != lastContents && !lastContents.isEmpty()) && isNumber(lastContents)) {
             int idx = Integer.parseInt(lastContents);
             lastContents = new XSSFRichTextString(sst.getEntryAt(idx)).toString();
         }
 
-        // t元素也包含字符串
+        // t element also contains a string
         if (isTElement) {
-            // 将单元格内容加入rowlist中，在这之前先去掉字符串前后的空白符
+            // Add the contents of the cell to rows, before removing the whitespace before and after the string
             String value = lastContents.trim();
-            rowlist.add(curCol, value);
+            rows.add(curCol, value);
             curCol++;
             isTElement = false;
         } else if ("v".equals(name)) {
-            // v => 单元格的值，如果单元格是字符串则v标签的值为该字符串在SST中的索引
-            String value = this.getDataValue(lastContents.trim(), "");
-            // 补全单元格之间的空单元格
+            // v => The value of the cell, if the cell is a string,
+            // the value of the v tag is the index of the string in the SST
+            String value = this.getDataValue(lastContents.trim());
+            // Complement empty cells between cells
             if (!ref.equals(preRef)) {
                 int len = countNullCell(ref, preRef);
                 for (int i = 0; i < len; i++) {
-                    rowlist.add(curCol, value);
+                    rows.add(curCol, value);
                     curCol++;
                 }
             }
-            rowlist.add(curCol, value);
+            rows.add(curCol, value);
             curCol++;
         } else {
-            // 如果标签名称为 row ，这说明已到行尾，调用 optRows() 方法
+            // If the tag name is row , this indicates that the end of the line has been reached and the method optRows() is called
             if (name.equals("row")) {
-                // 默认第一行为表头，以该行单元格数目为最大数目
+                // The default first row header, with the maximum number of cells in the row
                 if (curRow == 0) {
                     maxRef = ref;
                 }
-
-                // 补全一行尾部可能缺失的单元格
+                // Complementing cells that may be missing at the end of a row
                 if (maxRef != null) {
                     int len = countNullCell(maxRef, ref);
                     for (int i = 0; i <= len; i++) {
-                        rowlist.add(curCol, "");
+                        rows.add(curCol, "");
                         curCol++;
                     }
                 }
-
-                if (curRow >= reader.getStartRowIndex() && rowlist.stream().filter(ExcelUtils::isNotEmpty).count() > 0) {
+                if (curRow >= reader.getStartRowIndex() && rows.stream().anyMatch(ExcelUtils::isNotEmpty)) {
                     Pair<Integer, List<String>> pair = new Pair<>();
                     pair.setK(curRow);
-                    pair.setV(new ArrayList<>(rowlist));
+                    pair.setV(new ArrayList<>(rows));
                     data.add(pair);
                 }
-
-                rowlist.clear();
+                rows.clear();
                 curRow++;
                 curCol = 0;
                 preRef = null;
@@ -427,14 +354,11 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
     }
 
     /**
-     * 计算两个单元格之间的单元格数目(同一行)
-     *
-     * @param ref
-     * @param preRef
-     * @return
+     * Calculate the number of cells between two cells (same row)
      */
     public int countNullCell(String ref, String preRef) {
-        // excel2007最大行数是1048576，最大列数是16384，最后一列列名是XFD
+        // Excel 2007 maximum number of rows is 1048576, the maximum number of columns is 16384,
+        // the last column is XFD
         String xfd   = ref.replaceAll("\\d+", "");
         String xfd_1 = null == preRef ? "" : preRef.replaceAll("\\d+", "");
 
@@ -448,12 +372,9 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
     }
 
     /**
-     * 字符串的填充
-     *
-     * @param str
-     * @return
+     * Fill String
      */
-    String fillChar(String str) {
+    private String fillChar(String str) {
         int len_1 = str.length();
         if (len_1 < 3) {
             StringBuilder strBuilder = new StringBuilder(str);
@@ -467,9 +388,8 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
 
     @Override
     public void characters(char[] ch, int start, int length) {
-        // 得到单元格内容的值
+        // Get the value of the cell content
         lastContents += new String(ch, start, length);
     }
-
 
 }

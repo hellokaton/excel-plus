@@ -35,6 +35,15 @@ public class ExcelUtils {
         return null != value && !value.trim().isEmpty();
     }
 
+    public static boolean isNumber(String value) {
+        for (int i = 0; i < value.length(); i++) {
+            if (!Character.isDigit(value.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public static List<Pair<Integer, String>> getWriteFieldNames(Class<?> type) {
         List<Field>                 fields = getAndSaveFields(type);
         List<Pair<Integer, String>> pairs  = new ArrayList<>(fields.size());

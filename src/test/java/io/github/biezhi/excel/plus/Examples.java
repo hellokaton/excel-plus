@@ -18,31 +18,30 @@ public class Examples {
 
     public static void main(String[] args) throws Exception {
 
-        long      start     = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
 
         ExcelPlus excelPlus = new ExcelPlus();
 
-        List<Station> stations = excelPlus.read(
-                                    Station.class, Reader.create()
-                                    .parseType(ParseType.SAX)
-                                    .startRowIndex(2)
-//                                    .sheetIndex(2)
-                                    .sheetIndex(5)
-//                                    .sheetName("山西")
-                                    .excelFile(new File("test_data.xlsx"))
-                                ).asList();
+        Reader reader = Reader.create()
+                .parseType(ParseType.SAX)
+                .startRowIndex(2)
+                .sheetIndex(5)
+                .excelFile(new File("test_data.xlsx"));
+
+        List<Station> stations = excelPlus.read(Station.class, reader).asList();
 
         System.out.println(stations.size());
         System.out.println(stations);
         System.out.println((System.currentTimeMillis() - start) + "ms");
 
-        List<CardSecret> cardSecrets = excelPlus.read(
-                CardSecret.class, Reader.create()
-                        .parseType(ParseType.SAX)
-                        .startRowIndex(1)
-                        .sheetIndex(0)
-                        .excelFile(new File("卡密列表.xlsx"))
-        ).asList();
+        reader = Reader.create()
+                .parseType(ParseType.SAX)
+                .startRowIndex(1)
+                .sheetIndex(0)
+                .sheetName("Hello")
+                .excelFile(new File("卡密列表.xlsx"));
+
+        List<CardSecret> cardSecrets = excelPlus.read(CardSecret.class, reader).asList();
 
         System.out.println(cardSecrets.size());
         System.out.println(cardSecrets);
