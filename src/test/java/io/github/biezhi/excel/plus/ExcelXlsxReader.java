@@ -1,5 +1,6 @@
 package io.github.biezhi.excel.plus;
 
+import io.github.biezhi.excel.plus.utils.Pair;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.ss.usermodel.BuiltinFormats;
@@ -19,6 +20,7 @@ import org.xml.sax.helpers.XMLReaderFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -32,12 +34,6 @@ import java.util.List;
  * @since 2016年7月5日
  */
 public class ExcelXlsxReader extends DefaultHandler {
-
-    private IExcelRowReader rowReader;
-
-    public void setRowReader(IExcelRowReader rowReader) {
-        this.rowReader = rowReader;
-    }
 
     /**
      * 共享字符串表
@@ -57,12 +53,14 @@ public class ExcelXlsxReader extends DefaultHandler {
     /**
      * 工作表索引
      */
-    private int sheetIndex = -1;
+    private int sheetIndex = 0;
 
     /**
      * 行集合
      */
-    private List<String> rowlist = new ArrayList<String>();
+    private List<String> rowlist = new ArrayList<>();
+
+    private List<Pair<Integer, String[]>> data = new ArrayList<>();
 
     /**
      * 当前行
@@ -79,10 +77,11 @@ public class ExcelXlsxReader extends DefaultHandler {
      */
     private boolean isTElement;
 
-    /**
-     * 异常信息，如果为空则表示没有异常
-     */
-    private String exceptionMessage;
+    private int pos;
+
+    public ExcelXlsxReader(int pos) {
+        this.pos = pos;
+    }
 
     /**
      * 单元格数据类型，默认为字符串类型
@@ -115,7 +114,7 @@ public class ExcelXlsxReader extends DefaultHandler {
      * @throws SAXException
      * @throws Exception
      */
-    public void process(String filename) throws IOException, OpenXML4JException, SAXException {
+    public List<Pair<Integer, String[]>> parse(String filename) throws IOException, OpenXML4JException, SAXException {
         OPCPackage pkg        = OPCPackage.open(filename);
         XSSFReader xssfReader = new XSSFReader(pkg);
         stylesTable = xssfReader.getStylesTable();
@@ -124,12 +123,16 @@ public class ExcelXlsxReader extends DefaultHandler {
         Iterator<InputStream> sheets = xssfReader.getSheetsData();
         while (sheets.hasNext()) {
             curRow = 0;
+            InputStream sheet = sheets.next();
+            if (sheetIndex == pos) {
+                InputSource sheetSource = new InputSource(sheet);
+                parser.parse(sheetSource);
+            }
             sheetIndex++;
-            InputStream sheet       = sheets.next();
-            InputSource sheetSource = new InputSource(sheet);
-            parser.parse(sheetSource);
             sheet.close();
         }
+
+        return getData();
     }
 
     public XMLReader fetchSheetParser(SharedStringsTable sst) throws SAXException {
@@ -316,7 +319,7 @@ public class ExcelXlsxReader extends DefaultHandler {
             if (!ref.equals(preRef)) {
                 int len = countNullCell(ref, preRef);
                 for (int i = 0; i < len; i++) {
-                    rowlist.add(curCol, "");
+                    rowlist.add(curCol, value);
                     curCol++;
                 }
             }
@@ -337,7 +340,11 @@ public class ExcelXlsxReader extends DefaultHandler {
                         curCol++;
                     }
                 }
-                rowReader.getRows(sheetIndex, curRow, rowlist);
+
+                Pair<Integer, String[]> pair = new Pair<>();
+                pair.setK(curRow);
+                pair.setV(rowlist.toArray(new String[rowlist.size()]));
+                data.add(pair);
 
                 rowlist.clear();
                 curRow++;
@@ -346,6 +353,10 @@ public class ExcelXlsxReader extends DefaultHandler {
                 ref = null;
             }
         }
+    }
+
+    public List<Pair<Integer, String[]>> getData() {
+        return data;
     }
 
     /**
@@ -360,8 +371,8 @@ public class ExcelXlsxReader extends DefaultHandler {
         String xfd   = ref.replaceAll("\\d+", "");
         String xfd_1 = preRef.replaceAll("\\d+", "");
 
-        xfd = fillChar(xfd, 3, '@', true);
-        xfd_1 = fillChar(xfd_1, 3, '@', true);
+        xfd = fillChar(xfd);
+        xfd_1 = fillChar(xfd_1);
 
         char[] letter   = xfd.toCharArray();
         char[] letter_1 = xfd_1.toCharArray();
@@ -373,46 +384,39 @@ public class ExcelXlsxReader extends DefaultHandler {
      * 字符串的填充
      *
      * @param str
-     * @param len
-     * @param let
-     * @param isPre
      * @return
      */
-    String fillChar(String str, int len, char let, boolean isPre) {
+    String fillChar(String str) {
         int len_1 = str.length();
-        if (len_1 < len) {
-            if (isPre) {
-                for (int i = 0; i < (len - len_1); i++) {
-                    str = let + str;
-                }
-            } else {
-                for (int i = 0; i < (len - len_1); i++) {
-                    str = str + let;
-                }
+        if (len_1 < 3) {
+            StringBuilder strBuilder = new StringBuilder(str);
+            for (int i = 0; i < (3 - len_1); i++) {
+                strBuilder.insert(0, '@');
             }
+            str = strBuilder.toString();
         }
         return str;
     }
 
     @Override
-    public void characters(char[] ch, int start, int length) throws SAXException {
+    public void characters(char[] ch, int start, int length) {
         // 得到单元格内容的值
         lastContents += new String(ch, start, length);
     }
 
-    /**
-     * @return the exceptionMessage
-     */
-    public String getExceptionMessage() {
-        return exceptionMessage;
-    }
-
     public static void main(String[] args) {
-        IExcelRowReader reader = new ExcelRowReader();
         try {
-            ExcelXlsxReader exceXlsx = new ExcelXlsxReader();
-            exceXlsx.setRowReader(reader);
-            exceXlsx.process("/Users/biezhi/workspace/projects/java/excel-plus/src/test/resources/卡密列表.xlsx");
+            ExcelXlsxReader               exceXlsx = new ExcelXlsxReader(0);
+            List<Pair<Integer, String[]>> list     = exceXlsx.parse("/Users/biezhi/workspace/projects/java/excel-plus/src/test/resources/卡密列表.xlsx");
+            list.stream().forEach(pair -> {
+                System.out.println(pair.getK() + ": " + Arrays.toString(pair.getV()));
+            });
+
+            exceXlsx = new ExcelXlsxReader(2);
+            list = exceXlsx.parse("/Users/biezhi/workspace/projects/java/excel-plus/src/test/resources/test_data.xlsx");
+            list.stream().forEach(pair -> {
+                System.out.println(pair.getK() + ": " + Arrays.toString(pair.getV()));
+            });
         } catch (Exception e) {
             e.printStackTrace();
         }

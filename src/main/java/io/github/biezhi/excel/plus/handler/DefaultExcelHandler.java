@@ -29,9 +29,8 @@ public class DefaultExcelHandler<T> implements ExcelHandler {
 
     @Override
     public List<Pair<Integer, T>> parse() throws ParseException {
-
-        Workbook    workbook;
-        Sheet       sheet       = null;
+        Workbook workbook;
+        Sheet    sheet;
         try {
             workbook = WorkbookFactory.create(readerParam.getExcelFile());
         } catch (IOException | InvalidFormatException e) {
