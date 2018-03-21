@@ -1,3 +1,18 @@
+/**
+ *  Copyright (c) 2018, biezhi 王爵 (biezhi.me@gmail.com)
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
 package io.github.biezhi.excel.plus;
 
 import io.github.biezhi.excel.plus.enums.ParseType;
@@ -5,7 +20,7 @@ import io.github.biezhi.excel.plus.exception.ExcelException;
 import io.github.biezhi.excel.plus.exception.ParseException;
 import io.github.biezhi.excel.plus.handler.DefaultExcelHandler;
 import io.github.biezhi.excel.plus.handler.Excel2007Handler;
-import io.github.biezhi.excel.plus.reader.ReaderParam;
+import io.github.biezhi.excel.plus.reader.Reader;
 import io.github.biezhi.excel.plus.reader.ReaderResult;
 import io.github.biezhi.excel.plus.utils.Pair;
 import io.github.biezhi.excel.plus.writer.Exporter;
@@ -78,14 +93,14 @@ public class ExcelPlus {
         new ResponseExcelWriter(wrapper).export(exporter);
     }
 
-    public <T> ReaderResult<T> read(Class<T> type, ReaderParam readerParam) throws ParseException {
+    public <T> ReaderResult<T> read(Class<T> type, Reader reader) throws ParseException {
         List<Pair<Integer, T>> result;
 
-        boolean is2007 = readerParam.getExcelFile().getName().toLowerCase().endsWith(".xlsx");
-        if (readerParam.getParseType().equals(ParseType.SAX) && is2007) {
-            result = new Excel2007Handler<>(type, readerParam).parse();
+        boolean is2007 = reader.getExcelFile().getName().toLowerCase().endsWith(".xlsx");
+        if (reader.getParseType().equals(ParseType.SAX) && is2007) {
+            result = new Excel2007Handler<>(type, reader).parse();
         } else {
-            result = new DefaultExcelHandler<>(type, readerParam).parse();
+            result = new DefaultExcelHandler<>(type, reader).parse();
         }
         return new ReaderResult<>(result);
     }

@@ -27,6 +27,14 @@ public class ExcelUtils {
 
     private static final Map<String, List<Field>> FIELD_CACHE = new HashMap<>(8);
 
+    public static boolean isEmpty(String value) {
+        return null == value || value.trim().isEmpty();
+    }
+
+    public static boolean isNotEmpty(String value) {
+        return null != value && !value.trim().isEmpty();
+    }
+
     public static List<Pair<Integer, String>> getWriteFieldNames(Class<?> type) {
         List<Field>                 fields = getAndSaveFields(type);
         List<Pair<Integer, String>> pairs  = new ArrayList<>(fields.size());
@@ -80,7 +88,7 @@ public class ExcelUtils {
         return "";
     }
 
-    private static List<Field> getAndSaveFields(Class<?> type) {
+    public static List<Field> getAndSaveFields(Class<?> type) {
         List<Field> fields = FIELD_CACHE.getOrDefault(type.getName(), Arrays.asList(type.getDeclaredFields()));
 
         FIELD_CACHE.putIfAbsent(type.getClass().getName(), fields);
@@ -118,6 +126,12 @@ public class ExcelUtils {
 
     public static void writeToField(Object item, int col, String value) {
         Field field = ExcelUtils.getFieldByCols(item.getClass(), col);
+        if (null != field) {
+            writeToField(item, field, value);
+        }
+    }
+
+    public static void writeToField(Object item, Field field, String value) {
         if (null != field) {
             try {
                 field.setAccessible(true);

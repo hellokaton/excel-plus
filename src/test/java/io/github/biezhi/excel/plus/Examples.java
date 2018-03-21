@@ -3,7 +3,7 @@ package io.github.biezhi.excel.plus;
 import io.github.biezhi.excel.plus.enums.ParseType;
 import io.github.biezhi.excel.plus.model.CardSecret;
 import io.github.biezhi.excel.plus.model.Station;
-import io.github.biezhi.excel.plus.reader.ReaderParam;
+import io.github.biezhi.excel.plus.reader.Reader;
 
 import java.io.File;
 import java.util.List;
@@ -22,28 +22,26 @@ public class Examples {
 
         ExcelPlus excelPlus = new ExcelPlus();
 
-//        List<Station> stations = excelPlus.read(
-//                                    Station.class, ReaderParam.builder()
-//                                    .parseType(ParseType.SAX)
-//                                    .startRowIndex(2)
-////                                    .sheetIndex(2)
-//                                    .sheetIndex(5)
-////                                    .sheetName("山西")
-//                                    .excelFile(new File("test_data.xlsx"))
-//                                    .build()
-//                                ).asList();
-//
-//        System.out.println(stations.size());
-//        System.out.println(stations);
-//        System.out.println((System.currentTimeMillis() - start) + "ms");
+        List<Station> stations = excelPlus.read(
+                                    Station.class, Reader.create()
+                                    .parseType(ParseType.SAX)
+                                    .startRowIndex(2)
+//                                    .sheetIndex(2)
+                                    .sheetIndex(5)
+//                                    .sheetName("山西")
+                                    .excelFile(new File("test_data.xlsx"))
+                                ).asList();
+
+        System.out.println(stations.size());
+        System.out.println(stations);
+        System.out.println((System.currentTimeMillis() - start) + "ms");
 
         List<CardSecret> cardSecrets = excelPlus.read(
-                CardSecret.class, ReaderParam.builder()
+                CardSecret.class, Reader.create()
                         .parseType(ParseType.SAX)
                         .startRowIndex(1)
                         .sheetIndex(0)
                         .excelFile(new File("卡密列表.xlsx"))
-                        .build()
         ).asList();
 
         System.out.println(cardSecrets.size());

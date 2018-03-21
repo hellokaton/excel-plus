@@ -13,19 +13,14 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.github.biezhi.excel.plus.exception;
+package io.github.biezhi.excel.plus.enums;
 
 /**
- * Excel Parse Exception
+ * Cell Data Type
  *
  * @author biezhi
  * @date 2018/3/21
  */
-public class ParseException extends Exception {
-
-
-    public ParseException(Throwable t) {
-        super("表格转换错误", t);
-    }
-
+public enum CellDataType {
+    BOOL, ERROR, FORMULA, INLINESTR, SSTINDEX, NUMBER, DATE, NULL
 }

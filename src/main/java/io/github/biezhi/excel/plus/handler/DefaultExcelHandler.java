@@ -1,7 +1,22 @@
+/**
+ *  Copyright (c) 2018, biezhi 王爵 (biezhi.me@gmail.com)
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
 package io.github.biezhi.excel.plus.handler;
 
 import io.github.biezhi.excel.plus.exception.ParseException;
-import io.github.biezhi.excel.plus.reader.ReaderParam;
+import io.github.biezhi.excel.plus.reader.Reader;
 import io.github.biezhi.excel.plus.utils.ExcelUtils;
 import io.github.biezhi.excel.plus.utils.Pair;
 import lombok.extern.slf4j.Slf4j;
@@ -19,12 +34,12 @@ import java.util.List;
 @Slf4j
 public class DefaultExcelHandler<T> implements ExcelHandler {
 
-    private Class<T>    type;
-    private ReaderParam readerParam;
+    private Class<T> type;
+    private Reader   reader;
 
-    public DefaultExcelHandler(Class<T> type, ReaderParam readerParam) {
+    public DefaultExcelHandler(Class<T> type, Reader reader) {
         this.type = type;
-        this.readerParam = readerParam;
+        this.reader = reader;
     }
 
     @Override
@@ -32,15 +47,15 @@ public class DefaultExcelHandler<T> implements ExcelHandler {
         Workbook workbook;
         Sheet    sheet;
         try {
-            workbook = WorkbookFactory.create(readerParam.getExcelFile());
+            workbook = WorkbookFactory.create(reader.getExcelFile());
         } catch (IOException | InvalidFormatException e) {
             throw new ParseException(e);
         }
-        if (null != readerParam.getSheetName()) {
-            sheet = workbook.getSheet(readerParam.getSheetName());
+        if (null != reader.getSheetName()) {
+            sheet = workbook.getSheet(reader.getSheetName());
         } else {
-            if (readerParam.getSheetIndex() >= 0) {
-                sheet = workbook.getSheetAt(readerParam.getSheetIndex());
+            if (reader.getSheetIndex() >= 0) {
+                sheet = workbook.getSheetAt(reader.getSheetIndex());
             } else {
                 sheet = workbook.getSheetAt(0);
             }
@@ -52,7 +67,7 @@ public class DefaultExcelHandler<T> implements ExcelHandler {
         List<Pair<Integer, T>> list = new ArrayList<>(lastRowNum);
 
         // traverse excel row
-        for (int rowNum = firstRowNum + readerParam.getStartRowIndex(); rowNum <= lastRowNum; rowNum++) {
+        for (int rowNum = firstRowNum + reader.getStartRowIndex(); rowNum <= lastRowNum; rowNum++) {
             Row row = sheet.getRow(rowNum);
             if (row == null) {
                 continue;

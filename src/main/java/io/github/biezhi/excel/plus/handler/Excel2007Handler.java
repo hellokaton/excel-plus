@@ -1,7 +1,24 @@
+/**
+ *  Copyright (c) 2018, biezhi 王爵 (biezhi.me@gmail.com)
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
 package io.github.biezhi.excel.plus.handler;
 
-import io.github.biezhi.excel.plus.exception.ParseException;
-import io.github.biezhi.excel.plus.reader.ReaderParam;
+import io.github.biezhi.excel.plus.annotation.ExcelField;
+import io.github.biezhi.excel.plus.annotation.ReadField;
+import io.github.biezhi.excel.plus.enums.CellDataType;
+import io.github.biezhi.excel.plus.reader.Reader;
 import io.github.biezhi.excel.plus.utils.ExcelUtils;
 import io.github.biezhi.excel.plus.utils.Pair;
 import lombok.extern.slf4j.Slf4j;
@@ -21,25 +38,28 @@ import org.xml.sax.helpers.DefaultHandler;
 import org.xml.sax.helpers.XMLReaderFactory;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.lang.reflect.Field;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
+ * Excel 2007 Parser handle
+ *
  * @author biezhi
  * @date 2018/3/21
  */
 @Slf4j
 public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler {
 
-    /**
-     * 读取数据
-     */
-    private List<Pair<Integer, String[]>> data = new ArrayList<>();
 
-    private Class<T>    type;
-    private ReaderParam readerParam;
+    private Class<T> type;
+    private Reader   reader;
+
+    public Excel2007Handler(Class<T> type, Reader reader) {
+        this.type = type;
+        this.reader = reader;
+    }
 
     /**
      * 共享字符串表
@@ -65,10 +85,13 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
      * 行集合
      */
     private List<String> rowlist = new ArrayList<>();
+
+    private List<Pair<Integer, List<String>>> data = new ArrayList<>();
+
     /**
      * 当前行
      */
-    private int          curRow  = 0;
+    private int curRow = 0;
 
     /**
      * 当前列
@@ -80,10 +103,6 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
      */
     private boolean isTElement;
 
-    /**
-     * 异常信息，如果为空则表示没有异常
-     */
-    private String exceptionMessage;
 
     /**
      * 单元格数据类型，默认为字符串类型
@@ -107,22 +126,13 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
      */
     private StylesTable stylesTable;
 
-    public Excel2007Handler(Class<T> type, ReaderParam readerParam) {
-        this.type = type;
-        this.readerParam = readerParam;
-    }
-
     /**
-     * 转换表格
-     *
-     * @return 表格转换器
+     * 解析
      */
     @Override
-    public List<Pair<Integer, T>> parse() throws ParseException {
-        // 每次转换前都清空数据
-        data.clear();
+    public List<Pair<Integer, T>> parse() {
         try {
-            OPCPackage pkg        = OPCPackage.open(readerParam.getExcelFile());
+            OPCPackage pkg        = OPCPackage.open(reader.getExcelFile());
             XSSFReader xssfReader = new XSSFReader(pkg);
             stylesTable = xssfReader.getStylesTable();
             SharedStringsTable    sst    = xssfReader.getSharedStringsTable();
@@ -131,18 +141,69 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
             while (sheets.hasNext()) {
                 curRow = 0;
                 InputStream sheet = sheets.next();
-                if (sheetIndex == readerParam.getSheetIndex()) {
+                if (sheetIndex == reader.getSheetIndex()) {
                     InputSource sheetSource = new InputSource(sheet);
                     parser.parse(sheetSource);
                 }
                 sheetIndex++;
                 sheet.close();
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
+
         return getData().stream().map(this::parse).collect(Collectors.toList());
+    }
+
+    private Pair<Integer, T> parse(Pair<Integer, List<String>> pair) {
+        Pair<Integer, T> np = new Pair<>();
+        np.setK(pair.getK());
+        np.setV(convert(type, pair.getV()));
+        return np;
+    }
+
+    Map<Integer, Field> result = new HashMap<>();
+
+    public Map<Integer, Field> mapField() {
+
+        if (!result.isEmpty()) {
+            return result;
+        }
+
+        List<Field>         fields = ExcelUtils.getAndSaveFields(type);
+        Map<Integer, Field> map    = new HashMap<>();
+
+        for (Field field : fields) {
+            ExcelField excelField = field.getAnnotation(ExcelField.class);
+            if (null == excelField) {
+                continue;
+            }
+            ReadField readField = field.getAnnotation(ReadField.class);
+            if (null != readField) {
+                map.put(readField.order(), field);
+            } else {
+                map.put(excelField.order(), field);
+            }
+        }
+
+        AtomicInteger index = new AtomicInteger();
+        map.keySet().stream().sorted(Integer::compareTo).forEach(order -> {
+            result.put(index.getAndIncrement(), map.get(order));
+        });
+        return result;
+    }
+
+    private T convert(Class<T> type, List<String> columns) {
+        T item = ExcelUtils.newInstance(type);
+        if (null == item) {
+            return null;
+        }
+        for (int i = 0; i < columns.size(); i++) {
+            String value = columns.get(i);
+            Field  field = mapField().get(i);
+            ExcelUtils.writeToField(item, field, value);
+        }
+        return item;
     }
 
     public XMLReader fetchSheetParser(SharedStringsTable sst) throws SAXException {
@@ -152,11 +213,37 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
         return parser;
     }
 
-    /**
-     * 单元格中的数据可能的数据类型
-     */
-    enum CellDataType {
-        BOOL, ERROR, FORMULA, INLINESTR, SSTINDEX, NUMBER, DATE, NULL
+    public void startElement(String uri, String localName, String name, Attributes attributes) throws SAXException {
+
+        // c => 单元格
+        if ("c".equals(name)) {
+            // 前一个单元格的位置
+            if (preRef == null) {
+                preRef = attributes.getValue("r");
+            } else {
+                preRef = ref;
+            }
+            // 当前单元格的位置
+            ref = attributes.getValue("r");
+            // 设定单元格类型
+            this.setNextDataType(attributes);
+            // Figure out if the value is an index in the SST
+            String cellType = attributes.getValue("t");
+            if (cellType != null && cellType.equals("s")) {
+                nextIsString = true;
+            } else {
+                nextIsString = false;
+            }
+        }
+
+        // 当元素为t时
+        if ("t".equals(name)) {
+            isTElement = true;
+        } else {
+            isTElement = false;
+        }
+        // 置空
+        lastContents = "";
     }
 
     /**
@@ -274,7 +361,7 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
     }
 
     @Override
-    public void endElement(String uri, String localName, String name) throws SAXException {
+    public void endElement(String uri, String localName, String name) {
         // 根据SST的索引值的到单元格的真正要存储的字符串
         // 这时characters()方法可能会被调用多次
         if (nextIsString && (null != lastContents && !lastContents.isEmpty()) && isNumber(lastContents)) {
@@ -309,6 +396,7 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
                 if (curRow == 0) {
                     maxRef = ref;
                 }
+
                 // 补全一行尾部可能缺失的单元格
                 if (maxRef != null) {
                     int len = countNullCell(maxRef, ref);
@@ -318,10 +406,10 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
                     }
                 }
 
-                if (curRow >= readerParam.getStartRowIndex()) {
-                    Pair<Integer, String[]> pair = new Pair<>();
+                if (curRow >= reader.getStartRowIndex() && rowlist.stream().filter(ExcelUtils::isNotEmpty).count() > 0) {
+                    Pair<Integer, List<String>> pair = new Pair<>();
                     pair.setK(curRow);
-                    pair.setV(rowlist.toArray(new String[rowlist.size()]));
+                    pair.setV(new ArrayList<>(rowlist));
                     data.add(pair);
                 }
 
@@ -334,6 +422,10 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
         }
     }
 
+    public List<Pair<Integer, List<String>>> getData() {
+        return data;
+    }
+
     /**
      * 计算两个单元格之间的单元格数目(同一行)
      *
@@ -344,7 +436,7 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
     public int countNullCell(String ref, String preRef) {
         // excel2007最大行数是1048576，最大列数是16384，最后一列列名是XFD
         String xfd   = ref.replaceAll("\\d+", "");
-        String xfd_1 = preRef.replaceAll("\\d+", "");
+        String xfd_1 = null == preRef ? "" : preRef.replaceAll("\\d+", "");
 
         xfd = fillChar(xfd);
         xfd_1 = fillChar(xfd_1);
@@ -377,37 +469,6 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
     public void characters(char[] ch, int start, int length) {
         // 得到单元格内容的值
         lastContents += new String(ch, start, length);
-    }
-
-
-    private Pair<Integer, T> parse(Pair<Integer, String[]> pair) {
-        Pair<Integer, T> np = new Pair<>();
-        np.setK(pair.getK());
-        np.setV(convert(type, pair.getV()));
-        return np;
-    }
-
-    private T convert(Class<T> type, String[] columns) {
-        T item = ExcelUtils.newInstance(type);
-        if (null == item) {
-            return null;
-        }
-        for (int i = 0; i < columns.length; i++) {
-            String value = columns[i];
-            ExcelUtils.writeToField(item, i, value);
-        }
-        return item;
-    }
-
-    /**
-     * 获取表格读取数据,获取数据前，需要先转换数据<br>
-     * 此方法不会获取第一行数据
-     *
-     * @return 表格读取数据
-     */
-    public List<Pair<Integer, String[]>> getData() {
-        return data;
-
     }
 
 
