@@ -2,7 +2,6 @@ package io.github.biezhi.excel.plus.utils;
 
 import io.github.biezhi.excel.plus.Constant;
 import io.github.biezhi.excel.plus.annotation.ExcelField;
-import io.github.biezhi.excel.plus.annotation.ExcelSheet;
 import io.github.biezhi.excel.plus.annotation.ReadField;
 import io.github.biezhi.excel.plus.annotation.WriteField;
 import io.github.biezhi.excel.plus.converter.Converter;
@@ -10,13 +9,11 @@ import io.github.biezhi.excel.plus.converter.EmptyConverter;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static io.github.biezhi.excel.plus.Constant.TIP_MSG;
 
@@ -29,14 +26,6 @@ import static io.github.biezhi.excel.plus.Constant.TIP_MSG;
 public class ExcelUtils {
 
     private static final Map<String, List<Field>> FIELD_CACHE = new HashMap<>(8);
-
-    public static String getSheetName(Class<?> type) {
-        ExcelSheet excelSheet = type.getAnnotation(ExcelSheet.class);
-        if (null == excelSheet) {
-            return Constant.DEFAULT_SHEET_NAME;
-        }
-        return excelSheet.value();
-    }
 
     public static List<Pair<Integer, String>> getWriteFieldNames(Class<?> type) {
         List<Field>                 fields = getAndSaveFields(type);
@@ -141,7 +130,7 @@ public class ExcelUtils {
     }
 
     private static Object asObject(Field field, String value) {
-        if(null == value || "".equals(value)){
+        if (null == value || "".equals(value)) {
             return null;
         }
         ExcelField excelField = field.getAnnotation(ExcelField.class);
@@ -283,6 +272,14 @@ public class ExcelUtils {
                 break;
         }
         return cellValue;
+    }
+
+    public static int getMaxOrder(Class<?> type) {
+        return Arrays.stream(type.getDeclaredFields())
+                .filter(field -> null != field.getAnnotation(ExcelField.class))
+                .map(field -> field.getAnnotation(ExcelField.class))
+                .map(ExcelField::order)
+                .max(Integer::compareTo).orElse(0);
     }
 
 }

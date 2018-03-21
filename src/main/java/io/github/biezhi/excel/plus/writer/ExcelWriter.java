@@ -70,7 +70,11 @@ public interface ExcelWriter extends Constant {
 
             } else {
                 workbook = exporter.getExcelType().equals(ExcelType.XLSX) ? new XSSFWorkbook() : new HSSFWorkbook();
-                sheet = workbook.createSheet(ExcelUtils.getSheetName(data0.getClass()));
+                if (null != exporter.getSheetName()) {
+                    sheet = workbook.createSheet(exporter.getSheetName());
+                } else {
+                    sheet = workbook.createSheet("Sheet0");
+                }
 
                 if (null != exporter.getTitleStyle()) {
                     titleStyle = exporter.getTitleStyle().apply(workbook);

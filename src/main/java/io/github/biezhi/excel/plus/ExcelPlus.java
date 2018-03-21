@@ -1,18 +1,21 @@
 package io.github.biezhi.excel.plus;
 
+import io.github.biezhi.excel.plus.enums.ParseType;
 import io.github.biezhi.excel.plus.exception.ExcelException;
-import io.github.biezhi.excel.plus.reader.ExcelReader;
+import io.github.biezhi.excel.plus.exception.ParseException;
+import io.github.biezhi.excel.plus.handler.DefaultExcelHandler;
+import io.github.biezhi.excel.plus.handler.Excel2007Handler;
+import io.github.biezhi.excel.plus.reader.ReaderParam;
+import io.github.biezhi.excel.plus.reader.ReaderResult;
+import io.github.biezhi.excel.plus.utils.Pair;
 import io.github.biezhi.excel.plus.writer.Exporter;
 import io.github.biezhi.excel.plus.writer.FileExcelWriter;
 import io.github.biezhi.excel.plus.writer.ResponseExcelWriter;
 import io.github.biezhi.excel.plus.writer.ResponseWrapper;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Excel Plus
@@ -75,39 +78,16 @@ public class ExcelPlus {
         new ResponseExcelWriter(wrapper).export(exporter);
     }
 
-    /**
-     * Read an Excel file as a List container.
-     *
-     * @param file excel file
-     * @param type save to Java Type
-     * @param <T>  Java Type
-     * @return read the Excel rows
-     * @throws ExcelException
-     */
-    public <T> ExcelReader<T> read(File file, Class<T> type) throws ExcelException {
-        try {
-            return this.read(new FileInputStream(file), type);
-        } catch (Exception e) {
-            throw new ExcelException(e);
-        }
-    }
+    public <T> ReaderResult<T> read(Class<T> type, ReaderParam readerParam) throws ParseException {
+        List<Pair<Integer, T>> result;
 
-    /**
-     * Read an Excel inputStream as a List container.
-     *
-     * @param inputStream excel inputStream object
-     * @param type        save to Java Type
-     * @param <T>         Java Type
-     * @return read the Excel rows
-     * @throws ExcelException
-     */
-    public <T> ExcelReader<T> read(InputStream inputStream, Class<T> type) throws ExcelException {
-        try {
-            Workbook workbook = WorkbookFactory.create(inputStream);
-            return new ExcelReader<>(workbook, type);
-        } catch (Exception e) {
-            throw new ExcelException(e);
+        boolean is2007 = readerParam.getExcelFile().getName().toLowerCase().endsWith(".xlsx");
+        if (readerParam.getParseType().equals(ParseType.SAX) && is2007) {
+            result = new Excel2007Handler<>(type, readerParam).parse();
+        } else {
+            result = new DefaultExcelHandler<>(type, readerParam).parse();
         }
+        return new ReaderResult<>(result);
     }
 
 }

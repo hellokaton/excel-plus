@@ -1,7 +1,6 @@
 package io.github.biezhi.excel.plus.writer;
 
 import io.github.biezhi.excel.plus.enums.ExcelType;
-
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -21,6 +20,7 @@ public class Exporter<T> {
 
     private static final Integer BIG_DATA_EXCEL_BOUNDARY = 10000;
 
+    private String        sheetName;
     private String        headerTitle;
     private String        templatePath;
     private ExcelType     excelType;
@@ -35,6 +35,11 @@ public class Exporter<T> {
         Exporter<T> exporter = new Exporter<>();
         exporter.data = data;
         return exporter;
+    }
+
+    public Exporter<T> sheetName(String sheetName) {
+        this.sheetName = sheetName;
+        return this;
     }
 
     public Exporter<T> title(String title) {
@@ -95,6 +100,10 @@ public class Exporter<T> {
         return headerTitle;
     }
 
+    public String getSheetName() {
+        return sheetName;
+    }
+
     public void setExcelType(ExcelType excelType) {
         this.excelType = excelType;
     }
@@ -106,10 +115,9 @@ public class Exporter<T> {
         return excelType;
     }
 
-
     Workbook createWorkbook() {
         if (getExcelType() == ExcelType.XLSX) {
-            return getData().size() > BIG_DATA_EXCEL_BOUNDARY ? new SXSSFWorkbook(): new XSSFWorkbook();
+            return getData().size() > BIG_DATA_EXCEL_BOUNDARY ? new SXSSFWorkbook() : new XSSFWorkbook();
         }
         return new HSSFWorkbook();
     }
