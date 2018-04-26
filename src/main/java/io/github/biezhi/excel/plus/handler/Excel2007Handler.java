@@ -156,10 +156,17 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
         if (null == item) {
             return null;
         }
+        int emptyCount = 0;
         for (int i = 0; i < columns.size(); i++) {
             String value = columns.get(i);
+            if(null == value || value.trim().length() == 0){
+                emptyCount++;
+            }
             Field  field = mapField().get(i);
             ExcelUtils.writeToField(item, field, value);
+        }
+        if(columns.size() == emptyCount){
+            return null;
         }
         return item;
     }

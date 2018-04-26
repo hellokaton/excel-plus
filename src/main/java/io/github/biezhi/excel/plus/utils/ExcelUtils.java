@@ -6,6 +6,7 @@ import io.github.biezhi.excel.plus.annotation.ReadField;
 import io.github.biezhi.excel.plus.annotation.WriteField;
 import io.github.biezhi.excel.plus.converter.Converter;
 import io.github.biezhi.excel.plus.converter.EmptyConverter;
+import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 
@@ -170,10 +171,10 @@ public class ExcelUtils {
             return new BigDecimal(value);
         }
         if (field.getType().equals(Long.class) || field.getType().equals(long.class)) {
-            return Long.valueOf(value);
+            return new BigDecimal(value).longValue();
         }
         if (field.getType().equals(Integer.class) || field.getType().equals(int.class)) {
-            return Integer.valueOf(value);
+            return new BigDecimal(value).intValue();
         }
         if (field.getType().equals(Double.class) || field.getType().equals(double.class)) {
             return Double.valueOf(value);
@@ -268,11 +269,11 @@ public class ExcelUtils {
         if (cell == null) {
             return cellValue;
         }
-        if (cell.getCellTypeEnum().equals(CellType.NUMERIC)) {
-            cell.setCellType(CellType.STRING);
-        }
         switch (cell.getCellTypeEnum()) {
             case NUMERIC:
+                if (HSSFDateUtil.isCellDateFormatted(cell)) {
+                    return cell.getDateCellValue().getTime() + "";
+                }
                 cellValue = String.valueOf(cell.getNumericCellValue());
                 break;
             case STRING:
@@ -284,7 +285,7 @@ public class ExcelUtils {
             case FORMULA:
                 try {
                     cellValue = String.valueOf(cell.getStringCellValue());
-                } catch (Exception e){
+                } catch (Exception e) {
                     cellValue = String.valueOf(cell.getNumericCellValue());
                 }
                 break;

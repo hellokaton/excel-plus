@@ -3,7 +3,7 @@ package io.github.biezhi.excel.plus.model;
 import io.github.biezhi.excel.plus.annotation.ExcelField;
 import lombok.Data;
 
-@Data// alpha
+@Data
 public class Station {
 
     @ExcelField(order = 0, columnName = "序号")
@@ -32,6 +32,7 @@ public class Station {
 
     @ExcelField(order = 9, columnName = "纬度（度分秒）")
     private String latitudey;
+
 
 }
 

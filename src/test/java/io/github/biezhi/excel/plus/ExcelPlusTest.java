@@ -21,6 +21,7 @@ import java.math.BigDecimal;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -43,9 +44,11 @@ public class ExcelPlusTest {
 
     @Test
     public void testReadByDOM() throws ExcelException {
-        Reader reader = Reader.create().excelFile(getCardExcelFile());
+        Reader reader = Reader.create().startRowIndex(2).excelFile(getCardExcelFile());
 
-        List<CardSecret> cardSecrets = excelPlus.read(CardSecret.class, reader).asList();
+        List<CardSecret> cardSecrets = excelPlus.read(CardSecret.class, reader)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
 
         System.out.println(cardSecrets);
         Assert.assertNotNull(cardSecrets);
