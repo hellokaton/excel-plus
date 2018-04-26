@@ -114,3 +114,5 @@ local.properties
 .scala_dependencies
 .worksheet
 .vscode
+.idea
+*.iml
