@@ -27,7 +27,17 @@ As maven dependency
 <dependency>
     <groupId>io.github.biezhi</groupId>
     <artifactId>excel-plus</artifactId>
-    <version>0.0.3</version>
+    <version>0.1.1-alpha1</version>
+</dependency>
+```
+
+snapshot version
+
+```xml
+<dependency>
+    <groupId>io.github.biezhi</groupId>
+    <artifactId>excel-plus</artifactId>
+    <version>0.1.1-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -36,7 +46,6 @@ As maven dependency
 ```java
 ExcelPlus excelPlus = new ExcelPlus();
 List<Order> orders = queryData();
-
 excelPlus.exportor(orders).writeAsFile(new File("order-list.xls"));
 ```
 
@@ -54,14 +63,14 @@ excelPlus.exportor(orders)
 
 ```java
 ExcelPlus excelPlus = new ExcelPlus();
-List<Order>  orders = excelPlus.read(new File("/Users/biezhi/Desktop/order.xls"), Order.class).asList();
-```
 
-**Read as stream**
+Reader reader = Reader.create()
+                .parseType(ParseType.SAX)
+                .startRowIndex(2)
+                .sheetIndex(0)
+                .excelFile(new File("orders.xlsx"));
 
-```java
-ExcelPlus excelPlus = new ExcelPlus();
-List<Order>  orders = excelPlus.read(inputStream, Order.class).asList();
+List<Order> orders = excelPlus.read(Order.class, reader).asList();
 ```
 
 # Examples

@@ -3,6 +3,8 @@ package io.github.biezhi.excel.plus.model;
 import io.github.biezhi.excel.plus.annotation.ExcelField;
 import io.github.biezhi.excel.plus.converter.CardTypeConverter;
 import io.github.biezhi.excel.plus.converter.UsedTypeConverter;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -14,6 +16,8 @@ import java.util.Date;
  * @author biezhi
  * @date 2018/2/4
  */
+@Data
+@NoArgsConstructor
 public class CardSecret implements Serializable {
 
     @ExcelField(order = 0, columnName = "运营商", convertType = CardTypeConverter.class)
@@ -31,9 +35,6 @@ public class CardSecret implements Serializable {
     @ExcelField(order = 5, columnName = "使用情况", convertType = UsedTypeConverter.class)
     private Boolean used;
 
-    public CardSecret() {
-    }
-
     public CardSecret(Integer cardType, String secret, BigDecimal amount, boolean used) {
         this.cardType = cardType;
         this.secret = secret;
@@ -42,54 +43,4 @@ public class CardSecret implements Serializable {
         this.used = used;
     }
 
-    public Integer getCardType() {
-        return cardType;
-    }
-
-    public void setCardType(Integer cardType) {
-        this.cardType = cardType;
-    }
-
-    public String getSecret() {
-        return secret;
-    }
-
-    public void setSecret(String secret) {
-        this.secret = secret;
-    }
-
-    public BigDecimal getAmount() {
-        return amount;
-    }
-
-    public void setAmount(BigDecimal amount) {
-        this.amount = amount;
-    }
-
-    public Date getExpiredDate() {
-        return expiredDate;
-    }
-
-    public void setExpiredDate(Date expiredDate) {
-        this.expiredDate = expiredDate;
-    }
-
-    public Boolean getUsed() {
-        return used;
-    }
-
-    public void setUsed(Boolean used) {
-        this.used = used;
-    }
-
-    @Override
-    public String toString() {
-        return "CardSecret{" +
-                "cardType='" + new CardTypeConverter().write(this.cardType) + '\'' +
-                ", secret='" + secret + '\'' +
-                ", amount=" + amount +
-                ", expiredDate=" + expiredDate +
-                ", used='" + new UsedTypeConverter().write(this.used) + '\'' +
-                '}';
-    }
 }

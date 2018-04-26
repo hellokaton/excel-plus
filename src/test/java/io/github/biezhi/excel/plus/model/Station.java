@@ -3,7 +3,7 @@ package io.github.biezhi.excel.plus.model;
 import io.github.biezhi.excel.plus.annotation.ExcelField;
 import lombok.Data;
 
-@Data
+@Data// alpha
 public class Station {
 
     @ExcelField(order = 0, columnName = "序号")

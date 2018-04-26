@@ -282,7 +282,11 @@ public class ExcelUtils {
                 cellValue = String.valueOf(cell.getBooleanCellValue());
                 break;
             case FORMULA:
-                cellValue = String.valueOf(cell.getCellFormula());
+                try {
+                    cellValue = String.valueOf(cell.getStringCellValue());
+                } catch (Exception e){
+                    cellValue = String.valueOf(cell.getNumericCellValue());
+                }
                 break;
             case BLANK:
                 cellValue = "";
