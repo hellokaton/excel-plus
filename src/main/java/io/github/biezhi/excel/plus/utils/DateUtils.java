@@ -1,24 +1,23 @@
 /**
- *  Copyright (c) 2018, biezhi 王爵 (biezhi.me@gmail.com)
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *  http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Copyright (c) 2018, biezhi 王爵 (biezhi.me@gmail.com)
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package io.github.biezhi.excel.plus.utils;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
@@ -30,14 +29,16 @@ import java.util.Date;
  */
 public final class DateUtils {
 
+    static final DateTimeFormatter DEFAULT_DATE_TIME_PATTERN = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
     public static Date toDate(String value, String pattern) {
-        SimpleDateFormat sdf = new SimpleDateFormat(pattern);
-        try {
-            return sdf.parse(value);
-        } catch (ParseException e) {
-            e.printStackTrace();
-            return null;
+        LocalDateTime localDateTime;
+        if (ExcelUtils.isEmpty(pattern)) {
+            localDateTime = LocalDateTime.parse(value, DEFAULT_DATE_TIME_PATTERN);
+        } else {
+            localDateTime = LocalDateTime.parse(value, DateTimeFormatter.ofPattern(pattern));
         }
+        return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
     }
 
     public static LocalDate toLocalDate(String value, String pattern) {
@@ -49,8 +50,7 @@ public final class DateUtils {
     }
 
     public static String toString(Date value, String pattern) {
-        SimpleDateFormat sdf = new SimpleDateFormat(pattern);
-        return sdf.format(value);
+        return DateTimeFormatter.ofPattern(pattern).format(value.toInstant());
     }
 
     public static String toString(LocalDate value, String pattern) {

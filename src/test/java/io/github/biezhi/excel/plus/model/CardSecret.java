@@ -2,7 +2,6 @@ package io.github.biezhi.excel.plus.model;
 
 import io.github.biezhi.excel.plus.annotation.ExcelField;
 import io.github.biezhi.excel.plus.converter.CardTypeConverter;
-import io.github.biezhi.excel.plus.converter.DateTypeConverter;
 import io.github.biezhi.excel.plus.converter.UsedTypeConverter;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -30,7 +29,7 @@ public class CardSecret implements Serializable {
     @ExcelField(order = 2, columnName = "面额")
     private BigDecimal amount;
 
-    @ExcelField(order = 3, columnName = "过期时间", convertType = DateTypeConverter.class)
+    @ExcelField(order = 3, columnName = "过期时间")
     private Date expiredDate;
 
     @ExcelField(order = 5, columnName = "使用情况", convertType = UsedTypeConverter.class)

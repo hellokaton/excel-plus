@@ -8,15 +8,16 @@ import io.github.biezhi.excel.plus.converter.Converter;
 import io.github.biezhi.excel.plus.converter.EmptyConverter;
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 
 import static io.github.biezhi.excel.plus.Constant.TIP_MSG;
+import static io.github.biezhi.excel.plus.utils.DateUtils.DEFAULT_DATE_TIME_PATTERN;
 
 /**
  * Excel utils
@@ -197,7 +198,7 @@ public class ExcelUtils {
             if (null != writeField && !"".equals(writeField.datePattern())) {
                 return DateUtils.toDate(value, writeField.datePattern());
             }
-            if (null != excelField && !"".equals(excelField)) {
+            if ((null != excelField) && !"".equals(excelField)) {
                 return DateUtils.toDate(value, excelField.datePattern());
             }
         }
@@ -264,6 +265,7 @@ public class ExcelUtils {
         return value.toString();
     }
 
+
     public static String getCellValue(Cell cell) {
         String cellValue = "";
         if (cell == null) {
@@ -272,7 +274,11 @@ public class ExcelUtils {
         switch (cell.getCellTypeEnum()) {
             case NUMERIC:
                 if (HSSFDateUtil.isCellDateFormatted(cell)) {
-                    return cell.getDateCellValue().getTime() + "";
+                    try {
+                        return DEFAULT_DATE_TIME_PATTERN.format(cell.getDateCellValue().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
+                    } catch (Exception e) {
+                        return cell.getDateCellValue().getTime() + "";
+                    }
                 }
                 cellValue = String.valueOf(cell.getNumericCellValue());
                 break;
