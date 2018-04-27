@@ -59,7 +59,6 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
 
     private SharedStringsTable sst;
     private String             lastContents;
-    private boolean            nextIsString;
     private int                sheetIndex = 0;
 
     private       List<String>  rows         = new ArrayList<>();
@@ -146,9 +145,9 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
                 map.put(excelField.order(), field);
             }
         }
-        AtomicInteger index = new AtomicInteger();
-        map.keySet().stream().sorted(Integer::compareTo).forEach(order -> result.put(index.getAndIncrement(), map.get(order)));
-        return result;
+//        AtomicInteger index = new AtomicInteger();
+//        map.keySet().stream().sorted(Integer::compareTo).forEach(order -> result.put(index.getAndIncrement(), map.get(order)));
+        return map;
     }
 
     private T convert(Class<T> type, List<String> columns) {
@@ -192,9 +191,6 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
             ref = attributes.getValue("r");
             // set cell type
             this.setNextDataType(attributes);
-            // Figure out if the value is an index in the SST
-            String cellType = attributes.getValue("t");
-            nextIsString = cellType != null && cellType.equals("s");
         }
 
         // when the element is t
@@ -288,13 +284,6 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
 
     @Override
     public void endElement(String uri, String localName, String name) {
-        // The string to be actually stored in the cell according to the SST index value
-        // The characters() method may be called multiple times
-        if (nextIsString && (null != lastContents && !lastContents.isEmpty()) && isNumber(lastContents)) {
-            int idx = Integer.parseInt(lastContents);
-            lastContents = new XSSFRichTextString(sst.getEntryAt(idx)).toString();
-        }
-
         // t element also contains a string
         if (isTElement) {
             // Add the contents of the cell to rows, before removing the whitespace before and after the string

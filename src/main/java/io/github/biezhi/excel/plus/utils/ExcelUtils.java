@@ -11,6 +11,9 @@ import org.apache.poi.ss.usermodel.Cell;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
+import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -265,6 +268,7 @@ public class ExcelUtils {
         return value.toString();
     }
 
+    private static ThreadLocal<DecimalFormat> decimalFormatThreadLocal = ThreadLocal.withInitial(() -> new DecimalFormat("#"));
 
     public static String getCellValue(Cell cell) {
         String cellValue = "";
@@ -281,6 +285,9 @@ public class ExcelUtils {
                     }
                 }
                 cellValue = String.valueOf(cell.getNumericCellValue());
+                if (cellValue.contains("E")){
+                    cellValue = decimalFormatThreadLocal.get().format(cell.getNumericCellValue());
+                }
                 break;
             case STRING:
                 cellValue = String.valueOf(cell.getStringCellValue());
