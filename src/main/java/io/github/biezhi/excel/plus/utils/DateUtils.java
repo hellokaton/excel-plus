@@ -56,7 +56,11 @@ public final class DateUtils {
     }
 
     public static String toString(Date value, String pattern) {
-        return DateTimeFormatter.ofPattern(pattern).format(value.toInstant());
+        if (ExcelUtils.isEmpty(pattern)) {
+            return dateFormatThreadLocal.get().format(value);
+        } else {
+            return new SimpleDateFormat(pattern).format(value);
+        }
     }
 
     public static String toString(LocalDate value, String pattern) {

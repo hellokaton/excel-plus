@@ -275,7 +275,7 @@ public class ExcelUtils {
             case NUMERIC:
                 if (HSSFDateUtil.isCellDateFormatted(cell)) {
                     try {
-                        return DEFAULT_DATE_TIME_PATTERN.format(cell.getDateCellValue().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
+                        return DateUtils.toString(cell.getDateCellValue(), null);
                     } catch (Exception e) {
                         return cell.getDateCellValue().getTime() + "";
                     }
