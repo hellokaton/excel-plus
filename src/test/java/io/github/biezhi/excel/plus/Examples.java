@@ -1,7 +1,8 @@
 package io.github.biezhi.excel.plus;
 
 import io.github.biezhi.excel.plus.enums.ParseType;
-import io.github.biezhi.excel.plus.model.Station;
+import io.github.biezhi.excel.plus.model.CardSecret;
+import io.github.biezhi.excel.plus.model.Test07;
 import io.github.biezhi.excel.plus.reader.Reader;
 
 import java.io.File;
@@ -25,9 +26,18 @@ public class Examples {
                 .parseType(ParseType.SAX)
                 .startRowIndex(2)
                 .sheetIndex(0)
-                .excelFile(new File("formula.xlsx"));
+                .excelFile(new File("/Users/biezhi/Downloads/test07.xlsx"));
 
-        List<Station> stations = excelPlus.read(Station.class, reader).asList();
+        List<Test07> test07List = excelPlus.read(Test07.class, reader).asList();
+        System.out.println(test07List);
+
+        reader = Reader.create()
+                .parseType(ParseType.SAX)
+                .startRowIndex(2)
+                .sheetIndex(0)
+                .excelFile(new File("/Users/biezhi/workspace/projects/java/excel-plus/src/test/resources/卡密列表.xlsx"));
+
+        List<CardSecret> stations = excelPlus.read(CardSecret.class, reader).asList();
 
         System.out.println(stations.size());
         System.out.println(stations);

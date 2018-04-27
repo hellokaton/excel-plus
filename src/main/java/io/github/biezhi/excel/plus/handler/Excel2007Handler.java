@@ -60,7 +60,7 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
     private SharedStringsTable sst;
     private String             lastContents;
     private boolean            nextIsString;
-    private int sheetIndex = 0;
+    private int                sheetIndex = 0;
 
     private       List<String>  rows         = new ArrayList<>();
     private       CellDataType  nextDataType = CellDataType.SSTINDEX;
@@ -68,8 +68,8 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
 
     private List<Pair<Integer, List<String>>> data = new ArrayList<>();
 
-    private int curRow = 0;
-    private int curCol = 0;
+    private int     curRow = 0;
+    private int     curCol = 0;
     private boolean isTElement;
     private short   formatIndex;
     private String  formatString;
@@ -124,7 +124,7 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
     private Pair<Integer, T> parse(Pair<Integer, List<String>> pair) {
         Pair<Integer, T> np = new Pair<>();
         np.setK(pair.getK());
-        np.setV(convert(type, pair.getV()));
+        np.setV(this.convert(type, pair.getV()));
         return np;
     }
 
@@ -159,13 +159,13 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
         int emptyCount = 0;
         for (int i = 0; i < columns.size(); i++) {
             String value = columns.get(i);
-            if(null == value || value.trim().length() == 0){
+            if (null == value || value.trim().length() == 0) {
                 emptyCount++;
             }
-            Field  field = mapField().get(i);
+            Field field = mapField().get(i);
             ExcelUtils.writeToField(item, field, value);
         }
-        if(columns.size() == emptyCount){
+        if (columns.size() == emptyCount) {
             return null;
         }
         return item;
@@ -178,8 +178,8 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
         return parser;
     }
 
+    @Override
     public void startElement(String uri, String localName, String name, Attributes attributes) {
-
         // c => cell
         if ("c".equals(name)) {
             // previous cell position
@@ -202,16 +202,12 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
         lastContents = "";
     }
 
-    /**
-     * Processing data types
-     */
-    private void setNextDataType(Attributes attributes) {
+    public void setNextDataType(Attributes attributes) {
         nextDataType = CellDataType.NUMBER;
         formatIndex = -1;
         formatString = null;
         String cellType     = attributes.getValue("t");
         String cellStyleStr = attributes.getValue("s");
-        attributes.getValue("r");
 
         if ("b".equals(cellType)) {
             nextDataType = CellDataType.BOOL;
@@ -231,8 +227,9 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
             formatIndex = style.getDataFormat();
             formatString = style.getDataFormatString();
 
-            if ("m/d/yy" == formatString) {
+            if ("m/d/yy".equals(formatString)) {
                 nextDataType = CellDataType.DATE;
+                formatString = "yyyy-MM-dd hh:mm:ss.SSS";
             }
 
             if (formatString == null) {
@@ -245,12 +242,9 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
     /**
      * Type processing of parsed data
      */
-    @SuppressWarnings("deprecation")
-    private String getDataValue(String value) {
+    public String getDataValue(String value) {
         String thisStr;
         switch (nextDataType) {
-            // The sequence of these few can not be exchanged easily,
-            // and exchanges are likely to result in data errors
             case BOOL:
                 char first = value.charAt(0);
                 thisStr = first == '0' ? "FALSE" : "TRUE";
@@ -264,14 +258,12 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
             case INLINESTR:
                 XSSFRichTextString rtsi = new XSSFRichTextString(value);
                 thisStr = rtsi.toString();
-                rtsi = null;
                 break;
             case SSTINDEX:
                 try {
                     int                idx  = Integer.parseInt(value);
                     XSSFRichTextString rtss = new XSSFRichTextString(sst.getEntryAt(idx));
                     thisStr = rtss.toString();
-                    rtss = null;
                 } catch (NumberFormatException ex) {
                     thisStr = value;
                 }
@@ -286,8 +278,6 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
                 break;
             case DATE:
                 thisStr = formatter.formatRawCellContents(Double.parseDouble(value), formatIndex, formatString);
-                // special handling of date strings
-                thisStr = thisStr.replace(" ", "T");
                 break;
             default:
                 thisStr = " ";

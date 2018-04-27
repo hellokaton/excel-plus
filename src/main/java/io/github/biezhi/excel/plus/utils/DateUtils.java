@@ -15,6 +15,8 @@
  */
 package io.github.biezhi.excel.plus.utils;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -29,16 +31,20 @@ import java.util.Date;
  */
 public final class DateUtils {
 
-    static final DateTimeFormatter DEFAULT_DATE_TIME_PATTERN = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    static final DateTimeFormatter DEFAULT_DATE_TIME_PATTERN = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
+
+    private static ThreadLocal<DateFormat> dateFormatThreadLocal = ThreadLocal.withInitial(() -> new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS"));
 
     public static Date toDate(String value, String pattern) {
-        LocalDateTime localDateTime;
-        if (ExcelUtils.isEmpty(pattern)) {
-            localDateTime = LocalDateTime.parse(value, DEFAULT_DATE_TIME_PATTERN);
-        } else {
-            localDateTime = LocalDateTime.parse(value, DateTimeFormatter.ofPattern(pattern));
+        try {
+            if (ExcelUtils.isEmpty(pattern)) {
+                return dateFormatThreadLocal.get().parse(value);
+            } else {
+                return new SimpleDateFormat(pattern).parse(value);
+            }
+        } catch (Exception e) {
+            return null;
         }
-        return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
     }
 
     public static LocalDate toLocalDate(String value, String pattern) {
