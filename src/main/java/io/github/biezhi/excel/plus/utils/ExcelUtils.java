@@ -11,16 +11,12 @@ import org.apache.poi.ss.usermodel.Cell;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
-import java.text.DateFormat;
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.*;
 
 import static io.github.biezhi.excel.plus.Constant.TIP_MSG;
-import static io.github.biezhi.excel.plus.utils.DateUtils.DEFAULT_DATE_TIME_PATTERN;
 
 /**
  * Excel utils
@@ -54,22 +50,29 @@ public class ExcelUtils {
         List<Pair<Integer, String>> pairs  = new ArrayList<>(fields.size());
 
         for (Field field : fields) {
-            ExcelField excelField = field.getAnnotation(ExcelField.class);
-            if (null != excelField) {
-                Pair<Integer, String> pair = new Pair<>();
-                pair.setV(excelField.columnName());
 
-                WriteField writeField = field.getAnnotation(WriteField.class);
-                if (null != writeField && writeField.order() != Constant.DEFAULT_ORDER) {
+            WriteField writeField = field.getAnnotation(WriteField.class);
+            if (null != writeField) {
+                Pair<Integer, String> pair = new Pair<>();
+                pair.setV(writeField.columnName());
+                if (writeField.order() != Constant.DEFAULT_ORDER) {
                     pair.setK(writeField.order());
                 } else {
+                    System.err.println(String.format("[%s.%s] order config error, %s", type.getName(), field.getName(), TIP_MSG));
+                }
+                pairs.add(pair);
+            } else {
+                ExcelField excelField = field.getAnnotation(ExcelField.class);
+                if (null != excelField) {
+                    Pair<Integer, String> pair = new Pair<>();
+                    pair.setV(excelField.columnName());
                     if (excelField.order() != Constant.DEFAULT_ORDER) {
                         pair.setK(excelField.order());
                     } else {
                         System.err.println(String.format("[%s.%s] order config error, %s", type.getName(), field.getName(), TIP_MSG));
                     }
+                    pairs.add(pair);
                 }
-                pairs.add(pair);
             }
         }
         return pairs;
@@ -78,21 +81,23 @@ public class ExcelUtils {
     public static String getColumnValue(Object item, int order) {
         List<Field> fields = getAndSaveFields(item.getClass());
         for (Field field : fields) {
-            ExcelField excelField = field.getAnnotation(ExcelField.class);
-            if (null == excelField) {
-                continue;
-            }
-            ReadField readField = field.getAnnotation(ReadField.class);
             try {
-                if (null != readField && readField.order() == order) {
-                    field.setAccessible(true);
-                    Object value = field.get(item);
-                    return asString(field, value);
-                } else {
-                    if (excelField.order() == order) {
+                ReadField readField = field.getAnnotation(ReadField.class);
+                if (null != readField) {
+                    if (readField.order() == order) {
                         field.setAccessible(true);
                         Object value = field.get(item);
                         return asString(field, value);
+                    }
+                } else {
+                    ExcelField excelField = field.getAnnotation(ExcelField.class);
+                    if (null == excelField) {
+                    } else {
+                        if (excelField.order() == order) {
+                            field.setAccessible(true);
+                            Object value = field.get(item);
+                            return asString(field, value);
+                        }
                     }
                 }
             } catch (Exception e) {
@@ -122,14 +127,16 @@ public class ExcelUtils {
         List<Field> fields = getAndSaveFields(type);
 
         for (Field field : fields) {
-            ExcelField excelField = field.getAnnotation(ExcelField.class);
-            if (null == excelField) {
-                continue;
-            }
             ReadField readField = field.getAnnotation(ReadField.class);
-            if (null != readField && readField.order() == col) {
-                return field;
+            if (null != readField) {
+                if (readField.order() == col) {
+                    return field;
+                }
             } else {
+                ExcelField excelField = field.getAnnotation(ExcelField.class);
+                if (null == excelField) {
+                    continue;
+                }
                 if (excelField.order() == col) {
                     return field;
                 }
@@ -285,7 +292,7 @@ public class ExcelUtils {
                     }
                 }
                 cellValue = String.valueOf(cell.getNumericCellValue());
-                if (cellValue.contains("E")){
+                if (cellValue.contains("E")) {
                     cellValue = decimalFormatThreadLocal.get().format(cell.getNumericCellValue());
                 }
                 break;
