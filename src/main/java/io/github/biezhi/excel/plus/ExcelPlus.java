@@ -17,6 +17,7 @@ package io.github.biezhi.excel.plus;
 
 import io.github.biezhi.excel.plus.enums.ParseType;
 import io.github.biezhi.excel.plus.exception.ExcelException;
+import io.github.biezhi.excel.plus.handler.CSVHandler;
 import io.github.biezhi.excel.plus.handler.DefaultExcelHandler;
 import io.github.biezhi.excel.plus.handler.Excel2007Handler;
 import io.github.biezhi.excel.plus.reader.Reader;
@@ -101,7 +102,11 @@ public class ExcelPlus {
         if (reader.getParseType().equals(ParseType.SAX) && is2007) {
             result = new Excel2007Handler<>(type, reader).parse();
         } else {
-            result = new DefaultExcelHandler<>(type, reader).parse();
+            if (reader.getExcelFile().getName().endsWith(".csv")) {
+                result = new CSVHandler<>(type, reader).parse();
+            } else {
+                result = new DefaultExcelHandler<>(type, reader).parse();
+            }
         }
         return new ReaderResult<>(result);
     }

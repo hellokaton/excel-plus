@@ -38,8 +38,7 @@ public class Reader {
     private File excelFile;
 
     public static Reader create() {
-        Reader reader = new Reader();
-        return reader;
+        return new Reader();
     }
 
     public Reader sheetName(String sheetName) {
