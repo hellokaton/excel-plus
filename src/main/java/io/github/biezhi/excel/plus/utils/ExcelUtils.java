@@ -79,7 +79,7 @@ public class ExcelUtils {
     }
 
     public static String getColumnValue(Object item, int order) {
-        List<Field> fields = getAndSaveFields(item.getClass());
+        List<Field> fields = Arrays.asList(item.getClass().getDeclaredFields());// getAndSaveFields(item.getClass());
         for (Field field : fields) {
             try {
                 ReadField readField = field.getAnnotation(ReadField.class);
@@ -93,12 +93,11 @@ public class ExcelUtils {
                     ExcelField excelField = field.getAnnotation(ExcelField.class);
                     if (null == excelField) {
                         WriteField writeField = field.getAnnotation(WriteField.class);
-                        if(null == writeField || writeField.order() != order){
-                            return "";
+                        if(null != writeField && writeField.order() == order){
+                            field.setAccessible(true);
+                            Object value = field.get(item);
+                            return asString(field, value);
                         }
-                        field.setAccessible(true);
-                        Object value = field.get(item);
-                        return asString(field, value);
                     } else {
                         if (excelField.order() == order) {
                             field.setAccessible(true);
@@ -242,6 +241,7 @@ public class ExcelUtils {
         if (null == value) {
             return "";
         }
+
         ExcelField excelField = field.getAnnotation(ExcelField.class);
         if (null != excelField && !excelField.convertType().equals(EmptyConverter.class)) {
             Converter converter = newInstance(excelField.convertType());
@@ -251,31 +251,55 @@ public class ExcelUtils {
         }
 
         ReadField readField = field.getAnnotation(ReadField.class);
+        if (null != readField && !readField.convertType().equals(EmptyConverter.class)) {
+            Converter converter = newInstance(readField.convertType());
+            if (null != converter) {
+                return converter.write(value);
+            }
+        }
+
+        WriteField writeField = field.getAnnotation(WriteField.class);
+        if (null != writeField && !writeField.convertType().equals(EmptyConverter.class)) {
+            Converter converter = newInstance(writeField.convertType());
+            if (null != converter) {
+                return converter.write(value);
+            }
+        }
 
         if (value instanceof Date) {
+
+            if (null != excelField && !"".equals(excelField)) {
+                return DateUtils.toString((Date) value, excelField.datePattern());
+            }
             if (null != readField && !"".equals(readField.datePattern())) {
                 return DateUtils.toString((Date) value, readField.datePattern());
             }
-            if (null != excelField && !"".equals(excelField)) {
-                return DateUtils.toString((Date) value, excelField.datePattern());
+            if(null != writeField && !"".equals(writeField.datePattern())){
+                return DateUtils.toString((Date) value, writeField.datePattern());
             }
         }
 
         if (value instanceof LocalDate) {
+            if (null != excelField && !"".equals(excelField)) {
+                return DateUtils.toString((LocalDate) value, excelField.datePattern());
+            }
             if (null != readField && !"".equals(readField.datePattern())) {
                 return DateUtils.toString((LocalDate) value, readField.datePattern());
             }
-            if (null != excelField && !"".equals(excelField)) {
-                return DateUtils.toString((LocalDate) value, excelField.datePattern());
+            if (null != writeField && !"".equals(writeField.datePattern())) {
+                return DateUtils.toString((LocalDate) value, writeField.datePattern());
             }
         }
 
         if (value instanceof LocalDateTime) {
+            if (null != excelField && !"".equals(excelField)) {
+                return DateUtils.toString((LocalDateTime) value, excelField.datePattern());
+            }
             if (null != readField && !"".equals(readField.datePattern())) {
                 return DateUtils.toString((LocalDateTime) value, readField.datePattern());
             }
-            if (null != excelField && !"".equals(excelField)) {
-                return DateUtils.toString((LocalDateTime) value, excelField.datePattern());
+            if (null != writeField && !"".equals(writeField.datePattern())) {
+                return DateUtils.toString((LocalDateTime) value, writeField.datePattern());
             }
         }
 
