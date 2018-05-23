@@ -236,6 +236,11 @@ excelPlus.export(Exporter.create(cardSecrets).byTemplate("tpl.xls")).writeAsFile
 
 # 版本更新
 
+<b>v0.1.1</b>
+
+1. 优化读取性能
+2. 重构 POI 读取方式
+
 <b>v0.0.4</b>
 
 1. 添加 `sheetName` 方法在运行时读取工作表
