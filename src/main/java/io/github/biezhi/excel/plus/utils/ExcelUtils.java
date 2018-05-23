@@ -92,6 +92,13 @@ public class ExcelUtils {
                 } else {
                     ExcelField excelField = field.getAnnotation(ExcelField.class);
                     if (null == excelField) {
+                        WriteField writeField = field.getAnnotation(WriteField.class);
+                        if(null == writeField || writeField.order() != order){
+                            return "";
+                        }
+                        field.setAccessible(true);
+                        Object value = field.get(item);
+                        return asString(field, value);
                     } else {
                         if (excelField.order() == order) {
                             field.setAccessible(true);
