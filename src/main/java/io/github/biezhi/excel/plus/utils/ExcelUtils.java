@@ -79,7 +79,7 @@ public class ExcelUtils {
     }
 
     public static String getColumnValue(Object item, int order) {
-        List<Field> fields = Arrays.asList(item.getClass().getDeclaredFields());// getAndSaveFields(item.getClass());
+        List<Field> fields = getAndSaveFields(item.getClass());
         for (Field field : fields) {
             try {
                 ReadField readField = field.getAnnotation(ReadField.class);
