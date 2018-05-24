@@ -93,7 +93,7 @@ public class ExcelUtils {
                     ExcelField excelField = field.getAnnotation(ExcelField.class);
                     if (null == excelField) {
                         WriteField writeField = field.getAnnotation(WriteField.class);
-                        if(null != writeField && writeField.order() == order){
+                        if (null != writeField && writeField.order() == order) {
                             field.setAccessible(true);
                             Object value = field.get(item);
                             return asString(field, value);
@@ -274,7 +274,7 @@ public class ExcelUtils {
             if (null != readField && !"".equals(readField.datePattern())) {
                 return DateUtils.toString((Date) value, readField.datePattern());
             }
-            if(null != writeField && !"".equals(writeField.datePattern())){
+            if (null != writeField && !"".equals(writeField.datePattern())) {
                 return DateUtils.toString((Date) value, writeField.datePattern());
             }
         }
@@ -313,6 +313,7 @@ public class ExcelUtils {
         if (cell == null) {
             return cellValue;
         }
+        System.out.println(cell.getColumnIndex() + ":" + cell.getCellTypeEnum());
         switch (cell.getCellTypeEnum()) {
             case NUMERIC:
                 if (HSSFDateUtil.isCellDateFormatted(cell)) {

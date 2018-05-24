@@ -96,7 +96,8 @@ public class DefaultExcelHandler<T> implements ExcelHandler {
             return null;
         }
         int firstCellNum = row.getFirstCellNum();
-        int lastCellNum  = row.getPhysicalNumberOfCells();
+        int lastCellNum  = row.getLastCellNum();
+
         for (int cellNum = firstCellNum; cellNum < lastCellNum; cellNum++) {
             Cell   cell  = row.getCell(cellNum);
             String value = ExcelUtils.getCellValue(cell);
