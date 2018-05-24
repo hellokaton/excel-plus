@@ -313,7 +313,6 @@ public class ExcelUtils {
         if (cell == null) {
             return cellValue;
         }
-        System.out.println(cell.getColumnIndex() + ":" + cell.getCellTypeEnum());
         switch (cell.getCellTypeEnum()) {
             case NUMERIC:
                 if (HSSFDateUtil.isCellDateFormatted(cell)) {
