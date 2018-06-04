@@ -33,6 +33,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -190,7 +191,15 @@ public interface ExcelWriter extends Constant {
                 if (null != columnStyle) {
                     cell.setCellStyle(columnStyle);
                 }
-                cell.setCellValue(value);
+                if (null != value) {
+                    if (ExcelUtils.isNumber(value)) {
+                        cell.setCellValue(Double.valueOf(value));
+                    } else {
+                        cell.setCellValue(value);
+                    }
+                } else {
+                    cell.setCellValue(value);
+                }
                 sheet.autoSizeColumn(col);
             }
         }

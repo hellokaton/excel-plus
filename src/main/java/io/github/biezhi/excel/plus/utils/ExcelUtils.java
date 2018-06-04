@@ -37,10 +37,10 @@ public class ExcelUtils {
     }
 
     public static boolean isNumber(String value) {
-        for (int i = 0; i < value.length(); i++) {
-            if (!Character.isDigit(value.charAt(i))) {
-                return false;
-            }
+        try {
+            double d = Double.parseDouble(value);
+        } catch (NumberFormatException nfe) {
+            return false;
         }
         return true;
     }
@@ -351,14 +351,6 @@ public class ExcelUtils {
                 break;
         }
         return cellValue;
-    }
-
-    public static int getMaxOrder(Class<?> type) {
-        return Arrays.stream(type.getDeclaredFields())
-                .filter(field -> null != field.getAnnotation(ExcelField.class))
-                .map(field -> field.getAnnotation(ExcelField.class))
-                .map(ExcelField::order)
-                .max(Integer::compareTo).orElse(0);
     }
 
 }
