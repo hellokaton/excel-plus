@@ -43,7 +43,7 @@
 <dependency>
     <groupId>io.github.biezhi</groupId>
     <artifactId>excel-plus</artifactId>
-    <version>0.1.1-RELEASE</version>
+    <version>0.1.2-RELEASE</version>
 </dependency>
 ```
 
@@ -235,6 +235,12 @@ excelPlus.export(Exporter.create(cardSecrets).byTemplate("tpl.xls")).writeAsFile
 在使用过程中遇到什么问题或者建议可以发一个 [issue](https://github.com/biezhi/excel-plus/issues/new)
 
 # 版本更新
+
+<b>v0.1.2</b>
+
+1. 导出数字支持
+2. 修复日期格式化 bug
+3. 修复列索引错误
 
 <b>v0.1.1</b>
 
