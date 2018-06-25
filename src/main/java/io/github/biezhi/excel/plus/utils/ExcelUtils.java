@@ -238,9 +238,6 @@ public class ExcelUtils {
     }
 
     private static <T> String asString(Field field, T value) {
-        if (null == value) {
-            return "";
-        }
 
         ExcelField excelField = field.getAnnotation(ExcelField.class);
         if (null != excelField && !excelField.convertType().equals(EmptyConverter.class)) {
@@ -301,6 +298,10 @@ public class ExcelUtils {
             if (null != writeField && !"".equals(writeField.datePattern())) {
                 return DateUtils.toString((LocalDateTime) value, writeField.datePattern());
             }
+        }
+
+        if (null == value) {
+            return "";
         }
 
         return value.toString();
