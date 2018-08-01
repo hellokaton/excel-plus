@@ -20,24 +20,15 @@ import io.github.biezhi.excel.plus.enums.ExcelType;
 import io.github.biezhi.excel.plus.exception.ExcelException;
 import io.github.biezhi.excel.plus.utils.ExcelUtils;
 import io.github.biezhi.excel.plus.utils.Pair;
-
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.math.BigDecimal;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -68,6 +59,8 @@ public interface ExcelWriter extends Constant {
             CellStyle headerStyle;
             CellStyle columnStyle = null;
             CellStyle titleStyle;
+            List<CellStyle> specialColumnStyles = new ArrayList<>();
+            List<Predicate<String>> specialConditions = new ArrayList<>();
 
             T data0 = data.iterator().next();
             // Set Excel header
@@ -110,6 +103,11 @@ public interface ExcelWriter extends Constant {
                     columnStyle = this.defaultColumnStyle(workbook);
                 }
 
+                if (null != exporter.getSpecialColumn()) {
+                    exporter.getSpecialColumn().values().forEach(var -> specialColumnStyles.add(var.apply(workbook)));
+                    specialConditions = new ArrayList<>(exporter.getSpecialColumn().keySet());
+                }
+
                 String headerTitle = exporter.getHeaderTitle();
                 int    colIndex    = 0;
                 if (null != headerTitle) {
@@ -123,7 +121,7 @@ public interface ExcelWriter extends Constant {
 
             }
 
-            this.writeRows(sheet, columnStyle, null, iterator, startRow, columnIndexes);
+            this.writeRows(sheet, columnStyle, specialColumnStyles, null, specialConditions, iterator, startRow, columnIndexes);
 
             workbook.write(outputStream);
             outputStream.flush();
@@ -171,24 +169,45 @@ public interface ExcelWriter extends Constant {
      *
      * @param sheet       work sheet
      * @param columnStyle each column style in the row.
+     * @param specialColumnStyles each special column style in the row.
      * @param rowStyle    row style
+     * @param specialConditions    the judgment conditions for a special column
      * @param iterator    row data iterator
      * @param startRow    from the beginning of the line, the default is 1
      * @param <T>         Java Type
      */
-    default <T> void writeRows(Sheet sheet, CellStyle columnStyle, CellStyle rowStyle, Iterator<T> iterator, int startRow, List<Integer> columnIndexes) {
+    default <T> void writeRows(Sheet sheet, CellStyle columnStyle, List<CellStyle> specialColumnStyles, CellStyle rowStyle, List<Predicate<String>> specialConditions, Iterator<T> iterator, int startRow, List<Integer> columnIndexes) {
         for (int rowNum = startRow; iterator.hasNext(); rowNum++) {
             T   item = iterator.next();
             Row row  = sheet.createRow(rowNum);
             if (null != rowStyle) {
                 row.setRowStyle(rowStyle);
             }
+
+            boolean isSpecialColumn = false;
+            int index = -1;
+            if (null != specialColumnStyles && null != specialConditions) {
+                here:
+                for (Integer col : columnIndexes) {
+                    String value = ExcelUtils.getColumnValue(item, col);
+                    for (int i = 0, length = specialConditions.size(); i < length; i++) {
+                        index = i;
+                        isSpecialColumn = specialConditions.get(i).test(value);
+                        if (isSpecialColumn) {
+                            break here;
+                        }
+                    }
+                }
+            }
+
             Iterator<Integer> colIt = columnIndexes.iterator();
             while (colIt.hasNext()) {
                 int    col   = colIt.next();
                 Cell   cell  = row.createCell(col);
                 String value = ExcelUtils.getColumnValue(item, col);
-                if (null != columnStyle) {
+                if (isSpecialColumn) {
+                    cell.setCellStyle(specialColumnStyles.get(index));
+                } else if (null != columnStyle) {
                     cell.setCellStyle(columnStyle);
                 }
                 if (null != value) {
