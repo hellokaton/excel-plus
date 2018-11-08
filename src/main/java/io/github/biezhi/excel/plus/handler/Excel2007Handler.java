@@ -96,8 +96,13 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
 
     @Override
     public List<Pair<Integer, T>> parse() {
+        OPCPackage pkg;
         try {
-            OPCPackage pkg        = OPCPackage.open(reader.getExcelFile());
+            if(reader.getExcelFile() != null){
+                pkg = OPCPackage.open(reader.getExcelFile());
+            } else {
+                pkg = OPCPackage.open(reader.getInputStream());
+            }
             XSSFReader xssfReader = new XSSFReader(pkg);
             stylesTable = xssfReader.getStylesTable();
             SharedStringsTable    sst    = xssfReader.getSharedStringsTable();

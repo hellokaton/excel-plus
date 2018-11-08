@@ -15,6 +15,7 @@
  */
 package io.github.biezhi.excel.plus.reader;
 
+import io.github.biezhi.excel.plus.enums.ExcelType;
 import io.github.biezhi.excel.plus.enums.ParseType;
 import lombok.Data;
 
@@ -36,6 +37,10 @@ public class Reader {
     private ParseType parseType = ParseType.DOM;
 
     private File excelFile;
+
+    private ExcelType excelType;
+
+    private InputStream inputStream;
 
     public static Reader create() {
         return new Reader();
@@ -63,6 +68,17 @@ public class Reader {
 
     public Reader excelFile(File excelFile) {
         this.excelFile = excelFile;
+        this.excelType = ExcelType.getExcelType(this.excelFile.getName());
+        return this;
+    }
+
+    public Reader inputStream(InputStream inputStream) {
+        this.inputStream = inputStream;
+        return this;
+    }
+
+    public Reader excelType(ExcelType excelType){
+        this.excelType = excelType;
         return this;
     }
 
