@@ -15,6 +15,7 @@
  */
 package io.github.biezhi.excel.plus;
 
+import io.github.biezhi.excel.plus.enums.ExcelType;
 import io.github.biezhi.excel.plus.enums.ParseType;
 import io.github.biezhi.excel.plus.exception.ExcelException;
 import io.github.biezhi.excel.plus.handler.CSVHandler;
@@ -97,12 +98,10 @@ public class ExcelPlus {
     public <T> ReaderResult<T> read(Class<T> type, Reader reader) throws ExcelException {
         List<Pair<Integer, T>> result;
         this.beforeCheck(reader);
-
-        boolean is2007 = reader.getExcelFile().getName().toLowerCase().endsWith(".xlsx");
-        if (reader.getParseType().equals(ParseType.SAX) && is2007) {
+        if (reader.getParseType().equals(ParseType.SAX) && reader.getExcelType() == ExcelType.XLSX) {
             result = new Excel2007Handler<>(type, reader).parse();
         } else {
-            if (reader.getExcelFile().getName().endsWith(".csv")) {
+            if (ExcelType.CSV == reader.getExcelType()) {
                 result = new CSVHandler<>(type, reader).parse();
             } else {
                 result = new DefaultExcelHandler<>(type, reader).parse();
@@ -115,11 +114,14 @@ public class ExcelPlus {
         if (null == reader) {
             throw new ExcelException("Reader not is null.");
         }
-        if (null == reader.getExcelFile()) {
+        if (null == reader.getExcelFile() && null == reader.getInputStream()) {
             throw new ExcelException("Excel file not is null.");
         }
         if (null == reader.getParseType()) {
             throw new ExcelException("Excel parse type not is null.");
+        }
+        if (null == reader.getExcelType()) {
+            throw new ExcelException("Excel file type not is null.");
         }
         if (reader.getSheetIndex() < 0) {
             throw new ExcelException("SheetIndex Can't be less than 0.");

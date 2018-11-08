@@ -48,7 +48,11 @@ public class DefaultExcelHandler<T> implements ExcelHandler {
         Workbook workbook;
         Sheet    sheet;
         try {
-            workbook = WorkbookFactory.create(reader.getExcelFile());
+            if(reader.getExcelFile() != null){
+                workbook = WorkbookFactory.create(reader.getExcelFile());
+            } else {
+                workbook = WorkbookFactory.create(reader.getInputStream());
+            }
         } catch (IOException | InvalidFormatException e) {
             throw new ParseException(e);
         }
