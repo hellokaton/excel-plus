@@ -197,7 +197,9 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
             // set cell type
             this.setNextDataType(attributes);
         }
-
+        if("row".equals(name)) {
+            curRow = Integer.parseInt(attributes.getValue("r"));
+        }
         // when the element is t
         isTElement = "t".equals(name);
         lastContents = "";
@@ -338,7 +340,6 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
                     data.add(pair);
                 }
                 rows.clear();
-                curRow++;
                 curCol = 0;
                 preRef = null;
                 ref = null;
