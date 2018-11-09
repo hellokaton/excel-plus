@@ -2,8 +2,6 @@ package io.github.biezhi.excel.plus;
 
 import io.github.biezhi.excel.plus.enums.ParseType;
 import io.github.biezhi.excel.plus.model.CardSecret;
-import io.github.biezhi.excel.plus.model.Test07;
-import io.github.biezhi.excel.plus.model.Test08;
 import io.github.biezhi.excel.plus.reader.Reader;
 
 import java.io.File;
