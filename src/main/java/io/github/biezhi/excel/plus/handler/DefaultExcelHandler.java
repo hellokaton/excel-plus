@@ -76,13 +76,14 @@ public class DefaultExcelHandler<T> implements ExcelHandler {
 
         // traverse excel row
         for (int rowNum = firstRowNum + reader.getStartRowIndex(); rowNum <= lastRowNum; rowNum++) {
-            Row row = sheet.getRow(rowNum);
+            Row row = sheet.getRow(rowNum);//会读取出一些只有样式却没有实际数据的空行
             if (row == null) {
                 continue;
             }
             T item = this.buildItem(row);
             if (null != item) {
-                list.add(new Pair<>(rowNum, item));
+                //这里的rowNum实际上是索引，但是最终结果是需要的Excel的行号，因此这里将索引+1获得行号
+                list.add(new Pair<>(rowNum +1, item));
             }
         }
         return list;
@@ -101,13 +102,22 @@ public class DefaultExcelHandler<T> implements ExcelHandler {
         }
         int firstCellNum = row.getFirstCellNum();
         int lastCellNum  = row.getLastCellNum();
+        boolean flag = false;
 
         for (int cellNum = firstCellNum; cellNum < lastCellNum; cellNum++) {
             Cell   cell  = row.getCell(cellNum);
             String value = ExcelUtils.getCellValue(cell);
-            ExcelUtils.writeToField(item, cellNum, value);
+            if(ExcelUtils.isNotEmpty(value)){
+                ExcelUtils.writeToField(item, cellNum, value);
+                flag = true;
+            }
         }
-        return item;
+        //过滤掉光有样式却没有实际数据的空行(如这一行所有数据都为空字符串的情况)
+        if(flag){
+            return item;
+        } else {
+            return null;
+        }
     }
 
 }
