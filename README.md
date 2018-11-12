@@ -25,7 +25,7 @@ As maven dependency
 <dependency>
     <groupId>io.github.biezhi</groupId>
     <artifactId>excel-plus</artifactId>
-    <version>0.1.4.RELEASE</version>
+    <version>0.1.5.RELEASE</version>
 </dependency>
 ```
 
@@ -35,7 +35,7 @@ snapshot version
 <dependency>
     <groupId>io.github.biezhi</groupId>
     <artifactId>excel-plus</artifactId>
-    <version>0.1.5-SNAPSHOT</version>
+    <version>0.1.6-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -78,6 +78,10 @@ See [here](https://github.com/biezhi/excel-plus/tree/master/src/test/java/io/git
 # Advanced
 
 **Custom export style**
+
+# Thanks
+
+- [ydq](https://github.com/ydq)
 
 # License
 
