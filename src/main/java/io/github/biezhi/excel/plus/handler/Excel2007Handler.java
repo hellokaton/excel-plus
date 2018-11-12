@@ -66,6 +66,7 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
 
     private int     curRow = 0;
     private int     curCol = 0;
+    private int     endCTag = 0;
     private boolean isTElement;
     private short   formatIndex;
     private String  formatString;
@@ -256,7 +257,7 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
                 thisStr = "\"ERROR:" + value + '"';
                 break;
             case FORMULA:
-                thisStr = '"' + value + '"';
+                thisStr = value;
                 break;
             case INLINESTR:
                 XSSFRichTextString rtsi = new XSSFRichTextString(value);
@@ -305,6 +306,7 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
             curCol++;
             isTElement = false;
         } else if ("v".equals(name)) {
+            //SAX解析出来的xml 有两种空单元，第一种，直接xml中没有跳过了，第二种c标签中没有v标签，此处处理第一种情况
             // first column
             if (ref.equals(preRef)) {
                 // Complementing cells that may be missing at the start of a row
@@ -324,6 +326,14 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
             String value = this.getDataValue(lastContents.trim());
             rows.add(curCol, value);
             curCol++;
+        } else if("c".equals(name)){
+            endCTag ++;//c标签（标签对）的个数
+            //SAX解析出来的xml 有两种空单元，第一种，直接xml中没有跳过了，第二种c标签中没有v标签，此处处理第二种情况
+            int gap = endCTag - curCol;//比较c标签对的个数和v值得个数
+            for(int i=0;i < gap;i++){
+                rows.add(curCol, "");
+                curCol++;
+            }
         } else {
             // If the tag name is row , this indicates that the end of the line has been reached and the method optRows() is called
             if (name.equals("row")) {
@@ -333,7 +343,8 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
                     rows.add(curCol, "");
                     curCol++;
                 }
-                if (curRow >= reader.getStartRowIndex() && rows.stream().anyMatch(ExcelUtils::isNotEmpty)) {
+                //curRow 是Excel中的行号，startRowIndex是索引，所以对比的时候索引 + 1
+                if (curRow >= (reader.getStartRowIndex()+1) && rows.stream().anyMatch(ExcelUtils::isNotEmpty)) {
                     Pair<Integer, List<String>> pair = new Pair<>();
                     pair.setK(curRow);
                     pair.setV(new ArrayList<>(rows));
@@ -341,6 +352,7 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
                 }
                 rows.clear();
                 curCol = 0;
+                endCTag = 0;
                 preRef = null;
                 ref = null;
             }
