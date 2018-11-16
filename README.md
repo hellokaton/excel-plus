@@ -25,7 +25,7 @@ As maven dependency
 <dependency>
     <groupId>io.github.biezhi</groupId>
     <artifactId>excel-plus</artifactId>
-    <version>0.1.5.RELEASE</version>
+    <version>0.1.6.RELEASE</version>
 </dependency>
 ```
 
@@ -35,7 +35,7 @@ snapshot version
 <dependency>
     <groupId>io.github.biezhi</groupId>
     <artifactId>excel-plus</artifactId>
-    <version>0.1.6-SNAPSHOT</version>
+    <version>0.1.7-SNAPSHOT</version>
 </dependency>
 ```
 

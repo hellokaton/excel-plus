@@ -43,7 +43,7 @@
 <dependency>
     <groupId>io.github.biezhi</groupId>
     <artifactId>excel-plus</artifactId>
-    <version>0.1.2-RELEASE</version>
+    <version>0.1.6.RELEASE</version>
 </dependency>
 ```
 
