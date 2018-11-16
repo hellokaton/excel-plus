@@ -231,7 +231,7 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
             formatIndex = style.getDataFormat();
             formatString = style.getDataFormatString();
 
-            if ("m/d/yy".equals(formatString)) {
+            if ("m/d/yy".equals(formatString) || "m/d/yy h:mm".equals(formatString)) {
                 nextDataType = CellDataType.DATE;
                 formatString = "yyyy-MM-dd hh:mm:ss.SSS";
             }
