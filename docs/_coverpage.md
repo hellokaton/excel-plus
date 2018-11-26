@@ -1,4 +1,4 @@
-<img src="media/logo.svg" alt="excel-plus" title="excel-plus" />
+<img src="_media/logo.svg" alt="excel-plus" title="excel-plus" />
 
 > 提高生产力的 Excel 操作库
 
