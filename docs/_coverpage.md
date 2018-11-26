@@ -9,5 +9,3 @@
 
 [GitHub](https://github.com/biezhi/excel-plus)
 [快速开始](#快速开始)
-
-![color](linear-gradient(to bottom, #cceaff 0%, #b4e4c0 100%))

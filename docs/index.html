@@ -6,98 +6,18 @@
   <meta name="description" content="excel-plus - 提高生产力的 Excel 操作库">
   <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
   <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
-  <link rel="stylesheet" href="//unpkg.com/docsify/themes/buble.css">
-  <style>
-    body {
-      background-color: #f9f9f9;
-    }
-
-    table {
-      border-spacing: .5rem;
-    }
-
-    .cover-main img[alt="trilogy logo"] {
-      margin-top: -3%;
-      width: 420px;
-    }
-
-    section.cover ul {
-      text-align: left;
-      padding-left: 150px;
-    }
-
-    section.cover ul li{
-      list-style-type: square;
-    }
-    .cover-main p > a {
-      margin-top: 5%;
-
-    }
-    section.cover .cover-main > p:last-child a{
-      color: #257A2A;
-      border-color: #257A2A;
-    }
-
-    section.cover .cover-main > p:last-child a:last-child{
-      background-color: #257A2A;
-    }
-    .markdown-section blockquote{
-      border-left-color: #257A2A;
-    }
-    .sidebar-toggle span{
-      background-color: #257A2A;
-    }
-    .markdown-section h3 {
-      margin: 1.2em 0 1.2em;
-    }
-
-    .markdown-section pre {
-      border-left: 0;
-    }
-
-    .markdown-section code,
-    .markdown-section pre > code {
-      font-family: "Operator Mono", "Fira Code", "Ubuntu Mono",
-                   "Droid Sans Mono", "Liberation Mono", "Source Code Pro",
-                   Menlo, Consolas, Inconsolata, Courier, monospace;
-      font-size: 14px;
-      background-color: #e8e8e8;
-      border-radius: 0;
-    }
-  </style>
+  <link rel="stylesheet" href="//unpkg.com/docsify/lib/themes/vue.css">
 </head>
 <body>
   <div id="app"></div>
 </body>
 
-<script>
-  window.$docsify = {
-    coverpage: true,
-    maxLevel: 3,
-    name: 'Excel Plus',
-    repo: 'https://github.com/biezhi/excel-plus',
-    search: {
-      noData: {
-        '/': '没有找到'
-      },
-      paths: 'auto',
-      placeholder: {
-        '/': '搜索...'
-      }
-    },
-    formatUpdated: '{MM}/{DD} {HH}:{mm}',
-    plugins: [
-      (hook, vm) => {
-        hook.beforeEach(html => {
-          var url = 'https://github.com/biezhi/excel-plus/blob/master/docs/' + vm.route.file
-          var editHtml = '[📝 编辑文档](' + url + ')\n'
-          return html + '\n----\n' + editHtml
-        })
-      }
-    ]
-  }
-</script>
-<script src="//unpkg.com/docsify/lib/docsify.min.js"></script>
-<script src="//unpkg.com/docsify/lib/plugins/search.min.js"></script>
+<script
+        src="//unpkg.com/docsify/lib/docsify.min.js"
+        data-max-level="3"
+        data-sidebar-toggle
+        data-coverpage
+        data-router></script>
+
 <script src="//unpkg.com/prismjs/components/prism-java.js"></script>
 </html>
