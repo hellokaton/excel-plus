@@ -29,14 +29,11 @@ public class CardSecret implements Serializable {
     @ExcelField(order = 2, columnName = "面额")
     private BigDecimal amount;
 
-    @ExcelField(order = 3, columnName = "过期时间", datePattern = "yyyy.m.d h:mm")
+    @ExcelField(order = 3, columnName = "过期时间", datePattern = "yyyy年MM月dd日")
     private Date expiredDate;
 
     @ExcelField(order = 5, columnName = "使用情况", convertType = UsedTypeConverter.class)
     private Boolean used;
-
-    @ExcelField(order = 6, columnName = "公式")
-    private Integer formula;
 
     public CardSecret(Integer cardType, String secret, BigDecimal amount, boolean used) {
         this.cardType = cardType;

@@ -69,6 +69,10 @@ public class CardSecret {
 
     @ExcelField(order = 3, columnName = "过期时间", datePattern = "yyyy年MM月dd日")
     private Date expiredDate;
+    
+    // 可跳过索引为 4 的列
+    @ExcelField(order = 5, columnName = "使用情况", convertType = UsedTypeConverter.class)
+    private Boolean used;
 
     // getter setter 省略
 }
@@ -98,10 +102,10 @@ public class CardTypeConverter implements Converter<Integer> {
 ```java
 ExcelPlus excelPlus = new ExcelPlus();
 List<CardSecret> cardSecrets = new ArrayList<>();
-cardSecrets.add(new CardSecret(1, "vlfdzepjmlz2y43z7er4", new BigDecimal("20")));
-cardSecrets.add(new CardSecret(2, "rasefq2rzotsmx526z6g", new BigDecimal("10")));
-cardSecrets.add(new CardSecret(2, "2ru44qut6neykb2380wt", new BigDecimal("50")));
-cardSecrets.add(new CardSecret(1, "srcb4c9fdqzuykd6q4zl", new BigDecimal("15")));
+cardSecrets.add(new CardSecret(1, "vlfdzepjmlz2y43z7er4", new BigDecimal("20"), false));
+cardSecrets.add(new CardSecret(2, "rasefq2rzotsmx526z6g", new BigDecimal("10"), false));
+cardSecrets.add(new CardSecret(2, "2ru44qut6neykb2380wt", new BigDecimal("50"), true));
+cardSecrets.add(new CardSecret(1, "srcb4c9fdqzuykd6q4zl", new BigDecimal("15"), false));
 
 excelPlus.export(cardSecrets).writeAsFile(new File("卡密列表.xlsx"));
 ```

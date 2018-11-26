@@ -1,11 +1,10 @@
 package io.github.biezhi.excel.plus;
 
-import io.github.biezhi.excel.plus.enums.ParseType;
 import io.github.biezhi.excel.plus.model.CardSecret;
-import io.github.biezhi.excel.plus.reader.Reader;
 
 import java.io.File;
-import java.text.DecimalFormat;
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -18,33 +17,14 @@ import java.util.List;
 public class Examples {
 
     public static void main(String[] args) throws Exception {
+        ExcelPlus excelPlus = new ExcelPlus();
+        List<CardSecret> cardSecrets = new ArrayList<>();
+        cardSecrets.add(new CardSecret(1, "vlfdzepjmlz2y43z7er4", new BigDecimal("20"), false));
+        cardSecrets.add(new CardSecret(2, "rasefq2rzotsmx526z6g", new BigDecimal("10"), false));
+        cardSecrets.add(new CardSecret(2, "2ru44qut6neykb2380wt", new BigDecimal("50"), true));
+        cardSecrets.add(new CardSecret(1, "srcb4c9fdqzuykd6q4zl", new BigDecimal("15"), false));
 
-//        long start = System.currentTimeMillis();
-//
-//        ExcelPlus excelPlus = new ExcelPlus();
-//
-//        Reader reader = Reader.create()
-//                .parseType(ParseType.SAX)
-//                .startRowIndex(1)
-//                .sheetIndex(0)
-//                .excelFile(new File("/Users/biezhi/workspace/projects/java/excel-plus/返现明细列表示例模板.xls"));
-//
-//        List<Test08> test07List = excelPlus.read(Test08.class, reader).asList();
-//        System.out.println(test07List);
-//
-////        reader = Reader.create()
-////                .parseType(ParseType.SAX)
-////                .startRowIndex(2)
-////                .sheetIndex(0)
-////                .excelFile(new File("/Users/biezhi/workspace/projects/java/excel-plus/src/test/resources/卡密列表.xlsx"));
-////
-////        List<CardSecret> stations = excelPlus.read(CardSecret.class, reader).asList();
-//
-////        System.out.println(stations.size());
-////        System.out.println(stations);
-//        System.out.println((System.currentTimeMillis() - start) + "ms");
-
-        System.out.println(new DecimalFormat("0.00").format(123.4544));
+        excelPlus.export(cardSecrets).writeAsFile(new File("卡密列表.xlsx"));
     }
 
 }
