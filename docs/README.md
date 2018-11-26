@@ -114,9 +114,8 @@ excelPlus.export(cardSecrets).writeAsFile(new File("卡密列表.xlsx"));
 下面这个例子是从Excel 中读取数据到 Java List 容器，如果你想存储在 Set 里我相信你可以做到。
 
 ```java
-List<CardSecret> cardList = excelPlus.read(
-                                new File("卡密列表.xls"), 
-                                CardSecret.class).asList();
+Reader reader = Reader.create().excelFile(new File("卡密列表.xlsx"));
+List<CardSecret> cardList = excelPlus.read(CardSecret.class, reader).asList();
 ```
 
 没错，就是这么简单！如果有更加复杂或自定义的需求可以看下面的进阶使用。
@@ -128,9 +127,9 @@ List<CardSecret> cardList = excelPlus.read(
 有时候我们需要对读取的行数据做一下过滤，这时候就可以使用 `filter` 函数来筛选出合适的数据项。
 
 ```java
-List<CardSecret> readList = excelPlus.read(new File("卡密列表.xls"), CardSecret.class)
-                                     .filter(cardSecret -> !cardSecret.getSecret().isEmpty())
-                                     .asList();
+excelPlus.read(CardSecret.class, reader)
+         .filter(cardSecret -> !cardSecret.getSecret().isEmpty())
+         .asList();
 ```
 
 ## 读取校验
@@ -140,19 +139,18 @@ List<CardSecret> readList = excelPlus.read(new File("卡密列表.xls"), CardSec
 实际工作中你可能将它们交由前端处理。
 
 ```java
-ExcelResult<CardSecret> result = excelPlus
-                        .read(new File("卡密列表.xls"), CardSecret.class)
-                        .valid(cardSecret -> {
-                            if (cardSecret.getAmount().doubleValue() < 20) {
-                                return ValidRow.fail("最小金额为20");
-                            }
-                            return ValidRow.ok();
-                        }).asResult();
+ReaderResult<CardSecret> result = excelPlus.read(new File("卡密列表.xls"), CardSecret.class)
+         .valid((index, cardSecret) -> {
+            if(!cardSecret.getUsed()){
+                return ValidRow.ok();
+            }
+            return ValidRow.fail("已经被使用");
+         });
 
 if (!result.isValid()) {
     result.errors().forEach(System.out::println);
 } else {
-    System.out.println(result.rows().size());
+    System.out.println(result.asList().size());
 }
 ```
 
@@ -165,8 +163,11 @@ if (!result.isValid()) {
 如果你对样式的操作不熟悉可以参考 POI 的列设置[文档](https://poi.apache.org/spreadsheet/quick-guide.html#Creating+Date+Cells)。
 
 ```java
+// 构建数据
 List<CardSecret> cardSecrets = this.buildCardSecrets();
-excelPlus.export(Exporter.create(cardSecrets).headerStyle(workbook -> {
+
+Exporter<CardSecret> exporter = Exporter.create(cardSecrets);
+exporter.headerStyle(workbook -> {
     CellStyle headerStyle = workbook.createCellStyle();
     headerStyle.setAlignment(HorizontalAlignment.LEFT);
 
@@ -178,7 +179,10 @@ excelPlus.export(Exporter.create(cardSecrets).headerStyle(workbook -> {
     headerFont.setBold(true);
     headerStyle.setFont(headerFont);
     return headerStyle;
-})).writeAsFile(new File("卡密列表.xls"));
+});
+
+excelPlus.export(exporter)
+                .writeAsFile(new File("卡密列表.xlsx"));
 ```
 
 ## 浏览器下载
@@ -186,7 +190,8 @@ excelPlus.export(Exporter.create(cardSecrets).headerStyle(workbook -> {
 为了方便我们将数据库查询的数据直接输出到浏览器弹出下载，`excel-plus` 也做了一点 _手脚_ 让你一行代码就可以搞定。
 
 ```java
-excelPlus.export(data).writeAsResponse(ResponseWrapper.create(servletResponse, "xxx表格.xls"));
+excelPlus.export(exporter)
+         .writeAsResponse(ResponseWrapper.create(servletResponse, "xxx表格.xls"))
 ```
 
 只需要将 `HttpServletResponse` 对象传入，并输入导出的文件名称，其他的都见鬼去吧。
@@ -209,22 +214,22 @@ excelPlus.export(Exporter.create(cardSecrets).byTemplate("tpl.xls")).writeAsFile
 
 - `ExcelPlus`: 用于操作读取或导出 Excel 文档的类
 - `Converter`: 数据类型转换的顶层接口
-- `ExcelResult`: 当校验数据时候用于存储返回的错误消息和 `List` 数据
+- `ReaderResult`: 存储读取到的列表，包含校验不通过的消息
 - `Exporter`: 用于存储导出 Excel 文档时的配置，如样式、模板位置等
 
 ## 注解使用
 
 该项目中有 4 个注解，分别是 `ExcelField`、`ExcelSheet`、`ReadField`、`WriteField`。
-正常情况下你只会用到第一个注解，下面先来解释一下 `@ExcelField`。
+正常情况下你只会用到第一个注解，下面解释一下 `@ExcelField`。
 
 <b>@ExcelField 注解</b>
 
 | 选项        | 默认值               | 描述                                                               |
 |-------------|----------------------|--------------------------------------------------------------------|
-| order       | -1                   | 用于标识 Excel 中的列索引，从0开始，该选项适用于读取或写入Excel    |
-| columnName  | 必选                 | 导出Excel时的列名称，如：状态、姓名、手机号                        |
-| datePattern | 空                   | 日期格式化的pattern，对 Date、LocalDate、LocalDateTime 生效        |
-| convertType | EmptyConverter.class | 数据类型转换的类Class，实现自Converter接口，实现类需有无参构造函数 |
+| `order`       | -1                   | 用于标识 Excel 中的列索引，从 0 开始，该选项适用于读取或写入 Excel    |
+| `columnName`  | 必选                 | 导出Excel时的列名称，如：状态、姓名、手机号                        |
+| `datePattern` | 空                   | 日期格式化的 `pattern`，对 `Date`、`LocalDate`、`LocalDateTime` 生效        |
+| `convertType` | `EmptyConverter.class` | 数据类型转换的类 Class，实现自 Converter 接口，实现类需有无参构造函数 |
 
 > `@ReadField` 和 `@WriteField` 是针对读取和写入的顺序不一致、日期格式不一致时的覆盖型注解，一般用不到。
 
