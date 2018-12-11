@@ -46,7 +46,7 @@ public class CSVHandler<T> implements ExcelHandler {
     @Override
     public List<Pair<Integer, T>> parse() throws ExcelException {
         List<Pair<Integer, T>> list = new ArrayList<>();
-        try (InputStream in = new FileInputStream(reader.getExcelFile())) {
+        try (InputStream in = reader.getExcelFile() != null ? new FileInputStream(reader.getExcelFile()) : reader.getInputStream()) {
             CSV          csv      = new CSV(true, ',', in);
             List<String> colNames = null;
             if (csv.hasNext()) colNames = new ArrayList<>(csv.next());

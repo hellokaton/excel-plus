@@ -40,10 +40,7 @@ import org.xml.sax.helpers.XMLReaderFactory;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-
-import static io.github.biezhi.excel.plus.utils.ExcelUtils.isNumber;
 
 /**
  * Excel 2007 Parser handle
@@ -69,6 +66,7 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
 
     private int     curRow = 0;
     private int     curCol = 0;
+    private int     endCTag = 0;
     private boolean isTElement;
     private short   formatIndex;
     private String  formatString;
@@ -87,7 +85,7 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
      * Defines the maximum number of cells in a row of the document,
      * used to fill in the last row of cells that may be missing
      */
-    private String maxRef = null;
+    private int maxColIndex = -1;
 
     public Excel2007Handler(Class<T> type, Reader reader) {
         this.type = type;
@@ -96,8 +94,13 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
 
     @Override
     public List<Pair<Integer, T>> parse() {
+        OPCPackage pkg;
         try {
-            OPCPackage pkg        = OPCPackage.open(reader.getExcelFile());
+            if(reader.getExcelFile() != null){
+                pkg = OPCPackage.open(reader.getExcelFile());
+            } else {
+                pkg = OPCPackage.open(reader.getInputStream());
+            }
             XSSFReader xssfReader = new XSSFReader(pkg);
             stylesTable = xssfReader.getStylesTable();
             SharedStringsTable    sst    = xssfReader.getSharedStringsTable();
@@ -179,7 +182,10 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
 
     @Override
     public void startElement(String uri, String localName, String name, Attributes attributes) {
-        // c => cell
+        if ("dimension".equals(name)){
+            String dimension = attributes.getValue("ref");//有效范围的坐标，如：A1:G15
+            maxColIndex = convertRowIdToInt(dimension.substring(dimension.indexOf(":")+1));
+        }
         if ("c".equals(name)) {
             // previous cell position
             if (preRef == null) {
@@ -192,7 +198,9 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
             // set cell type
             this.setNextDataType(attributes);
         }
-
+        if("row".equals(name)) {
+            curRow = Integer.parseInt(attributes.getValue("r"));
+        }
         // when the element is t
         isTElement = "t".equals(name);
         lastContents = "";
@@ -223,7 +231,7 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
             formatIndex = style.getDataFormat();
             formatString = style.getDataFormatString();
 
-            if ("m/d/yy".equals(formatString)) {
+            if ("m/d/yy".equals(formatString) || "m/d/yy h:mm".equals(formatString)) {
                 nextDataType = CellDataType.DATE;
                 formatString = "yyyy-MM-dd hh:mm:ss.SSS";
             }
@@ -249,7 +257,7 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
                 thisStr = "\"ERROR:" + value + '"';
                 break;
             case FORMULA:
-                thisStr = '"' + value + '"';
+                thisStr = value;
                 break;
             case INLINESTR:
                 XSSFRichTextString rtsi = new XSSFRichTextString(value);
@@ -288,47 +296,63 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
         if (isTElement) {
             // Add the contents of the cell to rows, before removing the whitespace before and after the string
             String value = lastContents.trim();
+            try {
+                int idx = Integer.parseInt(value);
+                value = new XSSFRichTextString(sst.getEntryAt(idx)).toString();
+            } catch (NumberFormatException ex) {
+
+            }
             rows.add(curCol, value);
             curCol++;
             isTElement = false;
         } else if ("v".equals(name)) {
-            // v => The value of the cell, if the cell is a string,
-            // the value of the v tag is the index of the string in the SST
-            String value = this.getDataValue(lastContents.trim());
-            // Complement empty cells between cells
-            if (!ref.equals(preRef)) {
-                int len = countNullCell(ref, preRef);
-                for (int i = 0; i < len; i++) {
-                    rows.add(curCol, value);
+            //SAX解析出来的xml 有两种空单元，第一种，直接xml中没有跳过了，第二种c标签中没有v标签，此处处理第一种情况
+            // first column
+            if (ref.equals(preRef)) {
+                // Complementing cells that may be missing at the start of a row
+                int currColumn = convertRowIdToInt(ref);
+                for(int i=0;i< currColumn-1;i++){//1 means column A
+                    rows.add(curCol, "");
+                    curCol++;
+                }
+            }else{
+                // Complement empty cells between cells
+                int gap = convertRowIdToInt(ref) - convertRowIdToInt(preRef);
+                for(int i=0;i< gap -1;i++){
+                    rows.add(curCol, "");
                     curCol++;
                 }
             }
+            String value = this.getDataValue(lastContents.trim());
             rows.add(curCol, value);
             curCol++;
+        } else if("c".equals(name)){
+            endCTag ++;//c标签（标签对）的个数
+            //SAX解析出来的xml 有两种空单元，第一种，直接xml中没有跳过了，第二种c标签中没有v标签，此处处理第二种情况
+            int gap = endCTag - curCol;//比较c标签对的个数和v值得个数
+            for(int i=0;i < gap;i++){
+                rows.add(curCol, "");
+                curCol++;
+            }
         } else {
             // If the tag name is row , this indicates that the end of the line has been reached and the method optRows() is called
             if (name.equals("row")) {
-                // The default first row header, with the maximum number of cells in the row
-                if (curRow == 0) {
-                    maxRef = ref;
-                }
                 // Complementing cells that may be missing at the end of a row
-                if (maxRef != null) {
-                    int len = countNullCell(maxRef, ref);
-                    for (int i = 0; i <= len; i++) {
-                        rows.add(curCol, "");
-                        curCol++;
-                    }
+                int lastColIndex = convertRowIdToInt(preRef);
+                for(int i = 0; i< maxColIndex - lastColIndex; i++){
+                    rows.add(curCol, "");
+                    curCol++;
                 }
-                if (curRow >= reader.getStartRowIndex() && rows.stream().anyMatch(ExcelUtils::isNotEmpty)) {
+                //curRow 是Excel中的行号，startRowIndex是索引，所以对比的时候索引 + 1
+                if (curRow >= (reader.getStartRowIndex()+1) && rows.stream().anyMatch(ExcelUtils::isNotEmpty)) {
                     Pair<Integer, List<String>> pair = new Pair<>();
                     pair.setK(curRow);
                     pair.setV(new ArrayList<>(rows));
                     data.add(pair);
                 }
                 rows.clear();
-                curRow++;
                 curCol = 0;
+                endCTag = 0;
                 preRef = null;
                 ref = null;
             }
@@ -339,43 +363,38 @@ public class Excel2007Handler<T> extends DefaultHandler implements ExcelHandler 
         return data;
     }
 
-    /**
-     * Calculate the number of cells between two cells (same row)
-     */
-    public int countNullCell(String ref, String preRef) {
-        // Excel 2007 maximum number of rows is 1048576, the maximum number of columns is 16384,
-        // the last column is XFD
-        String xfd   = ref.replaceAll("\\d+", "");
-        String xfd_1 = null == preRef ? "" : preRef.replaceAll("\\d+", "");
-
-        xfd = fillChar(xfd);
-        xfd_1 = fillChar(xfd_1);
-
-        char[] letter   = xfd.toCharArray();
-        char[] letter_1 = xfd_1.toCharArray();
-        int    res      = (letter[0] - letter_1[0]) * 26 * 26 + (letter[1] - letter_1[1]) * 26 + (letter[2] - letter_1[2]);
-        return res - 1;
-    }
-
-    /**
-     * Fill String
-     */
-    private String fillChar(String str) {
-        int len_1 = str.length();
-        if (len_1 < 3) {
-            StringBuilder strBuilder = new StringBuilder(str);
-            for (int i = 0; i < (3 - len_1); i++) {
-                strBuilder.insert(0, '@');
-            }
-            str = strBuilder.toString();
-        }
-        return str;
-    }
 
     @Override
     public void characters(char[] ch, int start, int length) {
         // Get the value of the cell content
         lastContents += new String(ch, start, length);
+    }
+
+    private int convertRowIdToInt(String rowId) {
+        int firstDigit = -1;
+        for (int c = 0; c < rowId.length(); ++c) {
+            if (Character.isDigit(rowId.charAt(c))) {
+                firstDigit = c;
+                break;
+            }
+        }
+        //AB7-->AB
+        //AB是列号, 7是行号
+        String newRowId = rowId.substring(0, firstDigit);
+        int num = 0;
+        int result = 0;
+        int length = newRowId.length();
+        for (int i = 0; i < length; i++) {
+            //先取最低位，B
+            char ch = newRowId.charAt(length - i - 1);
+            //B表示的十进制2，ascii码相减，以A的ascii码为基准，A表示1，B表示2
+            num = (int) (ch - 'A' + 1);
+            //列号转换相当于26进制数转10进制
+            num *= Math.pow(26, i);
+            result += num;
+        }
+        return result;
+
     }
 
 }

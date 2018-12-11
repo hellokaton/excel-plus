@@ -11,4 +11,5 @@ public class CardTypeConverter implements Converter<Integer> {
     public Integer read(String value) {
         return value.equals("联通") ? 1 : 2;
     }
+
 }
