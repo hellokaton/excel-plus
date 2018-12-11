@@ -1,17 +1,16 @@
 package io.github.biezhi.excel.plus;
 
+import io.github.biezhi.excel.plus.enums.ExcelType;
 import io.github.biezhi.excel.plus.enums.ParseType;
 import io.github.biezhi.excel.plus.exception.ExcelException;
-import io.github.biezhi.excel.plus.exception.ParseException;
 import io.github.biezhi.excel.plus.model.CardSecret;
 import io.github.biezhi.excel.plus.reader.Reader;
 import io.github.biezhi.excel.plus.writer.Exporter;
 import io.github.biezhi.excel.plus.writer.ResponseWrapper;
 import org.apache.poi.hssf.util.HSSFColor;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.FillPatternType;
-import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -21,7 +20,11 @@ import java.math.BigDecimal;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -142,6 +145,49 @@ public class ExcelPlusTest {
         excelPlus.export(
                 Exporter.create(cardSecrets).byTemplate("tpl.xls").startRow(2)
         ).writeAsFile(new File("template_rows.xls"));
+    }
+
+    @Test
+    public void testExportBySpecials() throws ExcelException {
+        List<CardSecret> cardSecrets = this.buildCardSecrets();
+
+        Map<Predicate<String>, Function<Workbook, CellStyle>> specialColumn = new ConcurrentHashMap<>(3);
+        specialColumn.put(var -> var.equals("vlfdzepjmlz2y43z7er4"), webHook -> {
+            XSSFCellStyle cellStyle = (XSSFCellStyle) webHook.createCellStyle();
+            cellStyle.setAlignment(HorizontalAlignment.LEFT);
+            cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+            cellStyle.setWrapText(true);
+            XSSFColor xssfColor = new XSSFColor();
+            xssfColor.setRGB(new byte[]{(byte) 252, (byte) 228, (byte) 236});
+            cellStyle.setFillForegroundColor(xssfColor);
+            cellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+            Font font = webHook.createFont();
+            font.setFontName("Arial");
+            font.setFontHeightInPoints((short) 12);
+            cellStyle.setFont(font);
+            return cellStyle;
+        });
+        specialColumn.put(var -> var.equals("rasefq2rzotsmx526z6g"), webHook -> {
+            XSSFCellStyle cellStyle = (XSSFCellStyle) webHook.createCellStyle();
+            cellStyle.setAlignment(HorizontalAlignment.LEFT);
+            cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+            cellStyle.setWrapText(true);
+            XSSFColor xssfColor = new XSSFColor();
+            xssfColor.setRGB(new byte[]{(byte) 255, (byte) 235, (byte) 238});
+            cellStyle.setFillForegroundColor(xssfColor);
+            cellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+            Font font = webHook.createFont();
+            font.setFontName("Arial");
+            font.setFontHeightInPoints((short) 13);
+            cellStyle.setFont(font);
+            return cellStyle;
+        });
+
+        Exporter<CardSecret> exporter = Exporter.create(cardSecrets)
+                .sheetName("卡密列表第一季数据").specialColumn(specialColumn);
+        exporter.setExcelType(ExcelType.XLSX);
+
+        excelPlus.export(exporter).writeAsFile(new File("export.xlsx"));
     }
 
     //    @Test

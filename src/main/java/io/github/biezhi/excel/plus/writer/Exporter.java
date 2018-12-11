@@ -23,7 +23,10 @@ import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * Excel exporter
@@ -45,6 +48,7 @@ public class Exporter<T> {
     private Function<Workbook, CellStyle> titleStyle;
     private Function<Workbook, CellStyle> headerStyle;
     private Function<Workbook, CellStyle> columnStyle;
+    private Map<Predicate<String>,Function<Workbook, CellStyle>> specialColumn = new ConcurrentHashMap<>(16);
 
     public static <T> Exporter<T> create(Collection<T> data) {
         Exporter<T> exporter = new Exporter<>();
@@ -77,6 +81,11 @@ public class Exporter<T> {
         return this;
     }
 
+    public Exporter<T> specialColumn(Map<Predicate<String>,Function<Workbook, CellStyle>> specialColumn) {
+        this.specialColumn.putAll(specialColumn);
+        return this;
+    }
+
     public Exporter<T> byTemplate(String templatePath) {
         this.templatePath = templatePath;
         return this;
@@ -101,6 +110,10 @@ public class Exporter<T> {
 
     public Function<Workbook, CellStyle> getColumnStyle() {
         return columnStyle;
+    }
+
+    public Map<Predicate<String>, Function<Workbook, CellStyle>> getSpecialColumn() {
+        return specialColumn;
     }
 
     public String getTemplatePath() {
