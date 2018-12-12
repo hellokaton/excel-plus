@@ -16,7 +16,7 @@ Easier to read and generate an excel file, supports 2003 and 2007.
 - Support `xls`、`xlsx`、`csv`
 - Support export by template
 - Support custom column style
-- High performance, it takes only 15 seconds to write `1,000,000` lines
+- High performance, it takes only 30 seconds to write `1,000,000` lines
 
 # Usage
 

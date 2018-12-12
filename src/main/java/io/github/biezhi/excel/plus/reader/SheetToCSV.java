@@ -1,22 +1,24 @@
 /**
- *  Copyright (c) 2018, biezhi (biezhi.me@gmail.com)
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *  http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Copyright (c) 2018, biezhi (biezhi.me@gmail.com)
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package io.github.biezhi.excel.plus.reader;
 
 import io.github.biezhi.excel.plus.annotation.ExcelColumn;
-import io.github.biezhi.excel.plus.conveter.*;
+import io.github.biezhi.excel.plus.conveter.Converter;
+import io.github.biezhi.excel.plus.conveter.ConverterCache;
+import io.github.biezhi.excel.plus.conveter.NullConverter;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellReference;
@@ -24,10 +26,6 @@ import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler;
 import org.apache.poi.xssf.usermodel.XSSFComment;
 
 import java.lang.reflect.Field;
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -123,7 +121,12 @@ public class SheetToCSV<T> implements XSSFSheetXMLHandler.SheetContentsHandler {
             if (null != converter) {
                 field.set(row, converter.stringToR(value));
             } else {
-                converter = ConverterCache.computeConvert(field);
+                ExcelColumn column = field.getAnnotation(ExcelColumn.class);
+                if (NullConverter.class.equals(column.converter())) {
+                    converter = ConverterCache.computeConvert(field);
+                } else {
+                    converter = column.converter().newInstance();
+                }
                 if (null != converter) {
                     fieldConverterMap.put(field, converter);
                     field.set(row, converter.stringToR(value));
