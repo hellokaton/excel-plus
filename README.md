@@ -32,15 +32,20 @@ snapshot version
 **Read excel as List**
 
 ```java
-
+ExcelPlus excelPlus = new ExcelPlus();
+List<Member> members = excelPlus.read()
+                  .from(new File("members.xlsx"))
+                  .asList(Member.class);
 ```
 
-**Export as file**
+**Write excel as file**
 
 ```java
 ExcelPlus excelPlus = new ExcelPlus();
-List<Order> orders = queryData();
-excelPlus.exportor(orders).writeAsFile(new File("order-list.xls"));
+excelPlus.write()
+         .withRows(books)
+         .headerTitle("书籍列表 V1")
+         .to(new File("book.xlsx"));
 ```
 
 **Browser download**
@@ -49,22 +54,9 @@ excelPlus.exportor(orders).writeAsFile(new File("order-list.xls"));
 ExcelPlus excelPlus = new ExcelPlus();
 List<Order> orders = queryData();
 
-excelPlus.exportor(orders)
-         .writeAsResponse(ResponseWrapper.create(HttpServletResponse, "order-list.xls"));
-```
-
-**Read as file**
-
-```java
-ExcelPlus excelPlus = new ExcelPlus();
-
-Reader reader = Reader.create()
-                .parseType(ParseType.SAX)
-                .startRowIndex(2)
-                .sheetIndex(0)
-                .excelFile(new File("orders.xlsx"));
-
-List<Order> orders = excelPlus.read(Order.class, reader).asList();
+excelPlus.write()
+         .withRows(orders)
+         .to(ResponseWrapper.create(HttpServletResponse, "order-list.xls"));
 ```
 
 # Examples
