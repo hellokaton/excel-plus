@@ -1,17 +1,17 @@
 /**
- *  Copyright (c) 2018, biezhi (biezhi.me@gmail.com)
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *  http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Copyright (c) 2018, biezhi (biezhi.me@gmail.com)
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package io.github.biezhi.excel.plus.writer;
 
@@ -118,9 +118,23 @@ public abstract class ExcelWriter {
         }
     }
 
+
+    protected void writeHeader(CellStyle cellStyle, Sheet sheet, String title, int maxColIndex) {
+        Row titleRow = sheet.createRow(0);
+        titleRow.setHeightInPoints(50);
+        for (int i = 0; i <= maxColIndex; i++) {
+            Cell cell = titleRow.createCell(i);
+            if (i == 0) {
+                cell.setCellValue(title);
+            }
+            cell.setCellStyle(cellStyle);
+        }
+        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, maxColIndex));
+    }
+
     protected void writeColumnNames(int rowIndex, CellStyle headerStyle, Sheet sheet, List<ExcelColumn> columnList) {
         Row rowHead = sheet.createRow(rowIndex);
-
+        rowHead.setHeightInPoints(30);
         for (ExcelColumn column : columnList) {
             Cell cell = rowHead.createCell(column.index());
             if (null != headerStyle) {
@@ -133,19 +147,6 @@ public abstract class ExcelWriter {
                 sheet.setColumnWidth(column.index(), Constant.DEFAULT_COLUMN_WIDTH);
             }
         }
-
-    }
-
-    protected void writeHeader(CellStyle cellStyle, Sheet sheet, String title, int maxColIndex) {
-        Row titleRow = sheet.createRow(0);
-        for (int i = 0; i <= maxColIndex; i++) {
-            Cell cell = titleRow.createCell(i);
-            if (i == 0) {
-                cell.setCellValue(title);
-            }
-            cell.setCellStyle(cellStyle);
-        }
-        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, maxColIndex));
     }
 
     protected void writeRow(Sheet sheet, Object instance, CellStyle columnStyle,
@@ -159,10 +160,15 @@ public abstract class ExcelWriter {
             while (iterator.hasNext()) {
                 Integer columnIndex = iterator.next();
                 Cell    cell        = row.createCell(columnIndex);
-                cell.setCellStyle(columnStyle);
 
                 Field  field = fieldMap.get(columnIndex);
                 Object value = field.get(instance);
+
+                if (value == null) {
+                    continue;
+                }
+
+                cell.setCellStyle(columnStyle);
 
                 if (field.getType().equals(String.class)) {
                     cell.setCellValue(value.toString());
@@ -170,26 +176,32 @@ public abstract class ExcelWriter {
                 }
 
                 ExcelColumn column = field.getAnnotation(ExcelColumn.class);
-                if (NullConverter.class.equals(column.converter()) && StringUtils.isNotEmpty(column.datePattern())) {
-                    String content = "";
-                    if (Date.class.equals(field.getType())) {
-                        content = new DateConverter(column.datePattern()).toString((Date) value);
-                    } else if (LocalDate.class.equals(field.getType())) {
-                        content = new LocalDateConverter(column.datePattern()).toString((LocalDate) value);
-                    }
-                    if (LocalDateTime.class.equals(field.getType())) {
-                        content = new LocalDateTimeConverter(column.datePattern()).toString((LocalDateTime) value);
-                    }
-                    cell.setCellValue(content);
-                    continue;
-                }
-
-                Converter convert = ConverterCache.getConvert(column.converter());
-                if (null == convert) {
-                    convert = column.converter().newInstance();
+                if (!NullConverter.class.equals(column.converter())) {
+                    Converter convert = column.converter().newInstance();
                     ConverterCache.addConvert(convert);
+                    cell.setCellValue(convert.toString(value));
+                } else {
+                    if (StringUtils.isNotEmpty(column.datePattern())) {
+                        String content = "";
+                        if (Date.class.equals(field.getType())) {
+                            content = new DateConverter(column.datePattern()).toString((Date) value);
+                        } else if (LocalDate.class.equals(field.getType())) {
+                            content = new LocalDateConverter(column.datePattern()).toString((LocalDate) value);
+                        }
+                        if (LocalDateTime.class.equals(field.getType())) {
+                            content = new LocalDateTimeConverter(column.datePattern()).toString((LocalDateTime) value);
+                        }
+                        cell.setCellValue(content);
+                        continue;
+                    } else {
+                        Converter converter = ConverterCache.computeConvert(field);
+                        if (null != converter) {
+                            cell.setCellValue(converter.toString(value));
+                        } else {
+                            cell.setCellValue(value.toString());
+                        }
+                    }
                 }
-                cell.setCellValue(convert.toString(value));
             }
         } catch (Exception e) {
             e.printStackTrace();

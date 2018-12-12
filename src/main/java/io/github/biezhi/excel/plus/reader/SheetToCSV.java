@@ -123,40 +123,7 @@ public class SheetToCSV<T> implements XSSFSheetXMLHandler.SheetContentsHandler {
             if (null != converter) {
                 field.set(row, converter.stringToR(value));
             } else {
-                Class<?> fieldType = field.getType();
-                if (fieldType.equals(String.class)) {
-                    converter = ConverterCache.getConvert(StringConverter.class);
-                } else if (fieldType.equals(int.class) || fieldType.equals(Integer.class)) {
-                    converter = ConverterCache.getConvert(IntConverter.class);
-                } else if (fieldType.equals(long.class) || fieldType.equals(Long.class)) {
-                    converter = ConverterCache.getConvert(LongConverter.class);
-                } else if (fieldType.equals(double.class) || fieldType.equals(Double.class)) {
-                    converter = ConverterCache.getConvert(DoubleConverter.class);
-                } else if (fieldType.equals(float.class) || fieldType.equals(Float.class)) {
-                    converter = ConverterCache.getConvert(FloatConverter.class);
-                } else if (fieldType.equals(short.class) || fieldType.equals(Short.class)) {
-                    converter = ConverterCache.getConvert(ShortConverter.class);
-                } else if (fieldType.equals(byte.class) || fieldType.equals(Byte.class)) {
-                    converter = ConverterCache.getConvert(ByteConverter.class);
-                } else if (fieldType.equals(boolean.class) || fieldType.equals(Boolean.class)) {
-                    converter = ConverterCache.getConvert(BooleanConverter.class);
-                } else if (fieldType.equals(BigDecimal.class)) {
-                    converter = ConverterCache.getConvert(DecimalConverter.class);
-                } else if (fieldType.equals(Date.class)) {
-                    String pattern = field.getAnnotation(ExcelColumn.class).datePattern();
-                    converter = new DateConverter(pattern);
-                } else if (fieldType.equals(LocalDate.class)) {
-                    String pattern = field.getAnnotation(ExcelColumn.class).datePattern();
-                    converter = new LocalDateConverter(pattern);
-                } else if (fieldType.equals(LocalDateTime.class)) {
-                    String pattern = field.getAnnotation(ExcelColumn.class).datePattern();
-                    converter = new LocalDateTimeConverter(pattern);
-                } else {
-                    Class<? extends Converter> customConverter = field.getAnnotation(ExcelColumn.class).converter();
-                    if(!NullConverter.class.equals(customConverter)){
-                        converter = customConverter.newInstance();
-                    }
-                }
+                converter = ConverterCache.computeConvert(field);
                 if (null != converter) {
                     fieldConverterMap.put(field, converter);
                     field.set(row, converter.stringToR(value));

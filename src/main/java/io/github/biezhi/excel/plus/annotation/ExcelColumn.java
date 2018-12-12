@@ -35,7 +35,7 @@ public @interface ExcelColumn {
 
     int index() default -1;
 
-    String datePattern() default "yyyy-MM-dd";
+    String datePattern() default "";
 
     Class<? extends Converter> converter() default NullConverter.class;
 
