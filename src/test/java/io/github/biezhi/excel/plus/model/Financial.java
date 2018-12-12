@@ -6,6 +6,8 @@ import lombok.Data;
 import java.util.Date;
 
 /**
+ * FinancialSample.xlsx Test Model
+ *
  * @author biezhi
  * @date 2018-12-12
  */
@@ -21,10 +23,11 @@ public class Financial {
     @ExcelColumn(index = 4)
     private Double unitsSold;
 
-    @ExcelColumn(index = 5)
-    private String manufacturingPrice;
+    @ExcelColumn(index = 6)
+    private String salePrice;
 
-    @ExcelColumn(index = 12)
+//    @ExcelColumn(index = 12, datePattern = "yyyy/M/d")
+    @ExcelColumn(index = 12, datePattern = "M/d/yyyy")
     private Date date;
 
     @ExcelColumn(index = 14)

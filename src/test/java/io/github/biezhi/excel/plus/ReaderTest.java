@@ -1,6 +1,7 @@
 package io.github.biezhi.excel.plus;
 
 import io.github.biezhi.excel.plus.exception.ReaderException;
+import io.github.biezhi.excel.plus.model.Financial;
 import io.github.biezhi.excel.plus.model.PerformanceTestModel;
 import io.github.biezhi.excel.plus.model.Sample;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +20,14 @@ import java.util.List;
  */
 @Slf4j
 public class ReaderTest extends BaseTest {
+
+    @Test
+    public void testReadBasic() throws ReaderException {
+        List<Financial> financials = excelPlus.read()
+                .from(new File(classPath() + "/FinancialSample.xlsx"))
+                .asList(Financial.class);
+        System.out.println(financials);
+    }
 
     @Test
     public void testRead100wRows() throws Exception {
