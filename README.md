@@ -16,6 +16,7 @@ Easier to read and generate an excel file, supports 2003 and 2007.
 - Support `xls`、`xlsx`、`csv`
 - Support export by template
 - Support custom column style
+- High performance, it takes only 15 seconds to write `1,000,000` lines
 
 # Usage
 
@@ -29,19 +30,24 @@ snapshot version
 </dependency>
 ```
 
-**Read excel as List**
+**Create ExcelPlus**
 
 ```java
 ExcelPlus excelPlus = new ExcelPlus();
-List<Member> members = excelPlus.read()
-                  .from(new File("members.xlsx"))
-                  .asList(Member.class);
+```
+
+**Read excel as List**
+
+```java
+List<Member> members = 
+        excelPlus.read()
+                 .from(new File("members.xlsx"))
+                 .asList(Member.class);
 ```
 
 **Write excel as file**
 
 ```java
-ExcelPlus excelPlus = new ExcelPlus();
 excelPlus.write()
          .withRows(books)
          .headerTitle("书籍列表 V1")
@@ -51,9 +57,6 @@ excelPlus.write()
 **Browser download**
 
 ```java
-ExcelPlus excelPlus = new ExcelPlus();
-List<Order> orders = queryData();
-
 excelPlus.write()
          .withRows(orders)
          .to(ResponseWrapper.create(HttpServletResponse, "order-list.xls"));
