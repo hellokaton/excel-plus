@@ -30,11 +30,11 @@ import java.util.stream.Stream;
  * @author biezhi
  * @date 2018-12-11
  */
-public class Poi2003Reader implements ExcelReader {
+public class ReaderWith2003 implements ExcelReader {
 
     private Workbook workbook;
 
-    public Poi2003Reader(Workbook workbook) {
+    public ReaderWith2003(Workbook workbook) {
         this.workbook = workbook;
     }
 

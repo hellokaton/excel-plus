@@ -1,17 +1,17 @@
 /**
- *  Copyright (c) 2018, biezhi (biezhi.me@gmail.com)
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *  http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Copyright (c) 2018, biezhi (biezhi.me@gmail.com)
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package io.github.biezhi.excel.plus.reader;
 
@@ -43,11 +43,11 @@ import java.util.stream.Stream;
  * @author biezhi
  * @date 2018-12-11
  */
-public class Poi2007Reader implements ExcelReader {
+public class ReaderWith2007 implements ExcelReader {
 
     private Workbook workbook;
 
-    public Poi2007Reader(Workbook workbook) {
+    public ReaderWith2007(Workbook workbook) {
         this.workbook = workbook;
     }
 
@@ -120,21 +120,9 @@ public class Poi2007Reader implements ExcelReader {
             XSSFSheetXMLHandler.SheetContentsHandler sheetHandler,
             InputStream sheetInputStream) throws IOException, SAXException {
 
-        DataFormatter formatter = new DataFormatter() {
-            @Override
-            public String formatRawCellContents(double value, int formatIndex, String formatString, boolean use1904Windowing) {
-                if ("m/d/yy".equals(formatString)) {
-                    formatString = "m/d/yyyy";
-                }
-                if ("m/d/yy h:mm".equals(formatString)) {
-                    formatString = "m/d/yyyy HH:mm";
-                }
-                String contents = super.formatRawCellContents(value, formatIndex, formatString, use1904Windowing);
-                return contents;
-            }
-        };
+        DataFormatter formatter   = new XLSXDataFormatter();
+        InputSource   sheetSource = new InputSource(sheetInputStream);
 
-        InputSource sheetSource = new InputSource(sheetInputStream);
         try {
             XMLReader sheetParser = SAXHelper.newXMLReader();
             ContentHandler handler = new XSSFSheetXMLHandler(

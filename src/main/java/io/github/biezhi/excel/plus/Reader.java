@@ -16,8 +16,8 @@
 package io.github.biezhi.excel.plus;
 
 import io.github.biezhi.excel.plus.exception.ReaderException;
-import io.github.biezhi.excel.plus.reader.Poi2003Reader;
-import io.github.biezhi.excel.plus.reader.Poi2007Reader;
+import io.github.biezhi.excel.plus.reader.ReaderWith2003;
+import io.github.biezhi.excel.plus.reader.ReaderWith2007;
 import io.github.biezhi.excel.plus.utils.ExcelUtils;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 
@@ -76,15 +76,15 @@ public class Reader {
         try {
             if (this.fromFile != null) {
                 if (ExcelUtils.isXLSX(fromFile)) {
-                    return new Poi2007Reader(null).readExcel(this);
+                    return new ReaderWith2007(null).readExcel(this);
                 } else {
-                    return new Poi2003Reader(WorkbookFactory.create(fromFile)).readExcel(this);
+                    return new ReaderWith2003(WorkbookFactory.create(fromFile)).readExcel(this);
                 }
             } else {
                 if (ExcelUtils.isXLSX(fromStream)) {
-                    return new Poi2007Reader(null).readExcel(this);
+                    return new ReaderWith2007(null).readExcel(this);
                 } else {
-                    return new Poi2003Reader(WorkbookFactory.create(fromStream)).readExcel(this);
+                    return new ReaderWith2003(WorkbookFactory.create(fromStream)).readExcel(this);
                 }
             }
         } catch (Exception e) {

@@ -17,8 +17,8 @@ package io.github.biezhi.excel.plus;
 
 import io.github.biezhi.excel.plus.enums.ExcelType;
 import io.github.biezhi.excel.plus.exception.WriterException;
-import io.github.biezhi.excel.plus.writer.Poi2003Writer;
-import io.github.biezhi.excel.plus.writer.Poi2007Writer;
+import io.github.biezhi.excel.plus.writer.WriterWith2003;
+import io.github.biezhi.excel.plus.writer.WriterWith2007;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Workbook;
 
@@ -73,10 +73,10 @@ public class Writer {
 
     private void to(OutputStream outputStream) throws WriterException {
         if (excelType == ExcelType.XLSX) {
-            new Poi2007Writer(outputStream).writeWorkbook(this);
+            new WriterWith2007(outputStream).writeWorkbook(this);
         }
         if (excelType == ExcelType.XLS) {
-            new Poi2003Writer(outputStream).writeWorkbook(this);
+            new WriterWith2003(outputStream).writeWorkbook(this);
         }
     }
 

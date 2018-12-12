@@ -25,9 +25,9 @@ import java.io.OutputStream;
  * @author biezhi
  * @date 2018-12-11
  */
-public class Poi2003Writer extends ExcelWriter {
+public class WriterWith2003 extends ExcelWriter {
 
-    public Poi2003Writer(OutputStream outputStream) {
+    public WriterWith2003(OutputStream outputStream) {
         super(outputStream);
     }
 
