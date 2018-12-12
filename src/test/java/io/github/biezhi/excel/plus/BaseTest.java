@@ -50,4 +50,8 @@ public class BaseTest {
                 .to(new File(testFileName));
     }
 
+    protected String classPath(){
+        return BaseTest.class.getResource("/").getPath();
+    }
+
 }

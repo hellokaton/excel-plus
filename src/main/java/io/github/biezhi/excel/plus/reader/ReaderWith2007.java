@@ -17,6 +17,7 @@ package io.github.biezhi.excel.plus.reader;
 
 import io.github.biezhi.excel.plus.Reader;
 import io.github.biezhi.excel.plus.exception.ReaderException;
+import io.github.biezhi.excel.plus.utils.StringUtils;
 import org.apache.poi.ooxml.util.SAXHelper;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
@@ -90,10 +91,16 @@ public class ReaderWith2007 implements ExcelReader {
         XSSFReader.SheetIterator   iter       = (XSSFReader.SheetIterator) xssfReader.getSheetsData();
         int                        index      = 0;
 
+        boolean bySheetName = StringUtils.isNotEmpty(reader.sheetName());
+
         while (iter.hasNext()) {
             try (InputStream stream = iter.next()) {
                 String sheetName = iter.getSheetName();
-                if (reader.sheetIndex() == index || sheetName.equals(reader.sheetName())) {
+                if (bySheetName && reader.sheetName().equals(sheetName)) {
+                    processSheet(styles, strings, sheetToCSV, stream);
+                    break;
+                }
+                if (!bySheetName && reader.sheetIndex() == index) {
                     processSheet(styles, strings, sheetToCSV, stream);
                     break;
                 }

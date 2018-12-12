@@ -19,6 +19,7 @@ import io.github.biezhi.excel.plus.annotation.ExcelColumn;
 import io.github.biezhi.excel.plus.conveter.Converter;
 import io.github.biezhi.excel.plus.conveter.ConverterCache;
 import io.github.biezhi.excel.plus.conveter.NullConverter;
+import io.github.biezhi.excel.plus.utils.ExcelUtils;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellReference;
@@ -77,15 +78,21 @@ public class SheetToCSV<T> implements XSSFSheetXMLHandler.SheetContentsHandler {
         firstCellOfRow = true;
         currentRow = rowNum;
         currentCol = -1;
+        if (currentRow < startRow) {
+            return;
+        }
         try {
-            row = type.newInstance();
+            row = ExcelUtils.newInstance(type);
         } catch (InstantiationException | IllegalAccessException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 
     @Override
     public void endRow(int rowNum) {
+        if (currentRow < startRow) {
+            return;
+        }
         rowsStream.add(row);
     }
 
