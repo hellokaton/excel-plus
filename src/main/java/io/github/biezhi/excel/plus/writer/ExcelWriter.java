@@ -30,7 +30,6 @@ import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.Comparator.comparingInt;
 
@@ -42,6 +41,11 @@ import static java.util.Comparator.comparingInt;
  */
 @Slf4j
 public abstract class ExcelWriter {
+
+    private int                 rowNum;
+    private Sheet               sheet;
+    private Map<Integer, Field> fieldIndexes;
+    private List<ExcelColumn>   columns;
 
     OutputStream outputStream;
 
@@ -68,9 +72,8 @@ public abstract class ExcelWriter {
      * @throws WriterException
      */
     void writeSheet(Writer writer, Workbook workbook) throws WriterException {
-
         // create sheet
-        Sheet sheet = workbook.createSheet(writer.sheetName());
+        this.sheet = workbook.createSheet(writer.sheetName());
 
         // setting styles
         CellStyle headerStyle = Constant.defaultHeaderStyle(workbook);
@@ -86,51 +89,54 @@ public abstract class ExcelWriter {
             writer.cellStyle().accept(workbook, columnStyle);
         }
 
-        // compute the Filed to be written
-        Collection<?> rows   = writer.rows();
-        Field[]       fields = rows.iterator().next().getClass().getDeclaredFields();
+        if (writer.isRaw()) {
+            writer.sheetConsumer().accept(sheet);
+        } else {
+            // compute the Filed to be written
+            Collection<?> rows   = writer.rows();
+            Field[]       fields = rows.iterator().next().getClass().getDeclaredFields();
 
-        Map<Integer, Field> fieldIndexes = new HashMap<>(fields.length);
+            this.fieldIndexes = new HashMap<>(fields.length);
+            this.columns = new ArrayList<>();
 
-        List<ExcelColumn> columns = new ArrayList<>();
-
-        for (Field field : fields) {
-            ExcelColumn column = field.getAnnotation(ExcelColumn.class);
-            if (null != column) {
-                field.setAccessible(true);
-                fieldIndexes.put(column.index(), field);
-                columns.add(column);
+            for (Field field : fields) {
+                ExcelColumn column = field.getAnnotation(ExcelColumn.class);
+                if (null != column) {
+                    field.setAccessible(true);
+                    fieldIndexes.put(column.index(), field);
+                    columns.add(column);
+                }
             }
-        }
 
-        int colRowIndex = 0;
-        // write title
-        String title = writer.headerTitle();
-        if (StringUtils.isNotEmpty(title)) {
-            Integer maxColIndex = columns.stream()
-                    .map(ExcelColumn::index)
-                    .max(comparingInt(Integer::intValue))
-                    .get();
+            int colRowIndex = 0;
+            // write title
+            String title = writer.headerTitle();
+            if (StringUtils.isNotEmpty(title)) {
+                Integer maxColIndex = columns.stream()
+                        .map(ExcelColumn::index)
+                        .max(comparingInt(Integer::intValue))
+                        .get();
 
-            this.writeHeader(titleStyle, sheet, title, maxColIndex);
-            colRowIndex = 1;
-        }
-
-        AtomicInteger counter = new AtomicInteger(writer.startRow());
-        if (counter.get() == 0) {
-            counter.set(colRowIndex + 1);
-        }
-
-        // write column header
-        this.writeColumnNames(colRowIndex, headerStyle, sheet, columns);
-
-        try {
-            // write rows
-            for (Object row : rows) {
-                this.writeRow(sheet, row, columnStyle, fieldIndexes, counter.getAndIncrement());
+                this.writeHeader(titleStyle, sheet, title, maxColIndex);
+                colRowIndex = 1;
             }
-        } catch (Exception e) {
-            log.error("write row fail", e);
+
+            this.rowNum = writer.startRow();
+            if (this.rowNum == 0) {
+                this.rowNum = colRowIndex + 1;
+            }
+
+            try {
+                // write column header
+                this.writeColumnNames(colRowIndex, headerStyle);
+
+                // write rows
+                for (Object row : rows) {
+                    this.writeRow(row, columnStyle);
+                }
+            } catch (Exception e) {
+                log.error("write row fail", e);
+            }
         }
 
         // write to OutputStream
@@ -155,10 +161,10 @@ public abstract class ExcelWriter {
         sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, maxColIndex));
     }
 
-    private void writeColumnNames(int rowIndex, CellStyle headerStyle, Sheet sheet, List<ExcelColumn> columnList) {
+    private void writeColumnNames(int rowIndex, CellStyle headerStyle) {
         Row rowHead = sheet.createRow(rowIndex);
         rowHead.setHeightInPoints(30);
-        for (ExcelColumn column : columnList) {
+        for (ExcelColumn column : columns) {
             Cell cell = rowHead.createCell(column.index());
             if (null != headerStyle) {
                 cell.setCellStyle(headerStyle);
@@ -172,13 +178,10 @@ public abstract class ExcelWriter {
         }
     }
 
-    private void writeRow(Sheet sheet, Object instance, CellStyle columnStyle,
-                          Map<Integer, Field> fieldMap, int rowNum) throws Exception {
-
-        Row row = sheet.createRow(rowNum);
-
-        for (Integer index : fieldMap.keySet()) {
-            Field field = fieldMap.get(index);
+    private void writeRow(Object instance, CellStyle columnStyle) throws Exception {
+        Row row = sheet.createRow(rowNum++);
+        for (Integer index : fieldIndexes.keySet()) {
+            Field field = fieldIndexes.get(index);
             if (null == field) {
                 continue;
             }

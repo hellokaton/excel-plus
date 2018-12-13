@@ -21,6 +21,7 @@ import io.github.biezhi.excel.plus.utils.StringUtils;
 import io.github.biezhi.excel.plus.writer.WriterWith2003;
 import io.github.biezhi.excel.plus.writer.WriterWith2007;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
 import java.io.File;
@@ -63,6 +64,8 @@ public class Writer {
      */
     private int bufferSize = 100;
 
+    private boolean withRaw;
+
     /**
      * Type of excel written, select XLSX, XLS, CSV
      */
@@ -92,6 +95,8 @@ public class Writer {
      * Custom row column style
      */
     private BiConsumer<Workbook, CellStyle> cellStyle;
+
+    private Consumer<Sheet> sheetConsumer;
 
     public Writer(ExcelType excelType) {
         this.excelType = excelType;
@@ -190,7 +195,7 @@ public class Writer {
      * @param templatePath template file path
      * @return Writer
      */
-    public Writer templatePath(String templatePath) {
+    public Writer withTemplate(String templatePath) {
         this.templatePath = templatePath;
         return this;
     }
@@ -207,6 +212,16 @@ public class Writer {
      */
     public Writer bufferSize(int bufferSize) {
         this.bufferSize = bufferSize;
+        return this;
+    }
+
+    public Writer createRow(Consumer<Sheet> sheetConsumer) {
+        this.sheetConsumer = sheetConsumer;
+        return this;
+    }
+
+    public Writer withRaw() {
+        this.withRaw = true;
         return this;
     }
 
@@ -231,7 +246,7 @@ public class Writer {
      * @throws WriterException
      */
     public void to(OutputStream outputStream) throws WriterException {
-        if (null == rows || rows.isEmpty()) {
+        if (!withRaw && (null == rows || rows.isEmpty())) {
             throw new WriterException("write rows cannot be empty, please check it");
         }
         if (excelType == ExcelType.XLSX) {
@@ -276,6 +291,14 @@ public class Writer {
 
     public Collection<?> rows() {
         return rows;
+    }
+
+    public Consumer<Sheet> sheetConsumer() {
+        return sheetConsumer;
+    }
+
+    public boolean isRaw() {
+        return withRaw;
     }
 
 }
