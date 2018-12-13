@@ -47,6 +47,7 @@ public abstract class ExcelWriter {
     private Map<Integer, Field> fieldIndexes;
     private List<ExcelColumn>   columns;
 
+    Workbook workbook;
     OutputStream outputStream;
 
     ExcelWriter(OutputStream outputStream) {
@@ -55,8 +56,6 @@ public abstract class ExcelWriter {
 
     ExcelWriter() {
     }
-
-    public abstract void writeSheet(Writer writer) throws WriterException;
 
     /**
      * Write data to Excel Sheet
@@ -68,10 +67,9 @@ public abstract class ExcelWriter {
      * 5. write to OutputStream
      *
      * @param writer   excel-plus writer
-     * @param workbook workbook
      * @throws WriterException
      */
-    void writeSheet(Writer writer, Workbook workbook) throws WriterException {
+    void writeSheet(Writer writer) throws WriterException {
         // create sheet
         this.sheet = workbook.createSheet(writer.sheetName());
 

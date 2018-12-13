@@ -27,7 +27,6 @@
 - 可配置列顺序
 - 支持按模板导出
 - 支持过滤行数据
-- 支持校验行数据
 - 支持数据类型转换
 - 支持自定义列样式
 - 支持一行代码下载 Excel 文件
@@ -128,7 +127,7 @@ List<Sample> samples = Reader.create()
 
 大多数情况下我们是无需设置样式的，在 `excel-plus` 中提供了设置表头和列的样式 API。
 在某些需求下可能需要设置字体大小、颜色、居中等，你可以像下面的代码这样干。
-如果你对样式的操作不熟悉可以参考 POI 的列设置[文档](https://poi.apache.org/spreadsheet/quick-guide.html#Creating+Date+Cells)。
+如果你对样式的操作不熟悉可以参考 POI 的列设置 [文档](https://poi.apache.org/spreadsheet/quick-guide.html#Creating+Date+Cells)。
 
 ```java
 Writer.create()
@@ -218,10 +217,9 @@ Writer.create()
 
 ## 注解使用
 
-该项目中有 4 个注解，分别是 `ExcelField`、`ExcelSheet`、`ReadField`、`WriteField`。
-正常情况下你只会用到第一个注解，下面解释一下 `@ExcelField`。
+通过使用注解来配置如何读取、写入 Excel 文档。
 
-<b>@ExcelField 注解</b>
+<b>@ExcelColumn 注解</b>
 
 | 选项        | 默认值               | 描述                                                               |
 |-------------|----------------------|--------------------------------------------------------------------|
