@@ -15,6 +15,8 @@
  */
 package io.github.biezhi.excel.plus.conveter;
 
+import io.github.biezhi.excel.plus.utils.StringUtils;
+
 /**
  * @author biezhi
  * @date 2018-12-12
@@ -24,6 +26,9 @@ public class ShortConverter extends NumberConverter implements Converter<String,
     @Override
     public Short stringToR(String value) {
         value = super.replaceComma(value);
+        if (StringUtils.isEmpty(value)) {
+            return null;
+        }
         return Short.valueOf(value);
     }
 

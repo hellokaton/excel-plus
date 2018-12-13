@@ -30,4 +30,13 @@ public class Sample {
     @ExcelColumn(index = 6)
     private BigDecimal amount;
 
+    public Sample() {
+    }
+
+    public Sample(LocalDate date, String location, int proportion) {
+        this.date = date;
+        this.location = location;
+        this.proportion = proportion;
+    }
+
 }

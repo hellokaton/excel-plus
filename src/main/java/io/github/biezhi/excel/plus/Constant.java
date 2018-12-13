@@ -100,8 +100,7 @@ public interface Constant {
         cellStyle.setBorderLeft(BorderStyle.THIN);
         cellStyle.setWrapText(true);
 
-        DataFormat fmt = workbook.createDataFormat();
-        cellStyle.setDataFormat(fmt.getFormat("@"));
+        cellStyle.setDataFormat((short) 0);
 
         Font font = workbook.createFont();
         font.setFontName(DEFAULT_FONT_NAME);

@@ -15,11 +15,8 @@
  */
 package io.github.biezhi.excel.plus.reader;
 
-import io.github.biezhi.excel.plus.annotation.ExcelColumn;
-import io.github.biezhi.excel.plus.conveter.Converter;
-import io.github.biezhi.excel.plus.conveter.ConverterCache;
-import io.github.biezhi.excel.plus.conveter.NullConverter;
 import io.github.biezhi.excel.plus.utils.ExcelUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellReference;
@@ -27,8 +24,6 @@ import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler;
 import org.apache.poi.xssf.usermodel.XSSFComment;
 
 import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.stream.Stream;
 
 /**
@@ -36,7 +31,8 @@ import java.util.stream.Stream;
  * of parsing the Sheet XML, and outputs the contents
  * as a (basic) CSV.
  */
-public class SheetToCSV<T> implements XSSFSheetXMLHandler.SheetContentsHandler {
+@Slf4j
+public class SheetToCSV<T> extends ReaderConverter implements XSSFSheetXMLHandler.SheetContentsHandler {
 
     private boolean firstCellOfRow;
     private int     currentRow = -1;
@@ -47,10 +43,6 @@ public class SheetToCSV<T> implements XSSFSheetXMLHandler.SheetContentsHandler {
     private final Class<T>          type;
     private final int               startRow;
 
-    private Map<Field, Converter<String, ?>> fieldConverterMap;
-
-    private Map<Integer, Field> fieldIndexMap;
-
     private T row;
 
     public SheetToCSV(OPCPackage opcPackage, int startRow, Class<T> type) {
@@ -58,17 +50,12 @@ public class SheetToCSV<T> implements XSSFSheetXMLHandler.SheetContentsHandler {
         this.rowsStream = Stream.builder();
         this.startRow = startRow;
 
-        this.fieldConverterMap = new HashMap<>();
         this.type = type;
 
-        Field[] declaredFields = type.getDeclaredFields();
-        this.fieldIndexMap = new HashMap<>(declaredFields.length);
-
-        for (Field field : declaredFields) {
-            ExcelColumn excelColumn = field.getAnnotation(ExcelColumn.class);
-            if (null != excelColumn) {
-                fieldIndexMap.put(excelColumn.index(), field);
-            }
+        try {
+            this.initFieldConverter(type.getDeclaredFields());
+        } catch (Exception e) {
+            log.error("init field converter fail", e);
         }
     }
 
@@ -114,36 +101,17 @@ public class SheetToCSV<T> implements XSSFSheetXMLHandler.SheetContentsHandler {
         }
 
         currentCol = (int) (new CellReference(cellReference)).getCol();
-        Field field = fieldIndexMap.get(currentCol);
+
+        Field field = fieldIndexes.get(currentCol);
         if (null != field) {
-            this.writeToModel(formattedValue, field);
-        }
-    }
-
-    private void writeToModel(String value, Field field) {
-        try {
-            field.setAccessible(true);
-
-            Converter converter = fieldConverterMap.get(field);
-            if (null != converter) {
-                field.set(row, converter.stringToR(value));
-            } else {
-                ExcelColumn column = field.getAnnotation(ExcelColumn.class);
-                if (NullConverter.class.equals(column.converter())) {
-                    converter = ConverterCache.computeConvert(field);
-                } else {
-                    converter = column.converter().newInstance();
-                }
-                if (null != converter) {
-                    fieldConverterMap.put(field, converter);
-                    field.set(row, converter.stringToR(value));
-                }
+            try {
+                this.writeToModel(formattedValue, field, row);
+            } catch (Exception e) {
+                log.error("write field [%s] value fail", field.getName(), e);
             }
-        } catch (Exception e) {
-            System.out.println(field.getName());
-            e.printStackTrace();
         }
     }
+
 
     public OPCPackage getOpcPackage() {
         return opcPackage;

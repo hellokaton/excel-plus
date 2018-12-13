@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,6 +37,11 @@ public class WriterTest extends BaseTest {
     @Test
     public void testWriteSample() throws WriterException {
         List<Sample> samples = new ArrayList<>();
+        samples.add(new Sample(LocalDate.now(), "hello01", 101));
+        samples.add(new Sample(LocalDate.now(), "hello02", 102));
+        samples.add(new Sample(LocalDate.now(), "hello03", 103));
+        samples.add(new Sample(LocalDate.now(), "hello04", 104));
+        samples.add(new Sample(LocalDate.now(), "hello05", 105));
         excelPlus.write()
                 .headerTitle("一份简单的Excel表格")
                 .withRows(samples)

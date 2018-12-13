@@ -15,6 +15,8 @@
  */
 package io.github.biezhi.excel.plus.conveter;
 
+import io.github.biezhi.excel.plus.utils.StringUtils;
+
 /**
  * @author biezhi
  * @date 2018-12-12
@@ -22,7 +24,7 @@ package io.github.biezhi.excel.plus.conveter;
 public abstract class NumberConverter  {
 
     public String replaceComma(String value) {
-        if (null == value) {
+        if (StringUtils.isEmpty(value)) {
             return null;
         }
         return value.replaceAll(",", "");

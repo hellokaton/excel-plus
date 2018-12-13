@@ -15,6 +15,8 @@
  */
 package io.github.biezhi.excel.plus.conveter;
 
+import io.github.biezhi.excel.plus.utils.StringUtils;
+
 import java.math.BigInteger;
 
 /**
@@ -26,6 +28,9 @@ public class BigIntConverter extends NumberConverter implements Converter<String
     @Override
     public BigInteger stringToR(String value) {
         value = replaceComma(value);
+        if (StringUtils.isEmpty(value)) {
+            return null;
+        }
         return new BigInteger(value);
     }
 
