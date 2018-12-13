@@ -20,6 +20,7 @@ import io.github.biezhi.excel.plus.exception.WriterException;
 import io.github.biezhi.excel.plus.utils.StringUtils;
 import io.github.biezhi.excel.plus.writer.WriterWith2003;
 import io.github.biezhi.excel.plus.writer.WriterWith2007;
+import io.github.biezhi.excel.plus.writer.WriterWithCSV;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -254,6 +255,9 @@ public class Writer {
         }
         if (excelType == ExcelType.XLS) {
             new WriterWith2003(outputStream).writeSheet(this);
+        }
+        if(excelType == ExcelType.CSV){
+            new WriterWithCSV(outputStream).writeSheet(this);
         }
     }
 

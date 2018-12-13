@@ -194,36 +194,39 @@ public abstract class ExcelWriter {
             Cell cell = row.createCell(index);
             cell.setCellStyle(columnStyle);
 
-            if (field.getType().equals(String.class)) {
-                cell.setCellValue(value.toString());
-                continue;
-            }
+            String fieldValue = getFieldValue(value, field);
+            cell.setCellValue(fieldValue);
+        }
+    }
 
-            ExcelColumn column = field.getAnnotation(ExcelColumn.class);
+    String getFieldValue(Object value, Field field) throws Exception {
+        if (field.getType().equals(String.class)) {
+            return value.toString();
+        }
 
-            if (!NullConverter.class.equals(column.converter())) {
-                Converter convert = column.converter().newInstance();
-                ConverterCache.addConvert(convert);
-                cell.setCellValue(convert.toString(value));
+        ExcelColumn column = field.getAnnotation(ExcelColumn.class);
+        if (!NullConverter.class.equals(column.converter())) {
+            Converter convert = column.converter().newInstance();
+            ConverterCache.addConvert(convert);
+            return convert.toString(value);
+        } else {
+            if (StringUtils.isNotEmpty(column.datePattern())) {
+                String content = "";
+                if (Date.class.equals(field.getType())) {
+                    content = new DateConverter(column.datePattern()).toString((Date) value);
+                } else if (LocalDate.class.equals(field.getType())) {
+                    content = new LocalDateConverter(column.datePattern()).toString((LocalDate) value);
+                }
+                if (LocalDateTime.class.equals(field.getType())) {
+                    content = new LocalDateTimeConverter(column.datePattern()).toString((LocalDateTime) value);
+                }
+                return content;
             } else {
-                if (StringUtils.isNotEmpty(column.datePattern())) {
-                    String content = "";
-                    if (Date.class.equals(field.getType())) {
-                        content = new DateConverter(column.datePattern()).toString((Date) value);
-                    } else if (LocalDate.class.equals(field.getType())) {
-                        content = new LocalDateConverter(column.datePattern()).toString((LocalDate) value);
-                    }
-                    if (LocalDateTime.class.equals(field.getType())) {
-                        content = new LocalDateTimeConverter(column.datePattern()).toString((LocalDateTime) value);
-                    }
-                    cell.setCellValue(content);
+                Converter converter = ConverterCache.computeConvert(field);
+                if (null != converter) {
+                    return converter.toString(value);
                 } else {
-                    Converter converter = ConverterCache.computeConvert(field);
-                    if (null != converter) {
-                        cell.setCellValue(converter.toString(value));
-                    } else {
-                        cell.setCellValue(value.toString());
-                    }
+                    return value.toString();
                 }
             }
         }

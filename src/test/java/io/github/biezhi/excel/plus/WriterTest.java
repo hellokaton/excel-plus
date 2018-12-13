@@ -1,5 +1,6 @@
 package io.github.biezhi.excel.plus;
 
+import io.github.biezhi.excel.plus.enums.ExcelType;
 import io.github.biezhi.excel.plus.exception.WriterException;
 import io.github.biezhi.excel.plus.model.PerformanceTestModel;
 import io.github.biezhi.excel.plus.model.Sample;
@@ -13,7 +14,6 @@ import org.junit.Test;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -134,6 +134,17 @@ public class WriterTest extends BaseTest {
                 .headerTitle("一份简单的Excel表格")
                 .withRows(buildData())
                 .to(new FileOutputStream(new File(fileName)));
+
+        deleteTempFile(fileName);
+    }
+
+    @Test
+    public void testWriteByCSV() throws WriterException {
+        String fileName = "write_as_csv.csv";
+
+        excelPlus.write(ExcelType.CSV)
+                .withRows(buildData())
+                .to(new File(fileName));
 
         deleteTempFile(fileName);
     }
