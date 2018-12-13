@@ -34,7 +34,7 @@ public class Excel2003Test extends BaseTest {
                 .withRows(samples)
                 .to(new File(fileName));
 
-        deleteTempFile(fileName);
+//        deleteTempFile(fileName);
     }
 
     @Test
