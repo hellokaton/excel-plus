@@ -29,10 +29,8 @@ import java.io.InputStream;
  * @author biezhi
  * @date 2018-12-11
  */
+@Deprecated
 public final class ExcelPlus {
-
-    public ExcelPlus() {
-    }
 
     public Reader read() {
         return Reader.create();

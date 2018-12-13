@@ -185,10 +185,9 @@ Writer.create()
 
 ## 核心对象
 
-- `ExcelPlus`: 用于操作读取或导出 Excel 文档的类
-- `Converter`: 数据类型转换的顶层接口
-- `ReaderResult`: 存储读取到的列表，包含校验不通过的消息
-- `Exporter`: 用于存储导出 Excel 文档时的配置，如样式、模板位置等
+- `Reader`: 用于读取一份 Excel 文档
+- `Writer`: 用于写入一份 Excel 文档
+- `Converter`: 数据类型转换的顶层接口，处理自定义的读取、写入规则
 
 ## 注解使用
 
@@ -199,16 +198,11 @@ Writer.create()
 
 | 选项        | 默认值               | 描述                                                               |
 |-------------|----------------------|--------------------------------------------------------------------|
-| `order`       | -1                   | 用于标识 Excel 中的列索引，从 0 开始，该选项适用于读取或写入 Excel    |
-| `columnName`  | 必选                 | 导出Excel时的列名称，如：状态、姓名、手机号                        |
-| `datePattern` | 空                   | 日期格式化的 `pattern`，对 `Date`、`LocalDate`、`LocalDateTime` 生效        |
-| `convertType` | `EmptyConverter.class` | 数据类型转换的类 Class，实现自 Converter 接口，实现类需有无参构造函数 |
-
-> `@ReadField` 和 `@WriteField` 是针对读取和写入的顺序不一致、日期格式不一致时的覆盖型注解，一般用不到。
-
-<b>@ExcelSheet 注解</b>
-
-用于标识导出的工作表名称，默认是 `Sheet0`，无特殊需求用不到。
+| `index`       | `-1` | 用于标识 Excel 中的列索引，从 0 开始，该选项适用于读取或写入 Excel    |
+| `title`  | `""` | 导出 Excel 时的列名称，如：状态、姓名、手机号                        |
+| `datePattern` | `""`   | 日期格式化的 `pattern`，对 `Date`、`LocalDate`、`LocalDateTime` 生效        |
+| `converter` | `NullConverter.class` | 数据类型转换的类 Class，实现自 Converter 接口，实现类需提供无参构造函数 |
+| `width` | `-1` | 导出为 Excel 时的列宽度，建议以 `字符数 * 256` 为基准进行设置 |
 
 # 常见问题
 
@@ -221,4 +215,3 @@ Writer.create()
 1. 修复性能问题
 2. 重构部分 API
 3. 简化代码
-

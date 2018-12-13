@@ -106,7 +106,7 @@ public class WriterWithCSV extends ExcelWriter {
             if (null == value) {
                 row[i] = "";
             } else {
-                row[i] = this.getFieldValue(value, sortedFields.get(i));
+                row[i] = this.computeColumnContent(value, sortedFields.get(i));
             }
         }
         return row;

@@ -194,12 +194,12 @@ public abstract class ExcelWriter {
             Cell cell = row.createCell(index);
             cell.setCellStyle(columnStyle);
 
-            String fieldValue = getFieldValue(value, field);
+            String fieldValue = computeColumnContent(value, field);
             cell.setCellValue(fieldValue);
         }
     }
 
-    String getFieldValue(Object value, Field field) throws Exception {
+    String computeColumnContent(Object value, Field field) throws Exception {
         if (field.getType().equals(String.class)) {
             return value.toString();
         }
