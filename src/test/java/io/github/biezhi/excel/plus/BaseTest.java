@@ -19,7 +19,8 @@ import java.util.UUID;
 @Slf4j
 public class BaseTest {
 
-    protected final int    testCount    = 100_0000;
+    protected final int    testCount    = 1_0000;
+//    protected final int    testCount    = 100_0000;
     protected final String testFileName = "test_write.xlsx";
 
     protected ExcelPlus excelPlus = new ExcelPlus();
