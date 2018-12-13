@@ -42,7 +42,7 @@ public class ReaderWith2003 extends ReaderConverter implements ExcelReader {
 
     @Override
     public <T> Stream<T> readExcel(Reader reader) throws ReaderException {
-        Class             type    = reader.getType();
+        Class             type    = reader.modelType();
         Stream.Builder<T> builder = Stream.builder();
         try {
             this.initFieldConverter(type.getDeclaredFields());

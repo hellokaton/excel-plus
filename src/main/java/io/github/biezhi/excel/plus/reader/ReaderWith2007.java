@@ -53,7 +53,7 @@ public class ReaderWith2007 implements ExcelReader {
     }
 
     public <T> Stream<T> readExcel(Reader reader) throws ReaderException {
-        Class<T> type = reader.getType();
+        Class<T> type = reader.modelType();
         try {
             // The package open is instantaneous, as it should be.
             try (OPCPackage p = getPackage(reader)) {
@@ -71,10 +71,10 @@ public class ReaderWith2007 implements ExcelReader {
     }
 
     private OPCPackage getPackage(Reader reader) throws Exception {
-        if (reader.getFromFile() != null) {
-            return OPCPackage.open(reader.getFromFile(), PackageAccess.READ);
+        if (reader.fromFile() != null) {
+            return OPCPackage.open(reader.fromFile(), PackageAccess.READ);
         } else {
-            return OPCPackage.open(reader.inputStream());
+            return OPCPackage.open(reader.fromStream());
         }
     }
 

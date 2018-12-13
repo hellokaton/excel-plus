@@ -21,6 +21,6 @@ package io.github.biezhi.excel.plus.enums;
  */
 public enum ExcelType {
 
-    XLSX, XLS
+    XLSX, XLS, CSV
 
 }

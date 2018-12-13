@@ -21,6 +21,7 @@ import io.github.biezhi.excel.plus.annotation.ExcelColumn;
 import io.github.biezhi.excel.plus.conveter.*;
 import io.github.biezhi.excel.plus.exception.WriterException;
 import io.github.biezhi.excel.plus.utils.StringUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 
@@ -37,21 +38,22 @@ import static java.util.Comparator.comparingInt;
  * @author biezhi
  * @date 2018-12-11
  */
+@Slf4j
 public abstract class ExcelWriter {
 
-    protected OutputStream outputStream;
+    OutputStream outputStream;
 
-    public ExcelWriter(OutputStream outputStream) {
+    ExcelWriter(OutputStream outputStream) {
         this.outputStream = outputStream;
     }
 
-    protected ExcelWriter() {
+    ExcelWriter() {
     }
 
     public abstract void writeWorkbook(Writer writer) throws WriterException;
 
-    protected void writeWorkbook(Writer writer, Workbook workbook) throws WriterException {
-        List<?> rows = writer.getRows();
+    void writeWorkbook(Writer writer, Workbook workbook) throws WriterException {
+        Collection<?> rows = writer.rows();
         if (null == rows || rows.isEmpty()) {
             throw new WriterException("Write rows cannot be empty");
         }
@@ -65,36 +67,39 @@ public abstract class ExcelWriter {
             CellStyle columnStyle = Constant.defaultColumnStyle(workbook);
             CellStyle titleStyle  = Constant.defaultTitleStyle(workbook);
 
-            if (null != writer.getHeaderStyle()) {
-                writer.getTitleStyle().accept(headerStyle);
+            if (null != writer.headerStyle()) {
+                writer.titleStyle().accept(headerStyle);
             }
-            if (null != writer.getCellStyle()) {
-                writer.getCellStyle().accept(columnStyle);
+            if (null != writer.cellStyle()) {
+                writer.cellStyle().accept(columnStyle);
             }
-            if (null != writer.getTitleStyle()) {
-                writer.getTitleStyle().accept(titleStyle);
+            if (null != writer.titleStyle()) {
+                writer.titleStyle().accept(titleStyle);
             }
 
             String headerTitle = writer.headerTitle();
 
-            Class<?>            type           = rows.get(0).getClass();
-            Field[]             declaredFields = type.getDeclaredFields();
-            Map<Integer, Field> fieldMap       = new HashMap<>();
-            List<ExcelColumn>   columnList     = new ArrayList<>();
+            Class<?> type   = rows.iterator().next().getClass();
+            Field[]  fields = type.getDeclaredFields();
 
-            for (Field field : declaredFields) {
+            Map<Integer, Field> fieldIndexes = new HashMap<>(fields.length);
+            List<ExcelColumn>   columns      = new ArrayList<>();
+
+            for (Field field : fields) {
                 ExcelColumn column = field.getAnnotation(ExcelColumn.class);
                 if (null != column) {
                     field.setAccessible(true);
-                    fieldMap.put(column.index(), field);
-                    columnList.add(column);
+                    fieldIndexes.put(column.index(), field);
+                    columns.add(column);
                 }
             }
 
             // write header
             int colRowIndex = 0;
             if (StringUtils.isNotEmpty(headerTitle)) {
-                Integer maxColIndex = columnList.stream().map(ExcelColumn::index)
+
+                Integer maxColIndex = columns.stream()
+                        .map(ExcelColumn::index)
                         .max(comparingInt(Integer::intValue))
                         .get();
 
@@ -106,10 +111,16 @@ public abstract class ExcelWriter {
                 counter.set(colRowIndex + 1);
             }
 
-            this.writeColumnNames(colRowIndex, headerStyle, sheet, columnList);
+            this.writeColumnNames(colRowIndex, headerStyle, sheet, columns);
 
             // write rows
-            rows.forEach(row -> this.writeRow(sheet, row, columnStyle, fieldMap, counter.getAndIncrement()));
+            rows.forEach(row -> {
+                try {
+                    this.writeRow(sheet, row, columnStyle, fieldIndexes, counter.getAndIncrement());
+                } catch (Exception e) {
+                    log.error("write row fail", e);
+                }
+            });
 
             // write to OutputStream
             workbook.write(os);
@@ -118,8 +129,7 @@ public abstract class ExcelWriter {
         }
     }
 
-
-    protected void writeHeader(CellStyle cellStyle, Sheet sheet, String title, int maxColIndex) {
+    private void writeHeader(CellStyle cellStyle, Sheet sheet, String title, int maxColIndex) {
         Row titleRow = sheet.createRow(0);
         titleRow.setHeightInPoints(50);
         for (int i = 0; i <= maxColIndex; i++) {
@@ -132,7 +142,7 @@ public abstract class ExcelWriter {
         sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, maxColIndex));
     }
 
-    protected void writeColumnNames(int rowIndex, CellStyle headerStyle, Sheet sheet, List<ExcelColumn> columnList) {
+    private void writeColumnNames(int rowIndex, CellStyle headerStyle, Sheet sheet, List<ExcelColumn> columnList) {
         Row rowHead = sheet.createRow(rowIndex);
         rowHead.setHeightInPoints(30);
         for (ExcelColumn column : columnList) {
@@ -149,62 +159,57 @@ public abstract class ExcelWriter {
         }
     }
 
-    protected void writeRow(Sheet sheet, Object instance, CellStyle columnStyle,
-                            Map<Integer, Field> fieldMap, int rowNum) {
+    private void writeRow(Sheet sheet, Object instance, CellStyle columnStyle,
+                          Map<Integer, Field> fieldMap, int rowNum) throws Exception {
 
         Row row = sheet.createRow(rowNum);
 
-        Iterator<Integer> iterator = fieldMap.keySet().iterator();
+        for (Integer index : fieldMap.keySet()) {
+            Field field = fieldMap.get(index);
+            if (null == field) {
+                continue;
+            }
 
-        try {
-            while (iterator.hasNext()) {
-                Integer columnIndex = iterator.next();
-                Cell    cell        = row.createCell(columnIndex);
+            Object value = field.get(instance);
+            if (value == null) {
+                continue;
+            }
 
-                Field  field = fieldMap.get(columnIndex);
-                Object value = field.get(instance);
+            Cell cell = row.createCell(index);
+            cell.setCellStyle(columnStyle);
 
-                if (value == null) {
-                    continue;
-                }
+            if (field.getType().equals(String.class)) {
+                cell.setCellValue(value.toString());
+                continue;
+            }
 
-                cell.setCellStyle(columnStyle);
+            ExcelColumn column = field.getAnnotation(ExcelColumn.class);
 
-                if (field.getType().equals(String.class)) {
-                    cell.setCellValue(value.toString());
-                    continue;
-                }
-
-                ExcelColumn column = field.getAnnotation(ExcelColumn.class);
-                if (!NullConverter.class.equals(column.converter())) {
-                    Converter convert = column.converter().newInstance();
-                    ConverterCache.addConvert(convert);
-                    cell.setCellValue(convert.toString(value));
+            if (!NullConverter.class.equals(column.converter())) {
+                Converter convert = column.converter().newInstance();
+                ConverterCache.addConvert(convert);
+                cell.setCellValue(convert.toString(value));
+            } else {
+                if (StringUtils.isNotEmpty(column.datePattern())) {
+                    String content = "";
+                    if (Date.class.equals(field.getType())) {
+                        content = new DateConverter(column.datePattern()).toString((Date) value);
+                    } else if (LocalDate.class.equals(field.getType())) {
+                        content = new LocalDateConverter(column.datePattern()).toString((LocalDate) value);
+                    }
+                    if (LocalDateTime.class.equals(field.getType())) {
+                        content = new LocalDateTimeConverter(column.datePattern()).toString((LocalDateTime) value);
+                    }
+                    cell.setCellValue(content);
                 } else {
-                    if (StringUtils.isNotEmpty(column.datePattern())) {
-                        String content = "";
-                        if (Date.class.equals(field.getType())) {
-                            content = new DateConverter(column.datePattern()).toString((Date) value);
-                        } else if (LocalDate.class.equals(field.getType())) {
-                            content = new LocalDateConverter(column.datePattern()).toString((LocalDate) value);
-                        }
-                        if (LocalDateTime.class.equals(field.getType())) {
-                            content = new LocalDateTimeConverter(column.datePattern()).toString((LocalDateTime) value);
-                        }
-                        cell.setCellValue(content);
-                        continue;
+                    Converter converter = ConverterCache.computeConvert(field);
+                    if (null != converter) {
+                        cell.setCellValue(converter.toString(value));
                     } else {
-                        Converter converter = ConverterCache.computeConvert(field);
-                        if (null != converter) {
-                            cell.setCellValue(converter.toString(value));
-                        } else {
-                            cell.setCellValue(value.toString());
-                        }
+                        cell.setCellValue(value.toString());
                     }
                 }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 

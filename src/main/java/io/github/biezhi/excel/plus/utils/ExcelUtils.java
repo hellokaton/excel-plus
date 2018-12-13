@@ -16,10 +16,14 @@
 package io.github.biezhi.excel.plus.utils;
 
 import io.github.biezhi.excel.plus.enums.ExcelType;
+import io.github.biezhi.excel.plus.exception.ReaderException;
 import lombok.experimental.UtilityClass;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -33,6 +37,22 @@ public class ExcelUtils {
 
     public static <T> T newInstance(Class<T> type) throws IllegalAccessException, InstantiationException {
         return type.newInstance();
+    }
+
+    public static Workbook create(File file) throws ReaderException {
+        try {
+            return WorkbookFactory.create(file);
+        } catch (IOException e) {
+            throw new ReaderException(e);
+        }
+    }
+
+    public static Workbook create(InputStream inputStream) throws ReaderException {
+        try {
+            return WorkbookFactory.create(inputStream);
+        } catch (IOException e) {
+            throw new ReaderException(e);
+        }
     }
 
     public static ExcelType getType(String fileName) {

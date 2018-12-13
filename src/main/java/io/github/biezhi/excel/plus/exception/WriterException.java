@@ -39,4 +39,5 @@ public class WriterException extends ExcelPlusException {
     public WriterException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
+
 }

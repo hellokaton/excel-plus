@@ -93,4 +93,19 @@ public class ReaderTest extends BaseTest {
         Assert.assertEquals(new BigDecimal("1879.06"), samples.get(samples.size() - 1).getAmount());
     }
 
+    @Test
+    public void testReadAndValid() throws ReaderException {
+        List<Sample> samples = excelPlus.read()
+                .from(new File(classPath() + "/SampleData.xlsx"))
+                .sheetName("SalesOrders")
+                .startRow(1)
+                .asStream(Sample.class)
+                .filter(sample -> sample.getAmount().intValue() > 1000)
+                .collect(toList());
+
+        Assert.assertEquals(6, samples.size());
+        Assert.assertEquals(new BigDecimal("1619.19"), samples.get(0).getAmount());
+        Assert.assertEquals(new BigDecimal("1879.06"), samples.get(samples.size() - 1).getAmount());
+    }
+
 }
