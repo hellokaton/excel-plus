@@ -15,21 +15,28 @@
  */
 package io.github.biezhi.excel.plus.conveter;
 
+import io.github.biezhi.excel.plus.exception.ConverterException;
 import io.github.biezhi.excel.plus.utils.StringUtils;
 
 /**
+ * Long to string converter
+ *
  * @author biezhi
  * @date 2018-12-12
  */
 public class LongConverter extends NumberConverter implements Converter<String, Long> {
 
     @Override
-    public Long stringToR(String value) {
-        value = super.replaceComma(value);
-        if (StringUtils.isEmpty(value)) {
-            return null;
+    public Long stringToR(String value) throws ConverterException {
+        try {
+            value = super.replaceComma(value);
+            if (StringUtils.isEmpty(value)) {
+                return null;
+            }
+            return Long.parseLong(value);
+        } catch (Exception e){
+            throw new ConverterException("convert [" + value + "] to Long error", e);
         }
-        return Long.valueOf(value);
     }
 
 }

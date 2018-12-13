@@ -15,10 +15,14 @@
  */
 package io.github.biezhi.excel.plus.conveter;
 
+import io.github.biezhi.excel.plus.exception.ConverterException;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 /**
+ * LocalDateTime to string converter
+ *
  * @author biezhi
  * @date 2018-12-12
  */
@@ -31,13 +35,21 @@ public class LocalDateTimeConverter implements Converter<String, LocalDateTime> 
     }
 
     @Override
-    public LocalDateTime stringToR(String value) {
-        return LocalDateTime.parse(value, formatter);
+    public LocalDateTime stringToR(String value) throws ConverterException {
+        try {
+            return LocalDateTime.parse(value, formatter);
+        } catch (Exception e){
+            throw new ConverterException("convert [" + value + "] to LocalDateTime error", e);
+        }
     }
 
     @Override
-    public String toString(LocalDateTime localDateTime) {
-        return localDateTime.format(formatter);
+    public String toString(LocalDateTime localDateTime) throws ConverterException {
+        try {
+            return localDateTime.format(formatter);
+        } catch (Exception e){
+            throw new ConverterException("convert [" + localDateTime + "] to String error", e);
+        }
     }
 
 }

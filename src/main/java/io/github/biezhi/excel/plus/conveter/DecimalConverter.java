@@ -15,23 +15,30 @@
  */
 package io.github.biezhi.excel.plus.conveter;
 
+import io.github.biezhi.excel.plus.exception.ConverterException;
 import io.github.biezhi.excel.plus.utils.StringUtils;
 
 import java.math.BigDecimal;
 
 /**
+ * BigDecimal to string converter
+ *
  * @author biezhi
  * @date 2018-12-12
  */
 public class DecimalConverter extends NumberConverter implements Converter<String, BigDecimal> {
 
     @Override
-    public BigDecimal stringToR(String value) {
-        value = super.replaceComma(value);
-        if (StringUtils.isEmpty(value)) {
-            return null;
+    public BigDecimal stringToR(String value) throws ConverterException {
+        try {
+            value = super.replaceComma(value);
+            if (StringUtils.isEmpty(value)) {
+                return null;
+            }
+            return new BigDecimal(value);
+        } catch (Exception e){
+            throw new ConverterException("convert [" + value + "] to BigDecimal error", e);
         }
-        return new BigDecimal(value);
     }
 
 }

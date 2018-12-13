@@ -71,15 +71,15 @@ public class Reader {
      */
     private InputStream fromStream;
 
-    public static Reader create(){
+    public static Reader create() {
         return new Reader();
     }
 
-    public static Reader create(File fromFile){
+    public static Reader create(File fromFile) {
         return new Reader().from(fromFile);
     }
 
-    public static Reader create(InputStream fromStream){
+    public static Reader create(InputStream fromStream) {
         return new Reader().from(fromStream);
     }
 
@@ -90,6 +90,9 @@ public class Reader {
      * @return Reader
      */
     public Reader from(File fromFile) {
+        if (null == fromFile || !fromFile.exists()) {
+            throw new IllegalArgumentException("excel file must be exist");
+        }
         this.fromFile = fromFile;
         return this;
     }
@@ -156,9 +159,14 @@ public class Reader {
      * @throws ReaderException Thrown when an exception occurs during reading
      */
     public <T> Stream<T> asStream(Class<T> modelType) throws ReaderException {
+        if (modelType == null) {
+            throw new IllegalArgumentException("modelType can be not null");
+        }
+
         this.modelType = modelType;
+
         if (fromFile == null && fromStream == null) {
-            throw new IllegalArgumentException("Excel source not is null.");
+            throw new IllegalArgumentException("Excel source not is null");
         }
 
         if (fromFile != null) {

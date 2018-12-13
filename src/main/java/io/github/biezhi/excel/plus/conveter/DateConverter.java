@@ -22,6 +22,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
+ * Date to string converter
+ *
  * @author biezhi
  * @date 2018-12-12
  */
@@ -38,7 +40,7 @@ public class DateConverter implements Converter<String, Date> {
         try {
             return df.get().parse(value);
         } catch (Exception e) {
-            throw new ConverterException(e);
+            throw new ConverterException("convert [" + value + "] to Date error", e);
         }
     }
 
@@ -47,7 +49,7 @@ public class DateConverter implements Converter<String, Date> {
         try {
             return df.get().format(date);
         } catch (Exception e) {
-            throw new ConverterException(e);
+            throw new ConverterException("convert [" + date + "] to String error", e);
         }
     }
 

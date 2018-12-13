@@ -15,15 +15,23 @@
  */
 package io.github.biezhi.excel.plus.conveter;
 
+import io.github.biezhi.excel.plus.exception.ConverterException;
+
 /**
+ * Byte to string converter
+ *
  * @author biezhi
  * @date 2018-12-12
  */
 public class ByteConverter implements Converter<String, Byte> {
 
     @Override
-    public Byte stringToR(String value) {
-        return Byte.valueOf(value);
+    public Byte stringToR(String value) throws ConverterException {
+        try {
+            return Byte.parseByte(value);
+        } catch (Exception e){
+            throw new ConverterException("convert [" + value + "] to Byte error", e);
+        }
     }
 
 }

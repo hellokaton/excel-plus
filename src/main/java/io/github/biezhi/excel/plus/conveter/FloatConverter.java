@@ -15,21 +15,28 @@
  */
 package io.github.biezhi.excel.plus.conveter;
 
+import io.github.biezhi.excel.plus.exception.ConverterException;
 import io.github.biezhi.excel.plus.utils.StringUtils;
 
 /**
+ * Float to string converter
+ *
  * @author biezhi
  * @date 2018-12-12
  */
 public class FloatConverter extends NumberConverter implements Converter<String, Float> {
 
     @Override
-    public Float stringToR(String value) {
-        value = super.replaceComma(value);
-        if (StringUtils.isEmpty(value)) {
-            return null;
+    public Float stringToR(String value) throws ConverterException {
+        try {
+            value = super.replaceComma(value);
+            if (StringUtils.isEmpty(value)) {
+                return null;
+            }
+            return Float.parseFloat(value);
+        } catch (Exception e){
+            throw new ConverterException("convert [" + value + "] to Float error", e);
         }
-        return Float.valueOf(value);
     }
 
 }

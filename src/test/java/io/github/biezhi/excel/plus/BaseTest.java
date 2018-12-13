@@ -2,6 +2,7 @@ package io.github.biezhi.excel.plus;
 
 import io.github.biezhi.excel.plus.exception.WriterException;
 import io.github.biezhi.excel.plus.model.PerformanceTestModel;
+import io.github.biezhi.excel.plus.model.Sample;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
@@ -24,12 +25,22 @@ import java.util.UUID;
 @Slf4j
 public class BaseTest {
 
-    final int testCount = 1_0000;
+    protected final int testCount = 1_0000;
     //    protected final int    testCount    = 100_0000;
 
-    final String testFileName = "test_write_100w_rows.xlsx";
+    protected final String testFileName = "test_write_100w_rows.xlsx";
 
-    List<PerformanceTestModel> readyData() {
+    protected List<Sample> buildData() {
+        List<Sample> samples = new ArrayList<>();
+        samples.add(new Sample(LocalDate.now(), "hello01", 101));
+        samples.add(new Sample(LocalDate.now(), "hello02", 102));
+        samples.add(new Sample(LocalDate.now(), "hello03", 103));
+        samples.add(new Sample(LocalDate.now(), "hello04", 104));
+        samples.add(new Sample(LocalDate.now(), "hello05", 105));
+        return samples;
+    }
+
+    protected List<PerformanceTestModel> readyData() {
 
         List<PerformanceTestModel> data = new ArrayList<>(testCount);
 
@@ -46,7 +57,7 @@ public class BaseTest {
         return data;
     }
 
-    void writeTestExcel(List<PerformanceTestModel> rows) throws WriterException {
+    protected void writeTestExcel(List<PerformanceTestModel> rows) throws WriterException {
         log.info("data  ready !!!");
         log.info("start write !!!");
 
@@ -56,11 +67,11 @@ public class BaseTest {
                 .to(new File(testFileName));
     }
 
-    String classPath() {
+    protected String classPath() {
         return BaseTest.class.getResource("/").getPath();
     }
 
-    void deleteTempFile(String fileName) {
+    protected void deleteTempFile(String fileName) {
         try {
             Files.delete(Paths.get(fileName));
         } catch (IOException e) {

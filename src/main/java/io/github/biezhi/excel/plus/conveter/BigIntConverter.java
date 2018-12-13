@@ -15,23 +15,30 @@
  */
 package io.github.biezhi.excel.plus.conveter;
 
+import io.github.biezhi.excel.plus.exception.ConverterException;
 import io.github.biezhi.excel.plus.utils.StringUtils;
 
 import java.math.BigInteger;
 
 /**
+ * BigInteger to string converter
+ *
  * @author biezhi
  * @date 2018-12-12
  */
 public class BigIntConverter extends NumberConverter implements Converter<String, BigInteger> {
 
     @Override
-    public BigInteger stringToR(String value) {
-        value = replaceComma(value);
-        if (StringUtils.isEmpty(value)) {
-            return null;
+    public BigInteger stringToR(String value) throws ConverterException {
+        try {
+            value = replaceComma(value);
+            if (StringUtils.isEmpty(value)) {
+                return null;
+            }
+            return new BigInteger(value);
+        } catch (Exception e){
+            throw new ConverterException("convert [" + value + "] to BigInteger error", e);
         }
-        return new BigInteger(value);
     }
 
 }

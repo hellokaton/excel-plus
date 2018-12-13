@@ -15,15 +15,23 @@
  */
 package io.github.biezhi.excel.plus.conveter;
 
+import io.github.biezhi.excel.plus.exception.ConverterException;
+
 /**
+ * Boolean to string converter
+ *
  * @author biezhi
  * @date 2018-12-12
  */
 public class BooleanConverter implements Converter<String, Boolean> {
 
     @Override
-    public Boolean stringToR(String value) {
-        return Boolean.valueOf(value);
+    public Boolean stringToR(String value) throws ConverterException {
+        try {
+            return Boolean.valueOf(value);
+        } catch (Exception e){
+            throw new ConverterException("convert [" + value + "] to Boolean error", e);
+        }
     }
 
 }
