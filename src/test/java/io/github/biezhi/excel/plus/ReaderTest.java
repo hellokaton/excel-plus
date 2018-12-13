@@ -26,7 +26,8 @@ public class ReaderTest extends BaseTest {
         List<Financial> financials = excelPlus.read()
                 .from(new File(classPath() + "/FinancialSample.xlsx"))
                 .asList(Financial.class);
-        System.out.println(financials);
+
+        log.info("financials size: {}", financials.size());
     }
 
     @Test
@@ -63,7 +64,6 @@ public class ReaderTest extends BaseTest {
 
     @Test
     public void testReadBySheetName() throws ReaderException {
-        System.out.println(classPath());
         List<Sample> samples = excelPlus.read()
                 .from(new File(classPath() + "/SampleData.xlsx"))
                 .sheetName("SalesOrders")
