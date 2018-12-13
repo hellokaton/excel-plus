@@ -32,9 +32,9 @@ public class WriterWith2007 extends ExcelWriter {
     }
 
     @Override
-    public void writeWorkbook(Writer writer) throws WriterException {
+    public void writeSheet(Writer writer) throws WriterException {
         SXSSFWorkbook workbook = new SXSSFWorkbook(writer.bufferSize());
-        super.writeWorkbook(writer, workbook);
+        super.writeSheet(writer, workbook);
     }
 
 }

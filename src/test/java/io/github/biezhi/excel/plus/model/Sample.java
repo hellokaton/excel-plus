@@ -15,19 +15,19 @@ import java.time.LocalDate;
 @Data
 public class Sample {
 
-    @ExcelColumn(index = 0, datePattern = "M/d/yy")
+    @ExcelColumn(title = "日期", index = 0, datePattern = "M/d/yy")
     private LocalDate date;
 
-    @ExcelColumn(index = 1)
+    @ExcelColumn(title = "地区", index = 1)
     private String location;
 
-    @ExcelColumn(index = 4)
+    @ExcelColumn(title = "proportion", index = 4)
     private int proportion;
 
-    @ExcelColumn(index = 5)
+    @ExcelColumn(title = "ss", index = 5)
     private double ss;
 
-    @ExcelColumn(index = 6)
+    @ExcelColumn(title = "余额", index = 6)
     private BigDecimal amount;
 
     public Sample() {

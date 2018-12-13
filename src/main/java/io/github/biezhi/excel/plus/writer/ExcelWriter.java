@@ -35,6 +35,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static java.util.Comparator.comparingInt;
 
 /**
+ * ExcelWriter
+ *
  * @author biezhi
  * @date 2018-12-11
  */
@@ -50,88 +52,99 @@ public abstract class ExcelWriter {
     ExcelWriter() {
     }
 
-    public abstract void writeWorkbook(Writer writer) throws WriterException;
+    public abstract void writeSheet(Writer writer) throws WriterException;
 
-    void writeWorkbook(Writer writer, Workbook workbook) throws WriterException {
-        Collection<?> rows = writer.rows();
-        if (null == rows || rows.isEmpty()) {
-            throw new WriterException("Write rows cannot be empty");
-        }
+    /**
+     * Write data to Excel Sheet
+     * <p>
+     * 1. create sheet
+     * 2. write title(optional)
+     * 3. write column header
+     * 4. write row
+     * 5. write to OutputStream
+     *
+     * @param writer   excel-plus writer
+     * @param workbook workbook
+     * @throws WriterException
+     */
+    void writeSheet(Writer writer, Workbook workbook) throws WriterException {
 
+        // create sheet
         Sheet sheet = workbook.createSheet(writer.sheetName());
 
-        try (OutputStream os = outputStream) {
-            AtomicInteger counter = new AtomicInteger(writer.startRow());
+        // setting styles
+        CellStyle headerStyle = Constant.defaultHeaderStyle(workbook);
+        CellStyle columnStyle = Constant.defaultColumnStyle(workbook);
+        CellStyle titleStyle  = Constant.defaultTitleStyle(workbook);
+        if (null != writer.titleStyle()) {
+            writer.titleStyle().accept(workbook, titleStyle);
+        }
+        if (null != writer.headerStyle()) {
+            writer.headerStyle().accept(workbook, headerStyle);
+        }
+        if (null != writer.cellStyle()) {
+            writer.cellStyle().accept(workbook, columnStyle);
+        }
 
-            CellStyle headerStyle = Constant.defaultHeaderStyle(workbook);
-            CellStyle columnStyle = Constant.defaultColumnStyle(workbook);
-            CellStyle titleStyle  = Constant.defaultTitleStyle(workbook);
+        // compute the Filed to be written
+        Collection<?> rows   = writer.rows();
+        Field[]       fields = rows.iterator().next().getClass().getDeclaredFields();
 
-            if (null != writer.headerStyle()) {
-                writer.titleStyle().accept(headerStyle);
+        Map<Integer, Field> fieldIndexes = new HashMap<>(fields.length);
+
+        List<ExcelColumn> columns = new ArrayList<>();
+
+        for (Field field : fields) {
+            ExcelColumn column = field.getAnnotation(ExcelColumn.class);
+            if (null != column) {
+                field.setAccessible(true);
+                fieldIndexes.put(column.index(), field);
+                columns.add(column);
             }
-            if (null != writer.cellStyle()) {
-                writer.cellStyle().accept(columnStyle);
-            }
-            if (null != writer.titleStyle()) {
-                writer.titleStyle().accept(titleStyle);
-            }
+        }
 
-            String headerTitle = writer.headerTitle();
+        int colRowIndex = 0;
+        // write title
+        String title = writer.headerTitle();
+        if (StringUtils.isNotEmpty(title)) {
+            Integer maxColIndex = columns.stream()
+                    .map(ExcelColumn::index)
+                    .max(comparingInt(Integer::intValue))
+                    .get();
 
-            Class<?> type   = rows.iterator().next().getClass();
-            Field[]  fields = type.getDeclaredFields();
+            this.writeHeader(titleStyle, sheet, title, maxColIndex);
+            colRowIndex = 1;
+        }
 
-            Map<Integer, Field> fieldIndexes = new HashMap<>(fields.length);
-            List<ExcelColumn>   columns      = new ArrayList<>();
+        AtomicInteger counter = new AtomicInteger(writer.startRow());
+        if (counter.get() == 0) {
+            counter.set(colRowIndex + 1);
+        }
 
-            for (Field field : fields) {
-                ExcelColumn column = field.getAnnotation(ExcelColumn.class);
-                if (null != column) {
-                    field.setAccessible(true);
-                    fieldIndexes.put(column.index(), field);
-                    columns.add(column);
-                }
-            }
+        // write column header
+        this.writeColumnNames(colRowIndex, headerStyle, sheet, columns);
 
-            // write header
-            int colRowIndex = 0;
-            if (StringUtils.isNotEmpty(headerTitle)) {
-
-                Integer maxColIndex = columns.stream()
-                        .map(ExcelColumn::index)
-                        .max(comparingInt(Integer::intValue))
-                        .get();
-
-                this.writeHeader(titleStyle, sheet, headerTitle, maxColIndex);
-                colRowIndex = 1;
-            }
-
-            if (counter.get() == 0) {
-                counter.set(colRowIndex + 1);
-            }
-
-            this.writeColumnNames(colRowIndex, headerStyle, sheet, columns);
-
+        try {
             // write rows
-            rows.forEach(row -> {
-                try {
-                    this.writeRow(sheet, row, columnStyle, fieldIndexes, counter.getAndIncrement());
-                } catch (Exception e) {
-                    log.error("write row fail", e);
-                }
-            });
+            for (Object row : rows) {
+                this.writeRow(sheet, row, columnStyle, fieldIndexes, counter.getAndIncrement());
+            }
+        } catch (Exception e) {
+            log.error("write row fail", e);
+        }
 
-            // write to OutputStream
+        // write to OutputStream
+        try (OutputStream os = outputStream) {
             workbook.write(os);
         } catch (Exception e) {
-            throw new WriterException(e);
+            throw new WriterException("workbook write to OutputStream error", e);
         }
     }
 
     private void writeHeader(CellStyle cellStyle, Sheet sheet, String title, int maxColIndex) {
         Row titleRow = sheet.createRow(0);
         titleRow.setHeightInPoints(50);
+
         for (int i = 0; i <= maxColIndex; i++) {
             Cell cell = titleRow.createCell(i);
             if (i == 0) {

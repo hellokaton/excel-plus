@@ -21,12 +21,14 @@ import io.github.biezhi.excel.plus.utils.StringUtils;
 import io.github.biezhi.excel.plus.writer.WriterWith2003;
 import io.github.biezhi.excel.plus.writer.WriterWith2007;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Workbook;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.Collection;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
@@ -48,11 +50,6 @@ public class Writer {
      * Store the row to be written
      */
     private Collection<?> rows;
-
-    /**
-     * Write data to the first sheet, the default is 0, the first
-     */
-    private int sheetIndex;
 
     /**
      * Write from the first few lines,
@@ -84,17 +81,17 @@ public class Writer {
     /**
      * Custom title style
      */
-    private Consumer<CellStyle> titleStyle;
+    private BiConsumer<Workbook, CellStyle> titleStyle;
 
     /**
      * Custom column header style
      */
-    private Consumer<CellStyle> headerStyle;
+    private BiConsumer<Workbook, CellStyle> headerStyle;
 
     /**
      * Custom row column style
      */
-    private Consumer<CellStyle> cellStyle;
+    private BiConsumer<Workbook, CellStyle> cellStyle;
 
     public Writer(ExcelType excelType) {
         this.excelType = excelType;
@@ -108,20 +105,6 @@ public class Writer {
      */
     public Writer withRows(Collection<?> rows) {
         this.rows = rows;
-        return this;
-    }
-
-    /**
-     * The configuration is written from the first sheet, the default is 0.
-     *
-     * @param sheetIndex The sheet index to be written
-     * @return Writer
-     */
-    public Writer sheetIndex(int sheetIndex) {
-        if (sheetIndex < 0) {
-            throw new IllegalArgumentException("sheetIndex cannot be less than 0");
-        }
-        this.sheetIndex = sheetIndex;
         return this;
     }
 
@@ -172,7 +155,7 @@ public class Writer {
      * @param titleStyle title style consumer
      * @return Writer
      */
-    public Writer titleStyle(Consumer<CellStyle> titleStyle) {
+    public Writer titleStyle(BiConsumer<Workbook, CellStyle> titleStyle) {
         this.titleStyle = titleStyle;
         return this;
     }
@@ -184,7 +167,7 @@ public class Writer {
      * @param headerStyle header style consumer
      * @return Writer
      */
-    public Writer headerStyle(Consumer<CellStyle> headerStyle) {
+    public Writer headerStyle(BiConsumer<Workbook, CellStyle> headerStyle) {
         this.headerStyle = headerStyle;
         return this;
     }
@@ -196,7 +179,7 @@ public class Writer {
      * @param cellStyle row style consumer
      * @return Writer
      */
-    public Writer cellStyle(Consumer<CellStyle> cellStyle) {
+    public Writer cellStyle(BiConsumer<Workbook, CellStyle> cellStyle) {
         this.cellStyle = cellStyle;
         return this;
     }
@@ -248,11 +231,14 @@ public class Writer {
      * @throws WriterException
      */
     public void to(OutputStream outputStream) throws WriterException {
+        if (null == rows || rows.isEmpty()) {
+            throw new WriterException("write rows cannot be empty, please check it");
+        }
         if (excelType == ExcelType.XLSX) {
-            new WriterWith2007(outputStream).writeWorkbook(this);
+            new WriterWith2007(outputStream).writeSheet(this);
         }
         if (excelType == ExcelType.XLS) {
-            new WriterWith2003(outputStream).writeWorkbook(this);
+            new WriterWith2003(outputStream).writeSheet(this);
         }
     }
 
@@ -264,19 +250,15 @@ public class Writer {
         return this.sheetName;
     }
 
-    public int sheetIndex() {
-        return this.sheetIndex;
-    }
-
-    public Consumer<CellStyle> titleStyle() {
+    public BiConsumer<Workbook, CellStyle> titleStyle() {
         return this.titleStyle;
     }
 
-    public Consumer<CellStyle> headerStyle() {
+    public BiConsumer<Workbook, CellStyle> headerStyle() {
         return this.headerStyle;
     }
 
-    public Consumer<CellStyle> cellStyle() {
+    public BiConsumer<Workbook, CellStyle> cellStyle() {
         return this.cellStyle;
     }
 

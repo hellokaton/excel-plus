@@ -34,7 +34,7 @@ public class ResponseExcelWriter extends ExcelWriter {
     }
 
     @Override
-    public void writeWorkbook(Writer writer) throws WriterException {
+    public void writeSheet(Writer writer) throws WriterException {
         HttpServletResponse servletResponse = this.wrapper.getServletResponse();
         try {
             String fileName = wrapper.getFileName();
@@ -46,7 +46,7 @@ public class ResponseExcelWriter extends ExcelWriter {
             super.outputStream = servletResponse.getOutputStream();
 
             SXSSFWorkbook workbook = new SXSSFWorkbook(writer.bufferSize());
-            super.writeWorkbook(writer, workbook);
+            super.writeSheet(writer, workbook);
         } catch (Exception e) {
             throw new WriterException(e);
         }
