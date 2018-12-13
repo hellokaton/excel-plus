@@ -37,7 +37,7 @@
 
 ## 引入依赖
 
-加入以下 `maven` 依赖到你的 `pom.xml` 文件中，该项目使用的 `poi` 版本是 **3.17**，
+加入以下 `maven` 依赖到你的 `pom.xml` 文件中，该项目使用的 `poi` 版本是 [4.0.1](https://mvnrepository.com/artifact/org.apache.poi/poi/4.0.1)，
 如果你的项目已经存在，请注意删除或者排除依赖。
 
 ```xml
@@ -78,7 +78,7 @@ public class Sample {
 
 这是一个简单的模型类，使用 `@ExcelColumn` 来匹配 Excel 中的列关系，这个表格的数据在 [这里](https://github.com/biezhi/excel-plus/blob/v1.0/src/test/resources/SampleData.xlsx)。
 
-这个文档中有很多个 `Sheet`，我们只需要读取名为 `SalesOrders` 的就可以了，其他的不关心。
+测试的 Excel 文档中有很多个 `Sheet`，我们只需读取名为 `SalesOrders` 的就可以了，其他的不关心。
 
 ```java
 List<Sample> samples = Reader.create()
@@ -181,13 +181,40 @@ Writer.create()
 
 > 需要注意的是这里的 `template.xls` 位于 `classpath` 路径下。
 
-# API 介绍
+# API 概览
 
 ## 核心对象
 
 - `Reader`: 用于读取一份 Excel 文档
 - `Writer`: 用于写入一份 Excel 文档
 - `Converter`: 数据类型转换的顶层接口，处理自定义的读取、写入规则
+
+## Reader
+
+- `from(File)`：从文件中读取
+- `from(InputStream)`：从 InputStream 中读取
+- `startRow(int)`：设置从第几行开始读，索引从 0 开始
+- `sheetIndex(int)`：要读取的 sheet 索引，默认为 0
+- `sheetName(String)`：要读取的 sheet 名称，如果设置则不会根据 sheetIndex 读取
+- `asStream(Class)`：将读取结果存储在 Stream 中返回
+- `asList(Class)`：将读取结果存储在 List 中返回
+
+## Writer
+
+- `Writer(ExcelType)`：构造函数，写入什么类型的文件，支持 XLSX、XLS、CSV 格式
+- `withRows(Collection)`：写入的数据，该方法接收一个集合
+- `sheetName(String)`：写入的 Sheet 名称，默认为 `Sheet0`
+- `startRow(int)`：从第几行开始写入，索引从 0 开始，默认是计算出的，建议不设置
+- `headerTitle(String)`：Sheet 的大标题，可选项
+- `titleStyle(BiConsumer)`：自定义标题样式
+- `headerStyle(BiConsumer)`：自定义列头样式
+- `cellStyle(BiConsumer)`：自定义行中的单元格样式
+- `withTemplate(File)`：根据模板文件创建 Excel
+- `bufferSize(int)`：写入一个 XLSX 格式的文件时缓冲大小，默认为 100，建议不修改
+- `withRaw()`：自定义写入行，启用该配置后不会根据集合数据写 Excel
+- `createRow(int)`：`withRaw` 启用后可使用该 API，用于自定义创建 `Row` 和 `Cell`
+- `to(File)`：写入 Excel 文档到文件
+- `to(OutputStream)`：写入 Excel 文档到 OutputStream
 
 ## 注解使用
 

@@ -80,7 +80,7 @@ public class Writer {
     /**
      * Specify the path to the template by writing data according to the specified template
      */
-    private String templatePath;
+    private File template;
 
     /**
      * Custom title style
@@ -99,11 +99,11 @@ public class Writer {
 
     private Consumer<Sheet> sheetConsumer;
 
-    public static Writer create(){
+    public static Writer create() {
         return new Writer(ExcelType.XLSX);
     }
 
-    public static Writer create(ExcelType excelType){
+    public static Writer create(ExcelType excelType) {
         return new Writer(excelType);
     }
 
@@ -205,7 +205,20 @@ public class Writer {
      * @return Writer
      */
     public Writer withTemplate(String templatePath) {
-        this.templatePath = templatePath;
+        return this.withTemplate(new File(templatePath));
+    }
+
+    /**
+     * Specify to write an Excel table from a template file
+     *
+     * @param template template file instance
+     * @return Writer
+     */
+    public Writer withTemplate(File template) {
+        if (null == template || !template.exists()) {
+            throw new IllegalArgumentException("template file not exist");
+        }
+        this.template = template;
         return this;
     }
 
@@ -264,7 +277,7 @@ public class Writer {
         if (excelType == ExcelType.XLS) {
             new WriterWith2003(outputStream).writeSheet(this);
         }
-        if(excelType == ExcelType.CSV){
+        if (excelType == ExcelType.CSV) {
             new WriterWithCSV(outputStream).writeSheet(this);
         }
     }
@@ -289,8 +302,8 @@ public class Writer {
         return this.cellStyle;
     }
 
-    public String templatePath() {
-        return this.templatePath;
+    public File template() {
+        return this.template;
     }
 
     public String headerTitle() {
