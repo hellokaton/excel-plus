@@ -43,7 +43,17 @@
 <dependency>
     <groupId>io.github.biezhi</groupId>
     <artifactId>excel-plus</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0.Alpha</version>
+</dependency>
+```
+
+也可以使用快照版本，最新的 bug 修复和功能更新都在这里
+
+```xml
+<dependency>
+    <groupId>io.github.biezhi</groupId>
+    <artifactId>excel-plus</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
 </dependency>
 ```
 
