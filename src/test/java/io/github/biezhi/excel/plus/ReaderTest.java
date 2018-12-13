@@ -1,6 +1,7 @@
 package io.github.biezhi.excel.plus;
 
 import io.github.biezhi.excel.plus.exception.ReaderException;
+import io.github.biezhi.excel.plus.model.Sample;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -16,7 +17,7 @@ public class ReaderTest extends BaseTest {
 
     @Test
     public void testCreate() {
-        Reader reader = Reader.create();
+        Reader reader = Reader.create(null);
 
         Assert.assertNotNull(reader);
 
@@ -32,7 +33,7 @@ public class ReaderTest extends BaseTest {
 
     @Test
     public void testCreateByFile() {
-        Reader reader = Reader.create(new File(classPath() + "/SampleData.xlsx"));
+        Reader reader = Reader.create(Sample.class, new File(classPath() + "/SampleData.xlsx"));
 
         Assert.assertNotNull(reader);
         Assert.assertNotNull(reader.fromFile());
@@ -40,17 +41,17 @@ public class ReaderTest extends BaseTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testCreateByFileNotExist() {
-        Reader.create(new File("abc.xlsx"));
+        Reader.create(null, new File("abc.xlsx"));
     }
 
     @Test
     public void testReaderArgs() {
-        Reader reader = Reader.create();
+        Reader reader = Reader.create(Sample.class);
 
         reader.from(new File(classPath() + "/SampleData.xlsx"))
-                .sheetIndex(1)
+                .sheet(1)
                 .startRow(1)
-                .sheetName("SalesOrders");
+                .sheet("SalesOrders");
 
         Assert.assertNotNull(reader.fromFile());
 
@@ -61,22 +62,22 @@ public class ReaderTest extends BaseTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testStartRowError() {
-        Reader.create().startRow(-1);
+        Reader.create(null).startRow(-1);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testSheetIndexError() {
-        Reader.create().sheetIndex(-1);
+        Reader.create(null).sheet(-1);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testSheetNameError() {
-        Reader.create().sheetName(null);
+        Reader.create(null).sheet(null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testModelTypeError() throws ReaderException {
-        Reader.create().asList(null);
+        Reader.create(null).asList();
     }
 
 }

@@ -32,16 +32,16 @@ import java.io.InputStream;
 @Deprecated
 public final class ExcelPlus {
 
-    public Reader read() {
-        return Reader.create();
+    public Reader read(Class<?> modelType) {
+        return Reader.create(modelType);
     }
 
-    public Reader read(File fromFile) {
-        return Reader.create(fromFile);
+    public Reader read(Class<?> modelType, File fromFile) {
+        return Reader.create(modelType, fromFile);
     }
 
-    public Reader read(InputStream fromStream) {
-        return Reader.create(fromStream);
+    public Reader read(Class<?> modelType, InputStream fromStream) {
+        return Reader.create(modelType, fromStream);
     }
 
     public Writer write() {

@@ -17,9 +17,6 @@ package io.github.biezhi.excel.plus;
 
 import io.github.biezhi.excel.plus.exception.ReaderException;
 import io.github.biezhi.excel.plus.reader.ReaderFactory;
-import io.github.biezhi.excel.plus.reader.ReaderWith2003;
-import io.github.biezhi.excel.plus.reader.ReaderWith2007;
-import io.github.biezhi.excel.plus.utils.ExcelUtils;
 import io.github.biezhi.excel.plus.utils.StringUtils;
 
 import java.io.File;
@@ -37,12 +34,12 @@ import static java.util.stream.Collectors.toList;
  * @author biezhi
  * @date 2018-12-11
  */
-public class Reader {
+public class Reader<T> {
 
     /**
      * Java entity type to which the Excel row is mapped
      */
-    private Class<?> modelType;
+    private Class<T> modelType;
 
     /**
      * The index of the sheet to be read, default is 0
@@ -50,7 +47,7 @@ public class Reader {
     private int sheetIndex;
 
     /**
-     * Sheet name to be read, sheetIndex does not take effect if sheetName is configured
+     * Sheet name to be read, sheet does not take effect if sheet is configured
      */
     private String sheetName;
 
@@ -72,16 +69,20 @@ public class Reader {
      */
     private InputStream fromStream;
 
-    public static Reader create() {
-        return new Reader();
+    public Reader(Class<T> modelType) {
+        this.modelType = modelType;
     }
 
-    public static Reader create(File fromFile) {
-        return new Reader().from(fromFile);
+    public static <T> Reader<T> create(Class<T> modelType) {
+        return new Reader<>(modelType);
     }
 
-    public static Reader create(InputStream fromStream) {
-        return new Reader().from(fromStream);
+    public static <T> Reader<T> create(Class<T> modelType, File fromFile) {
+        return new Reader<>(modelType).from(fromFile);
+    }
+
+    public static <T> Reader<T> create(Class<T> modelType, InputStream fromStream) {
+        return new Reader<>(modelType).from(fromStream);
     }
 
     /**
@@ -90,7 +91,7 @@ public class Reader {
      * @param fromFile excel file object
      * @return Reader
      */
-    public Reader from(File fromFile) {
+    public Reader<T> from(File fromFile) {
         if (null == fromFile || !fromFile.exists()) {
             throw new IllegalArgumentException("excel file must be exist");
         }
@@ -104,7 +105,7 @@ public class Reader {
      * @param fromStream excel InputStream
      * @return Reader
      */
-    public Reader from(InputStream fromStream) {
+    public Reader<T> from(InputStream fromStream) {
         this.fromStream = fromStream;
         return this;
     }
@@ -115,7 +116,7 @@ public class Reader {
      * @param startRow start row index
      * @return Reader
      */
-    public Reader startRow(int startRow) {
+    public Reader<T> startRow(int startRow) {
         if (startRow < 0) {
             throw new IllegalArgumentException("startRow cannot be less than 0");
         }
@@ -129,23 +130,23 @@ public class Reader {
      * @param sheetIndex sheet index
      * @return Reader
      */
-    public Reader sheetIndex(int sheetIndex) {
+    public Reader<T> sheet(int sheetIndex) {
         if (sheetIndex < 0) {
-            throw new IllegalArgumentException("sheetIndex cannot be less than 0");
+            throw new IllegalArgumentException("sheet cannot be less than 0");
         }
         this.sheetIndex = sheetIndex;
         return this;
     }
 
     /**
-     * Set the name of the sheet to be read. If you set the name, sheetIndex will be invalid.
+     * Set the name of the sheet to be read. If you set the name, sheet will be invalid.
      *
      * @param sheetName sheet name
      * @return
      */
-    public Reader sheetName(String sheetName) {
+    public Reader<T> sheet(String sheetName) {
         if (StringUtils.isEmpty(sheetName)) {
-            throw new IllegalArgumentException("sheetName cannot be empty");
+            throw new IllegalArgumentException("sheet cannot be empty");
         }
         this.sheetName = sheetName;
         return this;
@@ -154,17 +155,13 @@ public class Reader {
     /**
      * Return the read result as a Stream
      *
-     * @param modelType java model type
-     * @param <T>       Model Class Type
      * @return Stream
      * @throws ReaderException Thrown when an exception occurs during reading
      */
-    public <T> Stream<T> asStream(Class<T> modelType) throws ReaderException {
+    public Stream<T> asStream() throws ReaderException {
         if (modelType == null) {
             throw new IllegalArgumentException("modelType can be not null");
         }
-
-        this.modelType = modelType;
 
         if (fromFile == null && fromStream == null) {
             throw new IllegalArgumentException("Excel source not is null");
@@ -180,13 +177,11 @@ public class Reader {
     /**
      * Convert the read result to a List
      *
-     * @param modelType java model type
-     * @param <T>       Model Class Type
      * @return List
      * @throws ReaderException Thrown when an exception occurs during reading
      */
-    public <T> List<T> asList(Class<T> modelType) throws ReaderException {
-        Stream<T> stream = this.asStream(modelType);
+    public List<T> asList() throws ReaderException {
+        Stream<T> stream = this.asStream();
         return stream.collect(toList());
     }
 
@@ -198,7 +193,7 @@ public class Reader {
         return fromFile;
     }
 
-    public <T> Class<T> modelType() {
+    public Class<T> modelType() {
         return (Class<T>) modelType;
     }
 

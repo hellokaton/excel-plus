@@ -46,9 +46,9 @@ public class Excel2003Test extends BaseTest {
     public void testRead2003() throws WriterException, ReaderException {
         testWrite2003();
 
-        List<Sample> samples = Reader.create()
+        List<Sample> samples = Reader.create(Sample.class)
                 .from(new File("sample_test.xls"))
-                .asList(Sample.class);
+                .asList();
 
         Assert.assertEquals(5, samples.size());
         Assert.assertEquals("hello01", samples.get(0).getLocation());

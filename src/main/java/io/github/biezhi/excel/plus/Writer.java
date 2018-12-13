@@ -128,9 +128,9 @@ public class Writer {
      * @param sheetName sheet name
      * @return Writer
      */
-    public Writer sheetName(String sheetName) {
+    public Writer sheet(String sheetName) {
         if (StringUtils.isEmpty(sheetName)) {
-            throw new IllegalArgumentException("sheetName cannot be empty");
+            throw new IllegalArgumentException("sheet cannot be empty");
         }
         this.sheetName = sheetName;
         return this;
@@ -286,7 +286,7 @@ public class Writer {
         return this.startRow;
     }
 
-    public String sheetName() {
+    public String sheet() {
         return this.sheetName;
     }
 

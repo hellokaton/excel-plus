@@ -27,9 +27,9 @@ public class ReaderExample extends BaseTest {
 
     @Test
     public void testReadBasic() throws ReaderException {
-        List<Financial> financials = Reader.create()
+        List<Financial> financials = Reader.create(Financial.class)
                 .from(new File(classPath() + "/FinancialSample.xlsx"))
-                .asList(Financial.class);
+                .asList();
 
         log.info("financials size: {}", financials.size());
     }
@@ -42,9 +42,9 @@ public class ReaderExample extends BaseTest {
 
         long start = System.currentTimeMillis();
 
-        List<PerformanceTestModel> list = Reader.create()
+        List<PerformanceTestModel> list = Reader.create(PerformanceTestModel.class)
                 .from(new File(testFileName))
-                .asList(PerformanceTestModel.class);
+                .asList();
 
         long end = System.currentTimeMillis();
         log.info("Read " + list.size() + " rows, time consuming: " + (end - start) + "ms");
@@ -55,11 +55,11 @@ public class ReaderExample extends BaseTest {
     @Test
     public void testReadBySheetIndex() throws ReaderException {
         System.out.println(classPath());
-        List<Sample> samples = Reader.create()
+        List<Sample> samples = Reader.create(Sample.class)
                 .from(new File(classPath() + "/SampleData.xlsx"))
-                .sheetIndex(1)
+                .sheet(1)
                 .startRow(1)
-                .asList(Sample.class);
+                .asList();
 
         Assert.assertEquals(43, samples.size());
         Assert.assertEquals(new BigDecimal("189.05"), samples.get(0).getAmount());
@@ -68,11 +68,11 @@ public class ReaderExample extends BaseTest {
 
     @Test
     public void testReadBySheetName() throws ReaderException {
-        List<Sample> samples = Reader.create()
+        List<Sample> samples = Reader.create(Sample.class)
                 .from(new File(classPath() + "/SampleData.xlsx"))
-                .sheetName("SalesOrders")
+                .sheet("SalesOrders")
                 .startRow(1)
-                .asList(Sample.class);
+                .asList();
 
         Assert.assertEquals(43, samples.size());
         Assert.assertEquals(new BigDecimal("189.05"), samples.get(0).getAmount());
@@ -81,11 +81,11 @@ public class ReaderExample extends BaseTest {
 
     @Test
     public void testReadAndFilter() throws ReaderException {
-        List<Sample> samples = Reader.create()
+        List<Sample> samples = Reader.create(Sample.class)
                 .from(new File(classPath() + "/SampleData.xlsx"))
-                .sheetName("SalesOrders")
+                .sheet("SalesOrders")
                 .startRow(1)
-                .asStream(Sample.class)
+                .asStream()
                 .filter(sample -> sample.getAmount().intValue() > 1000)
                 .collect(toList());
 
@@ -96,11 +96,11 @@ public class ReaderExample extends BaseTest {
 
     @Test
     public void testReadAndValid() throws ReaderException {
-        List<Sample> samples = Reader.create()
+        List<Sample> samples = Reader.create(Sample.class)
                 .from(new File(classPath() + "/SampleData.xlsx"))
-                .sheetName("SalesOrders")
+                .sheet("SalesOrders")
                 .startRow(1)
-                .asStream(Sample.class)
+                .asStream()
                 .filter(sample -> sample.getAmount().intValue() > 1000)
                 .collect(toList());
 

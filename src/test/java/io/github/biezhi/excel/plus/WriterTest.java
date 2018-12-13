@@ -30,7 +30,7 @@ public class WriterTest extends BaseTest {
 
         Assert.assertEquals(0, writer.startRow());
         Assert.assertEquals(100, writer.bufferSize());
-        Assert.assertEquals("Sheet0", writer.sheetName());
+        Assert.assertEquals("Sheet0", writer.sheet());
 
         Assert.assertFalse(writer.isRaw());
     }
@@ -60,7 +60,7 @@ public class WriterTest extends BaseTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testSheetNameError() {
-        Writer.create().sheetName(null);
+        Writer.create().sheet(null);
     }
 
 }

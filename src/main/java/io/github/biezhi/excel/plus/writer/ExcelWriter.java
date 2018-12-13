@@ -71,7 +71,7 @@ public abstract class ExcelWriter {
      */
     void writeSheet(Writer writer) throws WriterException {
         // create sheet
-        this.sheet = workbook.createSheet(writer.sheetName());
+        this.sheet = workbook.createSheet(writer.sheet());
 
         // setting styles
         CellStyle headerStyle = Constant.defaultHeaderStyle(workbook);
