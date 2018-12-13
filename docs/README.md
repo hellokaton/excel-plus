@@ -80,11 +80,11 @@ public class Sample {
 测试的 Excel 文档中有很多个 `Sheet`，我们只需读取名为 `SalesOrders` 的就可以了，其他的不关心。
 
 ```java
-List<Sample> samples = Reader.create()
+List<Sample> samples = Reader.create(Sample.class)
                 .from(new File("SampleData.xlsx"))
-                .sheetName("SalesOrders")
+                .sheet("SalesOrders")
                 .startRow(1)
-                .asList(Sample.class);
+                .asList();
 ```
 
 这样就可以读取到了，非常简单！
@@ -113,11 +113,11 @@ Writer.create()
 有时候我们需要对读取的行数据做一下过滤，这时候就可以使用 `filter` 函数来筛选出合适的数据项。
 
 ```java
-List<Sample> samples = Reader.create()
+List<Sample> samples = Reader.create(Sample.class)
                 .from(new File(classPath() + "/SampleData.xlsx"))
-                .sheetName("SalesOrders")
+                .sheet("SalesOrders")
                 .startRow(1)
-                .asStream(Sample.class)
+                .asStream()
                 .filter(sample -> sample.getAmount().intValue() > 1000)
                 .collect(toList());
 
@@ -190,19 +190,20 @@ Writer.create()
 
 ## Reader
 
+- `create(Class)`：创建指定类型的 Reader
 - `from(File)`：从文件中读取
 - `from(InputStream)`：从 InputStream 中读取
 - `startRow(int)`：设置从第几行开始读，索引从 0 开始
-- `sheetIndex(int)`：要读取的 sheet 索引，默认为 0
-- `sheetName(String)`：要读取的 sheet 名称，如果设置则不会根据 sheetIndex 读取
-- `asStream(Class)`：将读取结果存储在 Stream 中返回
-- `asList(Class)`：将读取结果存储在 List 中返回
+- `sheet(int)`：要读取的 sheet 索引，默认为 0
+- `sheet(String)`：要读取的 sheet 名称，如果设置则不会根据 sheetIndex 读取
+- `asStream()`：将读取结果存储在 Stream 中返回
+- `asList()`：将读取结果存储在 List 中返回
 
 ## Writer
 
 - `Writer(ExcelType)`：构造函数，写入什么类型的文件，支持 XLSX、XLS、CSV 格式
 - `withRows(Collection)`：写入的数据，该方法接收一个集合
-- `sheetName(String)`：写入的 Sheet 名称，默认为 `Sheet0`
+- `sheet(String)`：写入的 Sheet 名称，默认为 `Sheet0`
 - `startRow(int)`：从第几行开始写入，索引从 0 开始，默认是计算出的，建议不设置
 - `headerTitle(String)`：Sheet 的大标题，可选项
 - `titleStyle(BiConsumer)`：自定义标题样式
