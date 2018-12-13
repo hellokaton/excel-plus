@@ -51,6 +51,11 @@ public abstract class ExcelWriter {
     public abstract void writeWorkbook(Writer writer) throws WriterException;
 
     protected void writeWorkbook(Writer writer, Workbook workbook) throws WriterException {
+        List<?> rows = writer.getRows();
+        if (null == rows || rows.isEmpty()) {
+            throw new WriterException("Write rows cannot be empty");
+        }
+
         Sheet sheet = workbook.createSheet(writer.sheetName());
 
         try (OutputStream os = outputStream) {
@@ -71,11 +76,6 @@ public abstract class ExcelWriter {
             }
 
             String headerTitle = writer.headerTitle();
-
-            List<?> rows = writer.getRows();
-            if (null == rows || rows.isEmpty()) {
-                throw new WriterException("");
-            }
 
             Class<?>            type           = rows.get(0).getClass();
             Field[]             declaredFields = type.getDeclaredFields();
