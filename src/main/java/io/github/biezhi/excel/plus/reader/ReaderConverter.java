@@ -19,24 +19,26 @@ public class ReaderConverter {
 
     private Map<Field, Converter<String, ?>> fieldConverters;
 
-    void initFieldConverter(Field[] declaredFields) throws Exception {
+    void initFieldConverter(Field[] fields) throws Exception {
         this.fieldConverters = new HashMap<>();
-        this.fieldIndexes = new HashMap<>(declaredFields.length);
+        this.fieldIndexes = new HashMap<>(fields.length);
 
-        for (Field field : declaredFields) {
+        for (Field field : fields) {
             ExcelColumn column = field.getAnnotation(ExcelColumn.class);
-            if (null != column) {
-                field.setAccessible(true);
-                fieldIndexes.put(column.index(), field);
-                Converter converter;
-                if (NullConverter.class.equals(column.converter())) {
-                    converter = ConverterCache.computeConvert(field);
-                } else {
-                    converter = column.converter().newInstance();
-                }
-                if (null != converter) {
-                    fieldConverters.put(field, converter);
-                }
+            if (null == column) {
+                continue;
+            }
+            field.setAccessible(true);
+            fieldIndexes.put(column.index(), field);
+
+            Converter converter;
+            if (NullConverter.class.equals(column.converter())) {
+                converter = ConverterCache.computeConvert(field);
+            } else {
+                converter = column.converter().newInstance();
+            }
+            if (null != converter) {
+                fieldConverters.put(field, converter);
             }
         }
     }

@@ -13,6 +13,9 @@ import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * @author biezhi
@@ -73,6 +76,21 @@ public class ReaderTest extends BaseTest {
         Assert.assertEquals(43, samples.size());
         Assert.assertEquals(new BigDecimal("189.05"), samples.get(0).getAmount());
         Assert.assertEquals(new BigDecimal("139.72"), samples.get(samples.size() - 1).getAmount());
+    }
+
+    @Test
+    public void testReadAndFilter() throws ReaderException {
+        List<Sample> samples = excelPlus.read()
+                .from(new File(classPath() + "/SampleData.xlsx"))
+                .sheetName("SalesOrders")
+                .startRow(1)
+                .asStream(Sample.class)
+                .filter(sample -> sample.getAmount().intValue() > 1000)
+                .collect(toList());
+
+        Assert.assertEquals(6, samples.size());
+        Assert.assertEquals(new BigDecimal("1619.19"), samples.get(0).getAmount());
+        Assert.assertEquals(new BigDecimal("1879.06"), samples.get(samples.size() - 1).getAmount());
     }
 
 }

@@ -74,14 +74,15 @@ public class ReaderWith2003 extends ReaderConverter implements ExcelReader {
     }
 
     private void writeFiledValue(Row row, Object instance, Field field) {
-        ExcelColumn excelColumn = field.getAnnotation(ExcelColumn.class);
-        Cell        cell        = row.getCell(excelColumn.index());
-        if (cell != null) {
-            try {
-                this.writeToModel(cell.getStringCellValue(), field, instance);
-            } catch (Exception e) {
-                log.error("write field [%s] value fail", field.getName(), e);
-            }
+        ExcelColumn column = field.getAnnotation(ExcelColumn.class);
+        Cell        cell   = row.getCell(column.index());
+        if (null == cell) {
+            return;
+        }
+        try {
+            this.writeToModel(cell.getStringCellValue(), field, instance);
+        } catch (Exception e) {
+            log.error("write field [%s] value fail", field.getName(), e);
         }
     }
 
