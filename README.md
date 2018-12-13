@@ -11,8 +11,8 @@ Easier to read and generate an excel file, supports `XLSX`、`XLS`、`CSV`.
 [![](https://img.shields.io/maven-central/v/io.github.biezhi/excel-plus.svg)](https://mvnrepository.com/artifact/io.github.biezhi/excel-plus)
 [![](https://img.shields.io/badge/license-Apache2-FF0080.svg)](https://github.com/biezhi/excel-plus/blob/master/LICENSE)
 
-[![Test Coverage](https://codecov.io/gh/Vatavuk/excel-io/branch/master/graph/badge.svg)](https://codecov.io/gh/Vatavuk/excel-io)
-[![SonarQube](https://img.shields.io/badge/sonar-ok-green.svg)](https://sonarcloud.io/dashboard/index/hr.com.vgv:excel-io)
+[![codecov](https://codecov.io/gh/biezhi/excel-plus/branch/master/graph/badge.svg)](https://codecov.io/gh/biezhi/excel-plus)
+[![SonarQube](https://img.shields.io/badge/sonar-ok-green.svg)](https://sonarcloud.io/dashboard/index/io.github.biezhi:excel-plus)
 
 <a href="https://biezhi.github.io/excel-plus/" target="_blank">中文文档</a>
 
