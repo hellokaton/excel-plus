@@ -81,8 +81,7 @@ public class Sample {
 这个文档中有很多个 `Sheet`，我们只需要读取名为 `SalesOrders` 的就可以了，其他的不关心。
 
 ```java
-ExcelPlus excelPlus = new ExcelPlus();
-List<Sample> samples = excelPlus.read()
+List<Sample> samples = Reader.create()
                 .from(new File("SampleData.xlsx"))
                 .sheetName("SalesOrders")
                 .startRow(1)
@@ -98,10 +97,9 @@ List<Sample> samples = excelPlus.read()
 接下来试试写入一个表格到磁盘上吧 :)
 
 ```java
-ExcelPlus excelPlus = new ExcelPlus();
 List<Sample> samples = new ArrayList<>();
 // 这里的数据需自行准备
-excelPlus.write()
+Writer.create()
         .headerTitle("一份简单的Excel表格")
         .withRows(samples)
         .to(new File("sample_test.xlsx"));
@@ -116,62 +114,45 @@ excelPlus.write()
 有时候我们需要对读取的行数据做一下过滤，这时候就可以使用 `filter` 函数来筛选出合适的数据项。
 
 ```java
-excelPlus.read(CardSecret.class, reader)
-         .filter(cardSecret -> !cardSecret.getSecret().isEmpty())
-         .asList();
+List<Sample> samples = Reader.create()
+                .from(new File(classPath() + "/SampleData.xlsx"))
+                .sheetName("SalesOrders")
+                .startRow(1)
+                .asStream(Sample.class)
+                .filter(sample -> sample.getAmount().intValue() > 1000)
+                .collect(toList());
+
 ```
 
-## 读取校验
-
-有一种场景是当 Excel 中的某一行或者几行数据不满足条件时候，我们记录下这些异常数据，并提示给调用方（比如 Web 浏览器）。
-下面这个示例校验每行数据中的 `amount` 是否 `< 20`，如果满足则返回一个校验失败的错误信息，然后我们将错误内容输出到控制台，
-实际工作中你可能将它们交由前端处理。
-
-```java
-ReaderResult<CardSecret> result = excelPlus.read(new File("卡密列表.xls"), CardSecret.class)
-         .valid((index, cardSecret) -> {
-            if(!cardSecret.getUsed()){
-                return ValidRow.ok();
-            }
-            return ValidRow.fail("已经被使用");
-         });
-
-if (!result.isValid()) {
-    result.errors().forEach(System.out::println);
-} else {
-    System.out.println(result.asList().size());
-}
-```
-
-> 当然你可以将 `valid` 校验代码块封装一下看起来更流畅 :P
-
-## 导出样式
+## 自定义写入样式
 
 大多数情况下我们是无需设置样式的，在 `excel-plus` 中提供了设置表头和列的样式 API。
 在某些需求下可能需要设置字体大小、颜色、居中等，你可以像下面的代码这样干。
 如果你对样式的操作不熟悉可以参考 POI 的列设置[文档](https://poi.apache.org/spreadsheet/quick-guide.html#Creating+Date+Cells)。
 
 ```java
-// 构建数据
-List<CardSecret> cardSecrets = this.buildCardSecrets();
-
-Exporter<CardSecret> exporter = Exporter.create(cardSecrets);
-exporter.headerStyle(workbook -> {
-    CellStyle headerStyle = workbook.createCellStyle();
-    headerStyle.setAlignment(HorizontalAlignment.LEFT);
-
-    headerStyle.setFillForegroundColor(HSSFColor.HSSFColorPredefined.WHITE.getIndex());
-    headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-
-    Font headerFont = workbook.createFont();
-    headerFont.setFontHeightInPoints((short) 12);
-    headerFont.setBold(true);
-    headerStyle.setFont(headerFont);
-    return headerStyle;
-});
-
-excelPlus.export(exporter)
-                .writeAsFile(new File("卡密列表.xlsx"));
+Writer.create()
+        .headerTitle("一份自定义样式的Excel表格")
+        .withRows(buildData())
+        .titleStyle((wb, style) -> {
+            Font font = wb.createFont();
+            font.setFontHeightInPoints((short) 40);
+            font.setColor(HSSFColor.HSSFColorPredefined.RED.getIndex());
+            style.setFont(font);
+        })
+        .headerStyle((wb, style) -> {
+            Font font = wb.createFont();
+            font.setFontHeightInPoints((short) 20);
+            font.setColor(HSSFColor.HSSFColorPredefined.BLACK.getIndex());
+            style.setFont(font);
+        })
+        .cellStyle((wb, style) -> {
+            Font font = wb.createFont();
+            font.setFontHeightInPoints((short) 20);
+            font.setColor(HSSFColor.HSSFColorPredefined.BLUE.getIndex());
+            style.setFont(font);
+        })
+        .to(new File(fileName));
 ```
 
 ## 浏览器下载
@@ -179,8 +160,9 @@ excelPlus.export(exporter)
 为了方便我们将数据库查询的数据直接输出到浏览器弹出下载，`excel-plus` 也做了一点 _手脚_ 让你一行代码就可以搞定。
 
 ```java
-excelPlus.export(exporter)
-         .writeAsResponse(ResponseWrapper.create(servletResponse, "xxx表格.xls"))
+Writer.create()
+      ...
+      .to(ResponseWrapper.create(servletResponse, "xxx表格.xls"))
 ```
 
 只需要将 `HttpServletResponse` 对象传入，并输入导出的文件名称，其他的都见鬼去吧。
@@ -191,11 +173,13 @@ excelPlus.export(exporter)
 由程序向模板中填入数据，然后导出即可，这样就满足了美观的需求。
 
 ```java
-List<CardSecret> cardSecrets = this.buildCardSecrets();
-excelPlus.export(Exporter.create(cardSecrets).byTemplate("tpl.xls")).writeAsFile(new File("template_rows.xls"));
+Writer.create()
+        .withTemplate(classPath() + "/template.xls")
+        .withRows(buildData())
+        .to(new File(fileName));
 ```
 
-> 需要注意的是这里的 `tpl.xls` 位于 `classpath` 路径下。
+> 需要注意的是这里的 `template.xls` 位于 `classpath` 路径下。
 
 # API 介绍
 
