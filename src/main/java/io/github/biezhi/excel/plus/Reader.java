@@ -116,9 +116,9 @@ public class Reader<T> {
      * @param startRow start row index
      * @return Reader
      */
-    public Reader<T> startRow(int startRow) {
+    public Reader<T> start(int startRow) {
         if (startRow < 0) {
-            throw new IllegalArgumentException("startRow cannot be less than 0");
+            throw new IllegalArgumentException("start cannot be less than 0");
         }
         this.startRow = startRow;
         return this;

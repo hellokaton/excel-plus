@@ -58,7 +58,7 @@ public class ReaderExample extends BaseTest {
         List<Sample> samples = Reader.create(Sample.class)
                 .from(new File(classPath() + "/SampleData.xlsx"))
                 .sheet(1)
-                .startRow(1)
+                .start(1)
                 .asList();
 
         Assert.assertEquals(43, samples.size());
@@ -71,7 +71,7 @@ public class ReaderExample extends BaseTest {
         List<Sample> samples = Reader.create(Sample.class)
                 .from(new File(classPath() + "/SampleData.xlsx"))
                 .sheet("SalesOrders")
-                .startRow(1)
+                .start(1)
                 .asList();
 
         Assert.assertEquals(43, samples.size());
@@ -84,7 +84,7 @@ public class ReaderExample extends BaseTest {
         List<Sample> samples = Reader.create(Sample.class)
                 .from(new File(classPath() + "/SampleData.xlsx"))
                 .sheet("SalesOrders")
-                .startRow(1)
+                .start(1)
                 .asStream()
                 .filter(sample -> sample.getAmount().intValue() > 1000)
                 .collect(toList());
@@ -99,7 +99,7 @@ public class ReaderExample extends BaseTest {
         List<Sample> samples = Reader.create(Sample.class)
                 .from(new File(classPath() + "/SampleData.xlsx"))
                 .sheet("SalesOrders")
-                .startRow(1)
+                .start(1)
                 .asStream()
                 .filter(sample -> sample.getAmount().intValue() > 1000)
                 .collect(toList());

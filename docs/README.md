@@ -83,14 +83,14 @@ public class Sample {
 List<Sample> samples = Reader.create(Sample.class)
                 .from(new File("SampleData.xlsx"))
                 .sheet("SalesOrders")
-                .startRow(1)
+                .start(1)
                 .asList();
 ```
 
 这样就可以读取到了，非常简单！
 
-> 这里设置 `startRow` 为 1 的原因：
-> 1. 索引总是从 0 开始
+> 这里设置 `start` 为 1 的原因：
+> 1. 读取行的索引总是从 0 开始
 > 2. 这个表格中索引为 0 的行是列信息，故从索引为 1 的开始读取
 
 接下来试试写入一个表格到磁盘上吧 :)

@@ -4,6 +4,7 @@ import io.github.biezhi.excel.plus.BaseTest;
 import io.github.biezhi.excel.plus.Writer;
 import io.github.biezhi.excel.plus.enums.ExcelType;
 import io.github.biezhi.excel.plus.exception.WriterException;
+import io.github.biezhi.excel.plus.model.Book;
 import io.github.biezhi.excel.plus.model.PerformanceTestModel;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.hssf.util.HSSFColor;
@@ -15,6 +16,8 @@ import org.junit.Test;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -136,6 +139,21 @@ public class WriterExample extends BaseTest {
                 .to(new File(fileName));
 
         deleteTempFile(fileName);
+    }
+
+    @Test
+    public void testWriteBookXLSX(){
+        List<Book> books = new ArrayList<>();
+        books.add(new Book("新名字的故事", "埃莱娜·费兰特", 59.0D, LocalDate.of(2017, 4, 1)));
+        books.add(new Book("鱼王", "Царь-рыба", 78.0D, LocalDate.of(2017, 4, 1)));
+        books.add(new Book("不可思议的朋友", "[日] 田岛征彦", 45.0D, LocalDate.of(2017, 7, 1)));
+        books.add(new Book("杀死一只知更鸟", "[美] 哈珀·李", 48.0D, LocalDate.of(2017, 2, 1)));
+        books.add(new Book("现代艺术150年", " [英] 威尔·贡培兹", 65.0D, LocalDate.of(2017, 3, 1)));
+
+        Writer.create()
+                .withRows(books)
+                .headerTitle("书籍列表 V1")
+                .to(new File("book.xlsx"));
     }
 
 }

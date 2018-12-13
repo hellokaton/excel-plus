@@ -50,7 +50,7 @@ public class ReaderTest extends BaseTest {
 
         reader.from(new File(classPath() + "/SampleData.xlsx"))
                 .sheet(1)
-                .startRow(1)
+                .start(1)
                 .sheet("SalesOrders");
 
         Assert.assertNotNull(reader.fromFile());
@@ -62,7 +62,7 @@ public class ReaderTest extends BaseTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testStartRowError() {
-        Reader.create(null).startRow(-1);
+        Reader.create(null).start(-1);
     }
 
     @Test(expected = IllegalArgumentException.class)

@@ -55,7 +55,7 @@ public class WriterTest extends BaseTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testStartRowError() {
-        Writer.create().startRow(-1);
+        Writer.create().start(-1);
     }
 
     @Test(expected = IllegalArgumentException.class)

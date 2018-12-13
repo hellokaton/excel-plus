@@ -143,9 +143,9 @@ public class Writer {
      * @param startRow start row index
      * @return Writer
      */
-    public Writer startRow(int startRow) {
+    public Writer start(int startRow) {
         if (startRow < 0) {
-            throw new IllegalArgumentException("startRow cannot be less than 0");
+            throw new IllegalArgumentException("start cannot be less than 0");
         }
         this.startRow = startRow;
         return this;
