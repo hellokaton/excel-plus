@@ -2,9 +2,17 @@
 
 Easier to read and generate an excel file, supports `XLSX`、`XLS`、`CSV`.
 
+[![EO principles respected here](http://www.elegantobjects.org/badge.svg)](http://www.elegantobjects.org)
+[![DevOps By Rultor.com](http://www.rultor.com/b/Vatavuk/excel-io)](http://www.rultor.com/p/Vatavuk/excel-io)
+
+
 [![](https://img.shields.io/travis/biezhi/excel-plus.svg)](https://travis-ci.org/biezhi/excel-plus)
+[![Javadocs](http://javadoc.io/badge/io.github.biezhi/excel-plus.svg)](http://javadoc.io/doc/io.github.biezhi/excel-plus)
 [![](https://img.shields.io/maven-central/v/io.github.biezhi/excel-plus.svg)](https://mvnrepository.com/artifact/io.github.biezhi/excel-plus)
 [![](https://img.shields.io/badge/license-Apache2-FF0080.svg)](https://github.com/biezhi/excel-plus/blob/master/LICENSE)
+
+[![Test Coverage](https://codecov.io/gh/Vatavuk/excel-io/branch/master/graph/badge.svg)](https://codecov.io/gh/Vatavuk/excel-io)
+[![SonarQube](https://img.shields.io/badge/sonar-ok-green.svg)](https://sonarcloud.io/dashboard/index/hr.com.vgv:excel-io)
 
 <a href="https://biezhi.github.io/excel-plus/" target="_blank">中文文档</a>
 
@@ -19,6 +27,16 @@ Easier to read and generate an excel file, supports `XLSX`、`XLS`、`CSV`.
 - High performance, only 30 seconds to read or write `1,000,000` lines
 
 # Usage
+
+**How to use**. Latest version here
+
+```xml
+<dependency>
+    <groupId>io.github.biezhi</groupId>
+    <artifactId>excel-plus</artifactId>
+    <version>1.0.0.Alpha</version>
+</dependency>
+```
 
 snapshot version
 
@@ -105,7 +123,7 @@ Writer.create()
 
 ![](https://i.loli.net/2018/12/14/5c1292b23b66f.png)
 
-Code See [here]()
+Code See [here](https://github.com/biezhi/excel-plus/blob/master/src/test/java/io/github/biezhi/excel/plus/examples/WriterExample.java#L145)
 
 **Browser download**
 
@@ -117,7 +135,7 @@ Writer.create()
 
 # Examples
 
-See [here](https://github.com/biezhi/excel-plus/tree/master/src/test/java/io/github/biezhi/excel/plus)
+See [here](https://github.com/biezhi/excel-plus/blob/master/src/test/java/io/github/biezhi/excel/plus/examples)
 
 # Thanks
 
