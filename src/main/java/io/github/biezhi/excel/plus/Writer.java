@@ -99,6 +99,14 @@ public class Writer {
 
     private Consumer<Sheet> sheetConsumer;
 
+    public static Writer create(){
+        return new Writer(ExcelType.XLSX);
+    }
+
+    public static Writer create(ExcelType excelType){
+        return new Writer(excelType);
+    }
+
     public Writer(ExcelType excelType) {
         this.excelType = excelType;
     }

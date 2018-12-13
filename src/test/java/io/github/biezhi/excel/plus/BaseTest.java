@@ -29,8 +29,6 @@ public class BaseTest {
 
     final String testFileName = "test_write_100w_rows.xlsx";
 
-    ExcelPlus excelPlus = new ExcelPlus();
-
     List<PerformanceTestModel> readyData() {
 
         List<PerformanceTestModel> data = new ArrayList<>(testCount);
@@ -51,7 +49,8 @@ public class BaseTest {
     void writeTestExcel(List<PerformanceTestModel> rows) throws WriterException {
         log.info("data  ready !!!");
         log.info("start write !!!");
-        excelPlus.write()
+
+        Writer.create()
                 .withRows(rows)
                 .headerTitle("Test Write Model Excel")
                 .to(new File(testFileName));

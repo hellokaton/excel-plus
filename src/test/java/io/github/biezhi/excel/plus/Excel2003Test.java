@@ -18,8 +18,6 @@ import java.util.List;
  */
 public class Excel2003Test extends BaseTest {
 
-    private ExcelPlus excelPlus = new ExcelPlus();
-
     @Test
     public void testWrite2003() throws WriterException {
         String fileName = "sample_test.xls";
@@ -31,7 +29,7 @@ public class Excel2003Test extends BaseTest {
         samples.add(new Sample(LocalDate.now(), "hello04", 104));
         samples.add(new Sample(LocalDate.now(), "hello05", 105));
 
-        excelPlus.write(ExcelType.XLS)
+        Writer.create(ExcelType.XLS)
                 .headerTitle("一份简单的Excel表格")
                 .withRows(samples)
                 .to(new File(fileName));
@@ -43,7 +41,7 @@ public class Excel2003Test extends BaseTest {
     public void testRead2003() throws WriterException, ReaderException {
         testWrite2003();
 
-        List<Sample> samples = excelPlus.read()
+        List<Sample> samples = Reader.create()
                 .from(new File("sample_test.xls"))
                 .asList(Sample.class);
 

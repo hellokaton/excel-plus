@@ -54,7 +54,7 @@ public class WriterTest extends BaseTest {
     public void testWriteSample() throws WriterException {
         String fileName = "sample_test.xlsx";
 
-        excelPlus.write()
+        Writer.create()
                 .headerTitle("一份简单的Excel表格")
                 .withRows(buildData())
                 .to(new File("sample_test.xlsx"));
@@ -66,7 +66,7 @@ public class WriterTest extends BaseTest {
     public void testWriteCustomStyle() throws WriterException {
         String fileName = "sample_custom_style_test.xlsx";
 
-        excelPlus.write()
+        Writer.create()
                 .headerTitle("一份自定义样式的Excel表格")
                 .withRows(buildData())
                 .titleStyle((wb, style) -> {
@@ -96,7 +96,7 @@ public class WriterTest extends BaseTest {
     public void testWriteCustom() throws WriterException {
         String fileName = "sample_custom_with_raw.xlsx";
 
-        excelPlus.write()
+        Writer.create()
                 .withRaw()
                 .createRow(sheet -> {
                     sheet.setDefaultColumnWidth(30);
@@ -118,7 +118,7 @@ public class WriterTest extends BaseTest {
     public void testWriteByTemplate() throws WriterException {
         String fileName = "sample_custom_with_template.xlsx";
 
-        excelPlus.write()
+        Writer.create()
                 .withTemplate(classPath() + "/template.xls")
                 .withRows(buildData())
                 .to(new File(fileName));
@@ -130,7 +130,7 @@ public class WriterTest extends BaseTest {
     public void testWriteToOutputStream() throws FileNotFoundException, WriterException {
         String fileName = "sample_test_to_stream.xlsx";
 
-        excelPlus.write()
+        Writer.create()
                 .headerTitle("一份简单的Excel表格")
                 .withRows(buildData())
                 .to(new FileOutputStream(new File(fileName)));
@@ -142,7 +142,7 @@ public class WriterTest extends BaseTest {
     public void testWriteByCSV() throws WriterException {
         String fileName = "write_as_csv.csv";
 
-        excelPlus.write(ExcelType.CSV)
+        Writer.create(ExcelType.CSV)
                 .withRows(buildData())
                 .to(new File(fileName));
 

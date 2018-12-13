@@ -30,17 +30,10 @@ snapshot version
 </dependency>
 ```
 
-**Create ExcelPlus**
-
-```java
-ExcelPlus excelPlus = new ExcelPlus();
-```
-
 **Read excel as List**
 
 ```java
-List<Member> members = 
-        excelPlus.read()
+List<Member> members = Reader.create()
                  .from(new File("members.xlsx"))
                  .asList(Member.class);
 ```
@@ -48,7 +41,7 @@ List<Member> members =
 **Write excel as file**
 
 ```java
-excelPlus.write()
+Writer.create()
          .withRows(books)
          .headerTitle("书籍列表 V1")
          .to(new File("book.xlsx"));
@@ -57,18 +50,14 @@ excelPlus.write()
 **Browser download**
 
 ```java
-excelPlus.write()
+Writer.create()
          .withRows(orders)
          .to(ResponseWrapper.create(HttpServletResponse, "order-list.xls"));
 ```
 
 # Examples
 
-See [here](https://github.com/biezhi/excel-plus/tree/master/src/test/java/io/github/biezhi/excel/plus/Examples.java)
-
-# Advanced
-
-**Custom export style**
+See [here](https://github.com/biezhi/excel-plus/tree/master/src/test/java/io/github/biezhi/excel/plus)
 
 # Thanks
 

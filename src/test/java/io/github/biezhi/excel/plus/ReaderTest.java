@@ -13,7 +13,6 @@ import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -26,7 +25,7 @@ public class ReaderTest extends BaseTest {
 
     @Test
     public void testReadBasic() throws ReaderException {
-        List<Financial> financials = excelPlus.read()
+        List<Financial> financials = Reader.create()
                 .from(new File(classPath() + "/FinancialSample.xlsx"))
                 .asList(Financial.class);
 
@@ -41,7 +40,7 @@ public class ReaderTest extends BaseTest {
 
         long start = System.currentTimeMillis();
 
-        List<PerformanceTestModel> list = excelPlus.read()
+        List<PerformanceTestModel> list = Reader.create()
                 .from(new File(testFileName))
                 .asList(PerformanceTestModel.class);
 
@@ -54,7 +53,7 @@ public class ReaderTest extends BaseTest {
     @Test
     public void testReadBySheetIndex() throws ReaderException {
         System.out.println(classPath());
-        List<Sample> samples = excelPlus.read()
+        List<Sample> samples = Reader.create()
                 .from(new File(classPath() + "/SampleData.xlsx"))
                 .sheetIndex(1)
                 .startRow(1)
@@ -67,7 +66,7 @@ public class ReaderTest extends BaseTest {
 
     @Test
     public void testReadBySheetName() throws ReaderException {
-        List<Sample> samples = excelPlus.read()
+        List<Sample> samples = Reader.create()
                 .from(new File(classPath() + "/SampleData.xlsx"))
                 .sheetName("SalesOrders")
                 .startRow(1)
@@ -80,7 +79,7 @@ public class ReaderTest extends BaseTest {
 
     @Test
     public void testReadAndFilter() throws ReaderException {
-        List<Sample> samples = excelPlus.read()
+        List<Sample> samples = Reader.create()
                 .from(new File(classPath() + "/SampleData.xlsx"))
                 .sheetName("SalesOrders")
                 .startRow(1)
@@ -95,7 +94,7 @@ public class ReaderTest extends BaseTest {
 
     @Test
     public void testReadAndValid() throws ReaderException {
-        List<Sample> samples = excelPlus.read()
+        List<Sample> samples = Reader.create()
                 .from(new File(classPath() + "/SampleData.xlsx"))
                 .sheetName("SalesOrders")
                 .startRow(1)

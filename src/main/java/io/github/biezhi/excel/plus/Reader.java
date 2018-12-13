@@ -71,6 +71,18 @@ public class Reader {
      */
     private InputStream fromStream;
 
+    public static Reader create(){
+        return new Reader();
+    }
+
+    public static Reader create(File fromFile){
+        return new Reader().from(fromFile);
+    }
+
+    public static Reader create(InputStream fromStream){
+        return new Reader().from(fromStream);
+    }
+
     /**
      * Read row data from an Excel file
      *
