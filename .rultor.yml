@@ -1,0 +1,5 @@
+release:
+  script: |
+    mvn versions:set "-DnewVersion=${tag}"
+    git commit -am "${tag}"
+    mvn clean deploy -Pqulice -Psonatype -Pexcel-plus --settings /home/r/settings.xml
