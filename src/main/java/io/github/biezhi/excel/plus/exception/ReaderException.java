@@ -16,6 +16,8 @@
 package io.github.biezhi.excel.plus.exception;
 
 /**
+ * ReaderException
+ *
  * @author biezhi
  * @date 2018-12-11
  */
@@ -36,7 +38,4 @@ public class ReaderException extends ExcelPlusException {
         super(cause);
     }
 
-    public ReaderException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
 }

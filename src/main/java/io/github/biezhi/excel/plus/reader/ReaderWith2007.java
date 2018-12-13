@@ -41,15 +41,15 @@ import java.io.InputStream;
 import java.util.stream.Stream;
 
 /**
+ * Read 2007 Excel
+ *
  * @author biezhi
  * @date 2018-12-11
  */
 public class ReaderWith2007 implements ExcelReader {
 
-    private Workbook workbook;
-
     public ReaderWith2007(Workbook workbook) {
-        this.workbook = workbook;
+        //
     }
 
     public <T> Stream<T> readExcel(Reader reader) throws ReaderException {

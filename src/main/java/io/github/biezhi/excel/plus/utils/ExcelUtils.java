@@ -18,6 +18,7 @@ package io.github.biezhi.excel.plus.utils;
 import io.github.biezhi.excel.plus.enums.ExcelType;
 import io.github.biezhi.excel.plus.exception.ReaderException;
 import lombok.experimental.UtilityClass;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -79,9 +80,28 @@ public class ExcelUtils {
         return ext.toUpperCase().equals("XLSX");
     }
 
+    public static boolean isXLS(File file) {
+        String ext = getFileExtension(file.getName());
+        return ext.toUpperCase().equals("XLS");
+    }
+
+    public static boolean isCSV(File file) {
+        String ext = getFileExtension(file.getName());
+        return ext.toUpperCase().equals("CSV");
+    }
+
     public static boolean isXLSX(InputStream inputStream) {
         try {
             new XSSFWorkbook(inputStream);
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean isXLS(InputStream inputStream) {
+        try {
+            new HSSFWorkbook(inputStream);
         } catch (Exception e) {
             return false;
         }

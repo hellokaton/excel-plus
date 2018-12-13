@@ -16,56 +16,72 @@
 package io.github.biezhi.excel.plus.reader;
 
 import io.github.biezhi.excel.plus.Reader;
+import io.github.biezhi.excel.plus.annotation.ExcelColumn;
 import io.github.biezhi.excel.plus.exception.ReaderException;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
 import java.util.stream.Stream;
 
 /**
- * Reader 2003 Excel
+ * CSV Reader
  *
  * @author biezhi
- * @date 2018-12-11
+ * @date 2018-12-13
  */
 @Slf4j
-public class ReaderWith2003 extends ReaderConverter implements ExcelReader {
+public class ReaderWithCSV extends ReaderConverter implements ExcelReader {
 
-    private Workbook workbook;
+    private InputStream inputStream;
 
-    public ReaderWith2003(Workbook workbook) {
-        this.workbook = workbook;
+    public ReaderWithCSV(InputStream inputStream) {
+        this.inputStream = inputStream;
     }
 
     @Override
     public <T> Stream<T> readExcel(Reader reader) throws ReaderException {
-        Class             type    = reader.modelType();
-        Stream.Builder<T> builder = Stream.builder();
+        Class type = reader.modelType();
+
         try {
             this.initFieldConverter(type.getDeclaredFields());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-            Sheet sheet = workbook.getSheetAt(reader.sheetIndex());
+        int startRow = reader.startRow();
 
-            int startRow = reader.startRow();
-            int totalRow = sheet.getPhysicalNumberOfRows();
+        Stream.Builder<T> builder = Stream.builder();
 
-            for (int i = 0; i < totalRow; i++) {
-                if (i < startRow) {
+        String line;
+
+        try (BufferedReader br =
+                     new BufferedReader(
+                             new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+
+            int pos = 0;
+
+            while ((line = br.readLine()) != null) {
+                if (pos < startRow) {
                     continue;
                 }
-                Row row = sheet.getRow(i);
-                if (null == row) {
-                    continue;
-                }
-
                 Object instance = type.newInstance();
+
+                String[] csvLine = line.split(",");
+
                 for (Field field : fieldIndexes.values()) {
-                    writeFiledValue(row, instance, field);
+                    ExcelColumn column = field.getAnnotation(ExcelColumn.class);
+                    try {
+                        this.writeToModel(csvLine[column.index()], field, instance);
+                    } catch (Exception e) {
+                        log.error("write field [%s] value fail", field.getName(), e);
+                    }
                 }
                 builder.add((T) instance);
+                pos++;
             }
             return builder.build();
         } catch (Exception e) {

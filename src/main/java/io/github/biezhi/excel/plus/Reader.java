@@ -16,6 +16,7 @@
 package io.github.biezhi.excel.plus;
 
 import io.github.biezhi.excel.plus.exception.ReaderException;
+import io.github.biezhi.excel.plus.reader.ReaderFactory;
 import io.github.biezhi.excel.plus.reader.ReaderWith2003;
 import io.github.biezhi.excel.plus.reader.ReaderWith2007;
 import io.github.biezhi.excel.plus.utils.ExcelUtils;
@@ -170,17 +171,9 @@ public class Reader {
         }
 
         if (fromFile != null) {
-            if (ExcelUtils.isXLSX(fromFile)) {
-                return new ReaderWith2007(null).readExcel(this);
-            } else {
-                return new ReaderWith2003(ExcelUtils.create(fromFile)).readExcel(this);
-            }
+            return ReaderFactory.readByFile(this);
         } else {
-            if (ExcelUtils.isXLSX(fromStream)) {
-                return new ReaderWith2007(null).readExcel(this);
-            } else {
-                return new ReaderWith2003(ExcelUtils.create(fromStream)).readExcel(this);
-            }
+            return ReaderFactory.readByStream(this);
         }
     }
 
