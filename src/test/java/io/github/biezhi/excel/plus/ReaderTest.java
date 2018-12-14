@@ -5,6 +5,10 @@ import io.github.biezhi.excel.plus.model.Sample;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.util.List;
+import java.util.stream.Stream;
 
 import static org.junit.Assert.*;
 
@@ -33,16 +37,35 @@ public class ReaderTest extends BaseTest {
     }
 
     @Test
-    public void testCreateByFile() {
+    public void testCreateByFile() throws ReaderException {
         Reader reader = Reader.create(Sample.class, new File(classPath() + "/SampleData.xlsx"));
 
         assertNotNull(reader);
         assertNotNull(reader.fromFile());
+
+        Stream stream = reader.asStream();
+        assertNotNull(stream);
+    }
+
+    @Test
+    public void testCreateByStream() throws FileNotFoundException {
+        Reader reader = Reader.create(Sample.class, new FileInputStream(new File(classPath() + "/SampleData.xlsx")));
+
+        assertNotNull(reader);
+        assertNotNull(reader.fromStream());
+
+        Stream stream = reader.asStream();
+        assertNotNull(stream);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testCreateByFileNotExist() {
-        Reader.create(null, new File("abc.xlsx"));
+        Reader.create(Sample.class, new File("abcd123566.xlsx"));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testReaderFileAndStreamIsNull() throws ReaderException {
+        Reader.create(Sample.class).asStream();
     }
 
     @Test

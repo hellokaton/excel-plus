@@ -48,7 +48,7 @@ public class ConverterCacheTest {
 
     @Test
     public void testComputeConverter() throws Exception {
-        Field     field     = Sample.class.getField("date");
+        Field     field     = Sample.class.getDeclaredField("date");
         Converter converter = ConverterCache.computeConvert(field);
         assertNotNull(converter);
 

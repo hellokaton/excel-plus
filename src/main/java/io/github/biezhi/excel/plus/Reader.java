@@ -158,7 +158,7 @@ public class Reader<T> {
      * @return Stream
      * @throws ReaderException Thrown when an exception occurs during reading
      */
-    public Stream<T> asStream() throws ReaderException {
+    public Stream<T> asStream() {
         if (modelType == null) {
             throw new IllegalArgumentException("modelType can be not null");
         }
@@ -194,7 +194,7 @@ public class Reader<T> {
     }
 
     public Class<T> modelType() {
-        return (Class<T>) modelType;
+        return modelType;
     }
 
     public int sheetIndex() {

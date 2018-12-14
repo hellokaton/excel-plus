@@ -32,11 +32,58 @@ public class WriterTest extends BaseTest {
 
         assertEquals(0, writer.startRow());
         assertEquals(100, writer.bufferSize());
-        assertEquals("Sheet0", writer.sheet());
+        assertEquals("Sheet0", writer.sheetName());
 
         assertFalse(writer.isRaw());
     }
 
+
+    @Test(expected = WriterException.class)
+    public void testRowsIsNull() throws WriterException {
+        String fileName = "test_temp_012.xlsx";
+        Writer.create().to(new File(fileName));
+        deleteTempFile(fileName);
+    }
+
+    @Test
+    public void testChangeStartRow() {
+        Writer writer = Writer.create().start(10);
+        assertNotNull(writer);
+        assertEquals(10, writer.startRow());
+    }
+
+    @Test
+    public void testWithTemplate() {
+        Writer writer = Writer.create().withTemplate(classPath() + "/template.xlsx");
+
+        assertNotNull(writer);
+        assertNotNull(writer.template());
+        assertTrue(writer.template().exists());
+
+        writer = Writer.create().withTemplate(new File(classPath() + "/template.xlsx"));
+
+        assertNotNull(writer);
+        assertNotNull(writer.template());
+        assertTrue(writer.template().exists());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testNullTemplate(){
+        Writer.create().withTemplate((File) null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testNotExistTemplate(){
+        Writer.create().withTemplate(new File("abcd.12346"));
+    }
+
+    @Test
+    public void testChangeBufferSize(){
+        Writer writer = Writer.create().bufferSize(200);
+
+        assertNotNull(writer);
+        assertEquals(200, writer.bufferSize());
+    }
 
     @Test
     public void testCreateWithArgs() throws WriterException {
@@ -59,6 +106,16 @@ public class WriterTest extends BaseTest {
         deleteTempFile(fileName);
     }
 
+    @Test
+    public void testChangeSheetName() {
+        String sheetName = "MySheet";
+
+        Writer writer = Writer.create();
+        writer.sheet(sheetName);
+
+        assertEquals(sheetName, writer.sheetName());
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void testStartRowError() {
         Writer.create().start(-1);
@@ -67,6 +124,11 @@ public class WriterTest extends BaseTest {
     @Test(expected = IllegalArgumentException.class)
     public void testSheetNameError() {
         Writer.create().sheet(null);
+    }
+
+    @Test(expected = WriterException.class)
+    public void testToNotExistFile() throws WriterException {
+        Writer.create().withRows(buildData()).to(new File("/a/b/c"));
     }
 
 }
