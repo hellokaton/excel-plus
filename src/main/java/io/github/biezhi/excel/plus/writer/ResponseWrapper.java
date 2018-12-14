@@ -15,7 +15,9 @@
  */
 package io.github.biezhi.excel.plus.writer;
 
+import io.github.biezhi.excel.plus.Writer;
 import io.github.biezhi.excel.plus.exception.WriterException;
+import io.github.biezhi.excel.plus.util.StringUtil;
 import lombok.experimental.UtilityClass;
 
 import javax.servlet.http.HttpServletResponse;
@@ -32,6 +34,12 @@ public class ResponseWrapper {
 
     public static OutputStream create(HttpServletResponse servletResponse, String fileName) throws WriterException {
         try {
+            if (null == servletResponse) {
+                throw new WriterException("response instance not null");
+            }
+            if (StringUtil.isEmpty(fileName)) {
+                throw new WriterException("response file name not empty");
+            }
             servletResponse.setContentType("application/x-xls");
             fileName = new String(fileName.getBytes("UTF-8"), "ISO8859-1");
             servletResponse.setHeader("Content-Disposition", "attachment; filename=" + fileName);

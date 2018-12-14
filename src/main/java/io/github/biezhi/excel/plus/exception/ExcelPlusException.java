@@ -21,7 +21,7 @@ package io.github.biezhi.excel.plus.exception;
  * @author biezhi
  * @date 2018-12-11
  */
-public class ExcelPlusException extends RuntimeException {
+public class ExcelPlusException extends Exception {
 
     public ExcelPlusException() {
     }

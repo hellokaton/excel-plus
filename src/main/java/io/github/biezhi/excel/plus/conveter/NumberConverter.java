@@ -23,7 +23,11 @@ public abstract class NumberConverter  {
         if (StringUtil.isEmpty(value)) {
             return null;
         }
-        return value.replaceAll(",", "");
+        value = value.replaceAll(",", "");
+        if(value.endsWith(".0")){
+            return value.substring(0, value.length() - 2);
+        }
+        return value;
     }
 
 }

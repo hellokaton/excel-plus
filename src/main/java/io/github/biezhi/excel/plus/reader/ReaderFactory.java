@@ -21,8 +21,10 @@ import io.github.biezhi.excel.plus.util.ExcelUtil;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.stream.Stream;
 
 /**
@@ -53,14 +55,22 @@ public class ReaderFactory {
         }
     }
 
-    public static <T> Stream<T> readByStream(Reader reader) {
-        if (ExcelUtil.isXLSX(reader.fromStream())) {
+    public static <T> Stream<T> readByStream(Reader reader) throws ReaderException {
+        byte[] bytes;
+        try {
+            bytes = ExcelUtil.streamAsBytes(reader.fromStream());
+        } catch (IOException e) {
+            throw new ReaderException(e);
+        }
+
+        if (ExcelUtil.isXLSX(new ByteArrayInputStream(bytes))) {
+            reader.from(new ByteArrayInputStream(bytes));
             return new ReaderWith2007(null).readExcel(reader);
         } else {
-            if (ExcelUtil.isXLS(reader.fromStream())) {
-                return new ReaderWith2003(ExcelUtil.create(reader.fromStream())).readExcel(reader);
+            if (ExcelUtil.isXLS(new ByteArrayInputStream(bytes))) {
+                return new ReaderWith2003(ExcelUtil.create(new ByteArrayInputStream(bytes))).readExcel(reader);
             } else {
-                return new ReaderWithCSV(reader.fromStream()).readExcel(reader);
+                return new ReaderWithCSV(new ByteArrayInputStream(bytes)).readExcel(reader);
             }
         }
     }

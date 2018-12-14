@@ -286,7 +286,7 @@ public class Writer {
         return this.startRow;
     }
 
-    public String sheet() {
+    public String sheetName() {
         return this.sheetName;
     }
 

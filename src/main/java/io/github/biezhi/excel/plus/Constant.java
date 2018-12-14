@@ -26,8 +26,6 @@ import org.apache.poi.ss.usermodel.*;
  */
 public interface Constant {
 
-    String TIP_MSG = "Please see https://biezhi.github.io/excel-plus/";
-
     /**
      * The default worksheet name.
      */

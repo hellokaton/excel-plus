@@ -1,17 +1,17 @@
 /**
- *  Copyright (c) 2018, biezhi (biezhi.me@gmail.com)
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *  http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Copyright (c) 2018, biezhi (biezhi.me@gmail.com)
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package io.github.biezhi.excel.plus.conveter;
 
@@ -20,6 +20,7 @@ import lombok.experimental.UtilityClass;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -49,7 +50,9 @@ public class ConverterCache {
     }
 
     public static void addConvert(Converter converter) {
-        CONVERTER_MAP.put(converter.getClass(), converter);
+        if (null != converter) {
+            CONVERTER_MAP.put(converter.getClass(), converter);
+        }
     }
 
     public static Converter getConvert(
@@ -58,7 +61,16 @@ public class ConverterCache {
     }
 
     public static Converter computeConvert(Field field) throws Exception {
+        if (null == field) {
+            return null;
+        }
+
         Class fieldType = field.getType();
+
+        ExcelColumn column = field.getAnnotation(ExcelColumn.class);
+        if (null != column && !NullConverter.class.equals(column.converter())) {
+            return column.converter().newInstance();
+        }
 
         if (fieldType.equals(String.class)) {
             return ConverterCache.getConvert(StringConverter.class);
@@ -76,6 +88,8 @@ public class ConverterCache {
             return ConverterCache.getConvert(ByteConverter.class);
         } else if (fieldType.equals(boolean.class) || fieldType.equals(Boolean.class)) {
             return ConverterCache.getConvert(BooleanConverter.class);
+        } else if (fieldType.equals(BigInteger.class)) {
+            return ConverterCache.getConvert(BigIntConverter.class);
         } else if (fieldType.equals(BigDecimal.class)) {
             return ConverterCache.getConvert(DecimalConverter.class);
         } else if (fieldType.equals(Date.class)) {
@@ -87,12 +101,8 @@ public class ConverterCache {
         } else if (fieldType.equals(LocalDateTime.class)) {
             String pattern = field.getAnnotation(ExcelColumn.class).datePattern();
             return new LocalDateTimeConverter(pattern);
-        } else {
-            Class<? extends Converter> customConverter = field.getAnnotation(ExcelColumn.class).converter();
-            if(!NullConverter.class.equals(customConverter)){
-                return customConverter.newInstance();
-            }
         }
         return null;
     }
+
 }

@@ -33,6 +33,7 @@ public class IntConverter extends NumberConverter implements Converter<String, I
             if (StringUtil.isEmpty(value)) {
                 return null;
             }
+
             return Integer.parseInt(value);
         } catch (Exception e) {
             throw new ConverterException("convert [" + value + "] to Integer error", e);

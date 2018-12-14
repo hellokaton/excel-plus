@@ -1,28 +1,30 @@
 package io.github.biezhi.excel.plus.converter;
 
+import io.github.biezhi.excel.plus.conveter.BigIntConverter;
 import io.github.biezhi.excel.plus.conveter.Converter;
-import io.github.biezhi.excel.plus.conveter.IntConverter;
 import io.github.biezhi.excel.plus.exception.ConverterException;
 import org.junit.Test;
+
+import java.math.BigInteger;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 /**
  * @author biezhi
- * @date 2018-12-13
+ * @date 2018-12-14
  */
-public class IntConverterTest {
+public class BigIntConverterTest {
 
-    private Converter<String, Integer> converter = new IntConverter();
+    private Converter<String, BigInteger> converter = new BigIntConverter();
 
     @Test
     public void testStringToR() throws ConverterException {
-        int num1 = converter.stringToR("123");
-        assertEquals(123, num1);
+        BigInteger num1 = converter.stringToR("123");
+        assertEquals(new BigInteger("123"), num1);
 
-        int num2 = converter.stringToR(Integer.MAX_VALUE + "");
-        assertEquals(Integer.MAX_VALUE, num2);
+        BigInteger num2 = converter.stringToR(Integer.MAX_VALUE + "");
+        assertEquals(new BigInteger(Integer.MAX_VALUE + ""), num2);
 
         assertNull(converter.stringToR(null));
     }
@@ -30,14 +32,12 @@ public class IntConverterTest {
     @Test(expected = ConverterException.class)
     public void testStringToRError() throws ConverterException {
         converter.stringToR("abc");
-        converter.stringToR(Long.MAX_VALUE + "");
     }
 
     @Test
     public void testToString() throws ConverterException {
-        String value = converter.toString(123);
+        String value = converter.toString(new BigInteger("123"));
         assertEquals("123", value);
-        assertNull(converter.toString(null));
     }
 
 }

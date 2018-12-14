@@ -15,6 +15,7 @@
  */
 package io.github.biezhi.excel.plus.reader;
 
+import io.github.biezhi.excel.plus.conveter.Converter;
 import io.github.biezhi.excel.plus.util.ExcelUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.openxml4j.opc.OPCPackage;
@@ -101,13 +102,17 @@ public class SheetToCSV<T> extends ReaderConverter implements XSSFSheetXMLHandle
         Field field = fieldIndexes.get(currentCol);
         if (null != field) {
             try {
-                this.writeToModel(formattedValue, field, row);
+                Object    cellValue = formattedValue;
+                Converter converter = fieldConverters.get(field);
+                if (null != converter) {
+                    cellValue = converter.stringToR(formattedValue);
+                }
+                field.set(row, cellValue);
             } catch (Exception e) {
-                log.error("write field [%s] value fail", field.getName(), e);
+                log.error("write field {} value fail", field.getName(), e);
             }
         }
     }
-
 
     public OPCPackage getOpcPackage() {
         return opcPackage;
