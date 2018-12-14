@@ -4,6 +4,7 @@ import io.github.biezhi.excel.plus.exception.WriterException;
 import org.junit.Test;
 
 import java.io.File;
+import java.util.stream.Stream;
 
 import static org.junit.Assert.*;
 
@@ -107,6 +108,32 @@ public class WriterTest extends BaseTest {
     }
 
     @Test
+    public void testCustomTitleStyle(){
+        Writer writer = Writer.create().titleStyle((wb, style) -> {
+        });
+
+        assertNotNull(writer);
+        assertNotNull(writer.titleStyle());
+    }
+
+    @Test
+    public void testCustomHeaderStyle(){
+        Writer writer = Writer.create().headerStyle((wb, style) -> {
+        });
+
+        assertNotNull(writer);
+        assertNotNull(writer.headerStyle());
+    }
+
+    @Test
+    public void testWithRaw(){
+        Writer writer = Writer.create().withRaw();
+
+        assertNotNull(writer);
+        assertTrue(writer.isRaw());
+    }
+
+    @Test
     public void testChangeSheetName() {
         String sheetName = "MySheet";
 
@@ -129,6 +156,13 @@ public class WriterTest extends BaseTest {
     @Test(expected = WriterException.class)
     public void testToNotExistFile() throws WriterException {
         Writer.create().withRows(buildData()).to(new File("/a/b/c"));
+    }
+
+    @Test
+    public void testWriteCSV() throws WriterException {
+        String fileName = "write_csv_test.csv";
+        Writer.create().withRows(buildData()).to(new File(fileName));
+        deleteTempFile(fileName);
     }
 
 }
