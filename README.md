@@ -34,7 +34,7 @@ Easier to read and generate an excel file, supports `XLSX`、`XLS`、`CSV`.
 <dependency>
     <groupId>io.github.biezhi</groupId>
     <artifactId>excel-plus</artifactId>
-    <version>1.0.0.Alpha</version>
+    <version>1.0.1</version>
 </dependency>
 ```
 
@@ -44,7 +44,7 @@ snapshot version
 <dependency>
     <groupId>io.github.biezhi</groupId>
     <artifactId>excel-plus</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.2-SNAPSHOT</version>
 </dependency>
 ```
 
