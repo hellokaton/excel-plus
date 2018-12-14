@@ -1,12 +1,12 @@
 package io.github.biezhi.excel.plus;
 
 import io.github.biezhi.excel.plus.exception.WriterException;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
+import org.junit.Test;
 
 import java.io.File;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.*;
+
 
 /**
  * {@link Writer} Test
@@ -55,16 +55,14 @@ public class WriterTest extends BaseTest {
         assertNotNull(writer.headerTitle());
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testStartRowError() {
-        Executable e = () -> Writer.create().start(-1);
-        assertThrows(IllegalArgumentException.class, e);
+        Writer.create().start(-1);
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testSheetNameError() {
-        Executable e = () -> Writer.create().sheet(null);
-        assertThrows(IllegalArgumentException.class, e);
+        Writer.create().sheet(null);
     }
 
 }

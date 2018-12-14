@@ -5,15 +5,15 @@ import io.github.biezhi.excel.plus.Reader;
 import io.github.biezhi.excel.plus.exception.ReaderException;
 import io.github.biezhi.excel.plus.reader.XLSXDataFormatter;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.*;
+
 
 /**
  * @author biezhi
@@ -33,24 +33,22 @@ public class ExcelUtilTest extends BaseTest {
         assertNull(reader);
     }
 
-    @Test
+    @Test(expected = ReaderException.class)
     public void testCreateByFile() {
         Workbook workbook = ExcelUtil.create(new File(classPath() + "/SampleData.xlsx"));
 
         assertNotNull(workbook);
 
-        Executable e = () -> ExcelUtil.create(new File(classPath() + "/abc.xlsx"));
-        assertThrows(ReaderException.class, e);
+        ExcelUtil.create(new File(classPath() + "/abc.xlsx"));
     }
 
-    @Test
+    @Test(expected = FileNotFoundException.class)
     public void testCreateByInputStream() throws FileNotFoundException {
         Workbook workbook = ExcelUtil.create(new FileInputStream(new File(classPath() + "/SampleData.xlsx")));
 
         assertNotNull(workbook);
 
-        Executable e = () -> ExcelUtil.create(new FileInputStream(new File(classPath() + "/abc.xlsx")));
-        assertThrows(FileNotFoundException.class, e);
+        ExcelUtil.create(new FileInputStream(new File(classPath() + "/abc.xlsx")));
     }
 
     @Test
@@ -62,7 +60,7 @@ public class ExcelUtilTest extends BaseTest {
         assertEquals("", ExcelUtil.getFileExtension("abcd"));
     }
 
-    @Test
+    @Test(expected = FileNotFoundException.class)
     public void testIsXLSX() throws FileNotFoundException {
         assertTrue(ExcelUtil.isXLSX(new File(classPath() + "/SampleData.xlsx")));
         assertFalse(ExcelUtil.isXLSX(new File(classPath() + "/hello.xls")));
@@ -73,11 +71,10 @@ public class ExcelUtilTest extends BaseTest {
         assertFalse(ExcelUtil.isXLSX(new FileInputStream(new File(classPath() + "/SampleData.xls"))));
         assertFalse(ExcelUtil.isXLSX((InputStream) null));
 
-        Executable e = () -> ExcelUtil.isXLSX(new FileInputStream(new File(classPath() + "/hello.xls")));
-        assertThrows(FileNotFoundException.class, e);
+        ExcelUtil.isXLSX(new FileInputStream(new File(classPath() + "/hello.xls")));
     }
 
-    @Test
+    @Test(expected = FileNotFoundException.class)
     public void testIsXLS() throws FileNotFoundException {
         assertFalse(ExcelUtil.isXLS(new File(classPath() + "/SampleData.xlsx")));
         assertFalse(ExcelUtil.isXLS(new File(classPath() + "/hello.xls")));
@@ -88,8 +85,7 @@ public class ExcelUtilTest extends BaseTest {
         assertFalse(ExcelUtil.isXLS(new FileInputStream(new File(classPath() + "/SampleData.xlsx"))));
         assertFalse(ExcelUtil.isXLS((InputStream) null));
 
-        Executable e = () -> ExcelUtil.isXLS(new FileInputStream(new File(classPath() + "/hello.xlsx")));
-        assertThrows(FileNotFoundException.class, e);
+        ExcelUtil.isXLS(new FileInputStream(new File(classPath() + "/hello.xlsx")));
     }
 
     @Test

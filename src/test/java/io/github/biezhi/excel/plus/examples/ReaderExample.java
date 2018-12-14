@@ -7,10 +7,7 @@ import io.github.biezhi.excel.plus.model.Financial;
 import io.github.biezhi.excel.plus.model.PerformanceTestModel;
 import io.github.biezhi.excel.plus.model.Sample;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.Test;
 
 import java.io.File;
 import java.math.BigDecimal;
@@ -19,6 +16,7 @@ import java.nio.file.Paths;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author biezhi

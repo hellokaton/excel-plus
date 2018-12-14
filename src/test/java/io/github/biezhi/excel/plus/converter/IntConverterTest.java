@@ -3,10 +3,9 @@ package io.github.biezhi.excel.plus.converter;
 import io.github.biezhi.excel.plus.conveter.Converter;
 import io.github.biezhi.excel.plus.conveter.IntConverter;
 import io.github.biezhi.excel.plus.exception.ConverterException;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
+import org.junit.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author biezhi
@@ -25,10 +24,9 @@ public class IntConverterTest {
         assertEquals(Integer.MAX_VALUE, num2);
     }
 
-    @Test
+    @Test(expected = ConverterException.class)
     public void testStringToRError() throws ConverterException {
-        Executable e = () -> converter.stringToR("abc");
-        assertThrows(ConverterException.class, e);
+        converter.stringToR("abc");
     }
 
     @Test

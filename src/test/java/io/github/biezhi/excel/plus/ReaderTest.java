@@ -2,12 +2,11 @@ package io.github.biezhi.excel.plus;
 
 import io.github.biezhi.excel.plus.exception.ReaderException;
 import io.github.biezhi.excel.plus.model.Sample;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
+import org.junit.Test;
 
 import java.io.File;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.*;
 
 /**
  * {@link Reader} Test
@@ -41,10 +40,9 @@ public class ReaderTest extends BaseTest {
         assertNotNull(reader.fromFile());
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testCreateByFileNotExist() {
-        Executable e = () -> Reader.create(null, new File("abc.xlsx"));
-        assertThrows(IllegalArgumentException.class, e);
+        Reader.create(null, new File("abc.xlsx"));
     }
 
     @Test
@@ -63,28 +61,24 @@ public class ReaderTest extends BaseTest {
         assertEquals("SalesOrders", reader.sheetName());
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testStartRowError() {
-        Executable e = () -> Reader.create(null).start(-1);
-        assertThrows(IllegalArgumentException.class, e);
+        Reader.create(null).start(-1);
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testSheetIndexError() {
-        Executable e = () -> Reader.create(null).sheet(-1);
-        assertThrows(IllegalArgumentException.class, e);
+        Reader.create(null).sheet(-1);
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testSheetNameError() {
-        Executable e = () -> Reader.create(null).sheet(null);
-        assertThrows(IllegalArgumentException.class, e);
+        Reader.create(null).sheet(null);
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testModelTypeError() throws ReaderException {
-        Executable e = () -> Reader.create(null).asList();
-        assertThrows(IllegalArgumentException.class, e);
+        Reader.create(null).asList();
     }
 
 }
