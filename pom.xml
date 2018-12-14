@@ -95,6 +95,10 @@
                         <format>xml</format>
                     </formats>
                     <instrumentation>
+                        <ignores>
+                            <ignore>io.github.biezhi.excel.plus.annotation.*</ignore>
+                            <ignore>io.github.biezhi.excel.plus.exception.*</ignore>
+                        </ignores>
                         <excludes>
                             <exclude>io/github/biezhi/excel/plus/annotation/*.class</exclude>
                             <exclude>io/github/biezhi/excel/plus/exception/*.class</exclude>
