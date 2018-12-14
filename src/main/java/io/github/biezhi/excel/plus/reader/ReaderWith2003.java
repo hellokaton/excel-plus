@@ -16,14 +16,18 @@
 package io.github.biezhi.excel.plus.reader;
 
 import io.github.biezhi.excel.plus.Reader;
+import io.github.biezhi.excel.plus.conveter.Converter;
+import io.github.biezhi.excel.plus.exception.ConverterException;
 import io.github.biezhi.excel.plus.exception.ReaderException;
 import io.github.biezhi.excel.plus.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 
 import java.lang.reflect.Field;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.stream.Stream;
 
 /**
@@ -65,7 +69,7 @@ public class ReaderWith2003 extends ReaderConverter implements ExcelReader {
 
                 Object instance = type.newInstance();
                 for (Field field : fieldIndexes.values()) {
-                    writeFiledValue(row, instance, field);
+                    this.writeFiledValue(row, instance, field);
                 }
                 builder.add((T) instance);
             }
@@ -75,4 +79,31 @@ public class ReaderWith2003 extends ReaderConverter implements ExcelReader {
         }
     }
 
+    public Object getCellValue(Field field, Cell cell) throws ConverterException {
+        Converter converter    = fieldConverters.get(field);
+        String    cellRawValue = null;
+        if (null != converter) {
+            if (cell.getCellType() == CellType.NUMERIC) {
+                if (isDateType(field.getType())) {
+                    Date javaDate = DateUtil.getJavaDate(cell.getNumericCellValue());
+                    if (field.getType().equals(Date.class)) {
+                        return javaDate;
+                    } else if (field.getType().equals(LocalDate.class)) {
+                        return javaDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                    } else if (field.getType().equals(LocalDateTime.class)) {
+                        return javaDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+                    }
+                    return null;
+                }
+                cellRawValue = cell.getNumericCellValue() + "";
+            } else {
+                cellRawValue = cell.getStringCellValue();
+            }
+        }
+        return converter.stringToR(cellRawValue);
+    }
+
+    private boolean isDateType(Class<?> type) {
+        return Date.class.equals(type) || LocalDate.class.equals(type) || LocalDateTime.class.equals(type);
+    }
 }

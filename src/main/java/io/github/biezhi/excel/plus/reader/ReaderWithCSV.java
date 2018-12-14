@@ -17,6 +17,7 @@ package io.github.biezhi.excel.plus.reader;
 
 import io.github.biezhi.excel.plus.Reader;
 import io.github.biezhi.excel.plus.annotation.ExcelColumn;
+import io.github.biezhi.excel.plus.conveter.Converter;
 import io.github.biezhi.excel.plus.exception.ReaderException;
 import lombok.extern.slf4j.Slf4j;
 
@@ -58,9 +59,8 @@ public class ReaderWithCSV extends ReaderConverter implements ExcelReader {
 
         String line;
 
-        try (BufferedReader br =
-                     new BufferedReader(
-                             new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+        try (BufferedReader br = new BufferedReader(
+                new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
 
             int pos = 0;
 
@@ -75,9 +75,14 @@ public class ReaderWithCSV extends ReaderConverter implements ExcelReader {
                 for (Field field : fieldIndexes.values()) {
                     ExcelColumn column = field.getAnnotation(ExcelColumn.class);
                     try {
-                        this.writeToModel(csvLine[column.index()], field, instance);
+                        Object    cellValue = csvLine[column.index()];
+                        Converter converter = fieldConverters.get(field);
+                        if (null != converter) {
+                            cellValue = converter.stringToR(csvLine[column.index()]);
+                        }
+                        field.set(instance, cellValue);
                     } catch (Exception e) {
-                        log.error("write field [%s] value fail", field.getName(), e);
+                        log.error("write value {} to field {} failed", csvLine[column.index()], field.getName(), e);
                     }
                 }
                 builder.add((T) instance);

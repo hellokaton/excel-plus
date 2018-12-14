@@ -22,9 +22,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 
 /**
  * Excel Utils
@@ -68,7 +66,7 @@ public class ExcelUtil {
     }
 
     public static boolean isXLSX(File file) {
-        if(null == file || !file.exists()){
+        if (null == file || !file.exists()) {
             return false;
         }
         String ext = getFileExtension(file.getName());
@@ -76,7 +74,7 @@ public class ExcelUtil {
     }
 
     public static boolean isXLS(File file) {
-        if(null == file || !file.exists()){
+        if (null == file || !file.exists()) {
             return false;
         }
         String ext = getFileExtension(file.getName());
@@ -84,11 +82,28 @@ public class ExcelUtil {
     }
 
     public static boolean isCSV(File file) {
-        if(null == file || !file.exists()){
+        if (null == file || !file.exists()) {
             return false;
         }
         String ext = getFileExtension(file.getName());
         return ext.toUpperCase().equals("CSV");
+    }
+
+    public static byte[] streamAsBytes(InputStream inputStream) throws IOException {
+        if (null == inputStream) {
+            return null;
+        }
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        // Fake code simulating the copy
+        // You can generally do better with nio if you need...
+        // And please, unlike me, do something about the Exceptions :D
+        byte[] buffer = new byte[1024];
+        int    len;
+        while ((len = inputStream.read(buffer)) > -1) {
+            baos.write(buffer, 0, len);
+        }
+        baos.flush();
+        return baos.toByteArray();
     }
 
     public static boolean isXLSX(InputStream inputStream) {

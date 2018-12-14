@@ -7,10 +7,7 @@ import io.github.biezhi.excel.plus.reader.XLSXDataFormatter;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.junit.Test;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
+import java.io.*;
 
 import static org.junit.Assert.*;
 
@@ -97,4 +94,15 @@ public class ExcelUtilTest extends BaseTest {
         assertFalse(ExcelUtil.isCSV(null));
     }
 
+    @Test
+    public void testStreamAsBytes() throws IOException {
+        assertNull(ExcelUtil.streamAsBytes(null));
+
+        InputStream inputStream = new FileInputStream(new File(classPath() + "/book.csv"));
+
+        byte[] bytes = ExcelUtil.streamAsBytes(inputStream);
+
+        assertNotNull(bytes);
+        assertEquals(275, bytes.length);
+    }
 }
