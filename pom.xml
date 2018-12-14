@@ -94,6 +94,12 @@
                         <format>html</format>
                         <format>xml</format>
                     </formats>
+                    <instrumentation>
+                        <excludes>
+                            <exclude>io/github/biezhi/excel/plus/annotation/*.class</exclude>
+                            <exclude>io/github/biezhi/excel/plus/exception/*.class</exclude>
+                        </excludes>
+                    </instrumentation>
                     <check />
                 </configuration>
             </plugin>
