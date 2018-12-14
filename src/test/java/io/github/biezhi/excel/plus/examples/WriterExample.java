@@ -143,7 +143,7 @@ public class WriterExample extends BaseTest {
     }
 
     @Test
-    public void testWriteBookXLSX(){
+    public void testWriteBookXLSX() throws WriterException {
         List<Book> books = new ArrayList<>();
         books.add(new Book("新名字的故事", "埃莱娜·费兰特", 59.0D, LocalDate.of(2017, 4, 1)));
         books.add(new Book("鱼王", "Царь-рыба", 78.0D, LocalDate.of(2017, 4, 1)));
@@ -155,6 +155,8 @@ public class WriterExample extends BaseTest {
                 .withRows(books)
                 .headerTitle("书籍列表 V1")
                 .to(new File("book.xlsx"));
+
+        deleteTempFile("book.xlsx");
     }
 
 }

@@ -35,7 +35,7 @@ import java.util.stream.Stream;
 @UtilityClass
 public class ReaderFactory {
 
-    public static <T> Stream<T> readByFile(Reader reader) {
+    public static <T> Stream<T> readByFile(Reader reader) throws ReaderException {
         if (ExcelUtil.isXLSX(reader.fromFile())) {
             return new ReaderWith2007(null).readExcel(reader);
         } else {
@@ -53,7 +53,7 @@ public class ReaderFactory {
         }
     }
 
-    public static <T> Stream<T> readByStream(Reader reader) {
+    public static <T> Stream<T> readByStream(Reader reader) throws ReaderException {
         if (ExcelUtil.isXLSX(reader.fromStream())) {
             return new ReaderWith2007(null).readExcel(reader);
         } else {

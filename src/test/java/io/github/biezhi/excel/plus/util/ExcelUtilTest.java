@@ -34,7 +34,7 @@ public class ExcelUtilTest extends BaseTest {
     }
 
     @Test(expected = ReaderException.class)
-    public void testCreateByFile() {
+    public void testCreateByFile() throws ReaderException {
         Workbook workbook = ExcelUtil.create(new File(classPath() + "/SampleData.xlsx"));
 
         assertNotNull(workbook);
@@ -43,7 +43,7 @@ public class ExcelUtilTest extends BaseTest {
     }
 
     @Test(expected = FileNotFoundException.class)
-    public void testCreateByInputStream() throws FileNotFoundException {
+    public void testCreateByInputStream() throws FileNotFoundException, ReaderException {
         Workbook workbook = ExcelUtil.create(new FileInputStream(new File(classPath() + "/SampleData.xlsx")));
 
         assertNotNull(workbook);

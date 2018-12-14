@@ -40,19 +40,23 @@ public class WriterTest extends BaseTest {
 
     @Test
     public void testCreateWithArgs() throws WriterException {
+        String fileName = "test_create_args.xlsx";
+
         Writer writer = Writer.create();
 
         writer.withRows(buildData())
                 .cellStyle((workbook, cellStyle) -> {
                 })
                 .headerTitle("Test Title")
-                .to(new File("test_create_args.xlsx"));
+                .to(new File(fileName));
 
         assertNotNull(writer);
 
         assertNotNull(writer.rows());
         assertNotNull(writer.cellStyle());
         assertNotNull(writer.headerTitle());
+
+        deleteTempFile(fileName);
     }
 
     @Test(expected = IllegalArgumentException.class)
