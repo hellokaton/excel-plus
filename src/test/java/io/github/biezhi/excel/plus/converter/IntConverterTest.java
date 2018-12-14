@@ -6,6 +6,7 @@ import io.github.biezhi.excel.plus.exception.ConverterException;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * @author biezhi
@@ -22,6 +23,8 @@ public class IntConverterTest {
 
         int num2 = converter.stringToR(Integer.MAX_VALUE + "");
         assertEquals(Integer.MAX_VALUE, num2);
+
+        assertNull(converter.stringToR(null));
     }
 
     @Test(expected = ConverterException.class)
@@ -34,6 +37,7 @@ public class IntConverterTest {
     public void testToString() throws ConverterException {
         String value = converter.toString(123);
         assertEquals("123", value);
+        assertNull(converter.toString(null));
     }
 
 }

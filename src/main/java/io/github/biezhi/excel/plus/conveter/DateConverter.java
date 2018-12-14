@@ -38,6 +38,9 @@ public class DateConverter implements Converter<String, Date> {
     @Override
     public Date stringToR(String value) throws ConverterException {
         try {
+            if(null == value){
+                return null;
+            }
             return df.get().parse(value);
         } catch (Exception e) {
             throw new ConverterException("convert [" + value + "] to Date error", e);
@@ -47,6 +50,9 @@ public class DateConverter implements Converter<String, Date> {
     @Override
     public String toString(Date date) throws ConverterException {
         try {
+            if(null == date){
+                return null;
+            }
             return df.get().format(date);
         } catch (Exception e) {
             throw new ConverterException("convert [" + date + "] to String error", e);

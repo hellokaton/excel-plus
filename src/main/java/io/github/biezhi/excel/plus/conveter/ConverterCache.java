@@ -20,6 +20,7 @@ import lombok.experimental.UtilityClass;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -66,6 +67,11 @@ public class ConverterCache {
 
         Class fieldType = field.getType();
 
+        ExcelColumn column = field.getAnnotation(ExcelColumn.class);
+        if (null != column && !NullConverter.class.equals(column.converter())) {
+            return column.converter().newInstance();
+        }
+
         if (fieldType.equals(String.class)) {
             return ConverterCache.getConvert(StringConverter.class);
         } else if (fieldType.equals(int.class) || fieldType.equals(Integer.class)) {
@@ -82,6 +88,8 @@ public class ConverterCache {
             return ConverterCache.getConvert(ByteConverter.class);
         } else if (fieldType.equals(boolean.class) || fieldType.equals(Boolean.class)) {
             return ConverterCache.getConvert(BooleanConverter.class);
+        } else if (fieldType.equals(BigInteger.class)) {
+            return ConverterCache.getConvert(BigIntConverter.class);
         } else if (fieldType.equals(BigDecimal.class)) {
             return ConverterCache.getConvert(DecimalConverter.class);
         } else if (fieldType.equals(Date.class)) {
@@ -93,11 +101,6 @@ public class ConverterCache {
         } else if (fieldType.equals(LocalDateTime.class)) {
             String pattern = field.getAnnotation(ExcelColumn.class).datePattern();
             return new LocalDateTimeConverter(pattern);
-        } else {
-            Class<? extends Converter> customConverter = field.getAnnotation(ExcelColumn.class).converter();
-            if (!NullConverter.class.equals(customConverter)) {
-                return customConverter.newInstance();
-            }
         }
         return null;
     }

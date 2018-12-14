@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * @author biezhi
@@ -27,6 +28,8 @@ public class LocalDateTimeConverterTest {
         assertEquals(2018, date.getYear());
         assertEquals(12, date.getMonthValue());
         assertEquals(12, date.getDayOfMonth());
+
+        assertNull(converter.stringToR(null));
     }
 
     @Test(expected = ConverterException.class)
@@ -41,6 +44,8 @@ public class LocalDateTimeConverterTest {
 
         String value = converter.toString(LocalDateTime.now());
         assertEquals(LocalDateTime.now().format(DateTimeFormatter.ofPattern(pattern)), value);
+
+        assertNull(converter.toString(null));
     }
 
 }

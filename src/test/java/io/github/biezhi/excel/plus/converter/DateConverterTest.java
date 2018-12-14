@@ -10,6 +10,7 @@ import java.util.Calendar;
 import java.util.Date;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * @author biezhi
@@ -29,6 +30,8 @@ public class DateConverterTest {
         assertEquals(2018, cal.get(Calendar.YEAR));
         assertEquals(12, cal.get(Calendar.MONTH) + 1);
         assertEquals(12, cal.get(Calendar.DAY_OF_MONTH));
+
+        assertNull(converter.stringToR(null));
     }
 
     @Test(expected = ConverterException.class)
@@ -43,6 +46,14 @@ public class DateConverterTest {
 
         String value = converter.toString(new Date());
         assertEquals(new SimpleDateFormat("yyyy/MM/dd").format(new Date()), value);
+
+        assertNull(converter.toString(null));
+    }
+
+    @Test(expected = ConverterException.class)
+    public void testToStringError() throws ConverterException {
+        Converter<String, Date> converter = new DateConverter("abcd");
+        converter.toString(new Date());
     }
 
 }

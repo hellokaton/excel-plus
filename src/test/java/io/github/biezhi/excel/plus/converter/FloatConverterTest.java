@@ -7,6 +7,7 @@ import io.github.biezhi.excel.plus.exception.ConverterException;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * @author biezhi
@@ -19,6 +20,7 @@ public class FloatConverterTest {
     @Test
     public void testStringToR() throws ConverterException {
         assertEquals(new Float("123"), converter.stringToR("123"));
+        assertNull(converter.stringToR(null));
     }
 
     @Test(expected = ConverterException.class)
@@ -30,6 +32,7 @@ public class FloatConverterTest {
     public void testToString() throws ConverterException {
         assertEquals("123.0", converter.toString(new Float("123")));
         assertEquals("123.0", converter.toString(123F));
+        assertNull(converter.toString(null));
     }
 
 }

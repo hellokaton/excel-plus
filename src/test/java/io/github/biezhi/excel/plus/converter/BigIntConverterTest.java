@@ -8,6 +8,7 @@ import org.junit.Test;
 import java.math.BigInteger;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * @author biezhi
@@ -24,6 +25,8 @@ public class BigIntConverterTest {
 
         BigInteger num2 = converter.stringToR(Integer.MAX_VALUE + "");
         assertEquals(new BigInteger(Integer.MAX_VALUE + ""), num2);
+
+        assertNull(converter.stringToR(null));
     }
 
     @Test(expected = ConverterException.class)

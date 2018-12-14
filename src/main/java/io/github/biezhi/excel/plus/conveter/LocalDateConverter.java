@@ -40,6 +40,9 @@ public class LocalDateConverter implements Converter<String, LocalDate> {
     @Override
     public LocalDate stringToR(String value) throws ConverterException {
         try {
+            if(null == value){
+                return null;
+            }
             return LocalDate.parse(value, formatter);
         } catch (DateTimeParseException e) {
             try {
@@ -54,12 +57,11 @@ public class LocalDateConverter implements Converter<String, LocalDate> {
     }
 
     @Override
-    public String toString(LocalDate localDate) throws ConverterException {
-        try {
-            return localDate.format(formatter);
-        } catch (Exception e) {
-            throw new ConverterException("convert [" + localDate + "] to String error", e);
+    public String toString(LocalDate localDate) {
+        if(null == localDate){
+            return null;
         }
+        return localDate.format(formatter);
     }
 
 }

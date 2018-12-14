@@ -8,6 +8,7 @@ import org.junit.Test;
 import java.math.BigDecimal;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * @author biezhi
@@ -20,6 +21,7 @@ public class DecimalConverterTest {
     @Test
     public void testStringToR() throws ConverterException {
         assertEquals(new BigDecimal("123"), converter.stringToR("123"));
+        assertNull(converter.stringToR(null));
     }
 
     @Test(expected = ConverterException.class)
@@ -31,6 +33,7 @@ public class DecimalConverterTest {
     public void testToString() throws ConverterException {
         String value = converter.toString(new BigDecimal("123"));
         assertEquals("123", value);
+        assertNull(converter.toString(null));
     }
 
 }
