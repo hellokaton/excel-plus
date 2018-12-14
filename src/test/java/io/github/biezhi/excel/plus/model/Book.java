@@ -20,6 +20,9 @@ public class Book {
     @ExcelColumn(title = "出版日期", index = 3, datePattern = "yyyy年M月")
     private LocalDate publishDate;
 
+    public Book() {
+    }
+
     public Book(String title, String author, Double price, LocalDate publishDate) {
         this.title = title;
         this.author = author;
