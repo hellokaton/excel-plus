@@ -17,7 +17,7 @@ package io.github.biezhi.excel.plus;
 
 import io.github.biezhi.excel.plus.enums.ExcelType;
 import io.github.biezhi.excel.plus.exception.WriterException;
-import io.github.biezhi.excel.plus.utils.StringUtils;
+import io.github.biezhi.excel.plus.util.StringUtil;
 import io.github.biezhi.excel.plus.writer.WriterWith2003;
 import io.github.biezhi.excel.plus.writer.WriterWith2007;
 import io.github.biezhi.excel.plus.writer.WriterWithCSV;
@@ -129,7 +129,7 @@ public class Writer {
      * @return Writer
      */
     public Writer sheet(String sheetName) {
-        if (StringUtils.isEmpty(sheetName)) {
+        if (StringUtil.isEmpty(sheetName)) {
             throw new IllegalArgumentException("sheet cannot be empty");
         }
         this.sheetName = sheetName;

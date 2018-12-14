@@ -16,7 +16,7 @@
 package io.github.biezhi.excel.plus.conveter;
 
 import io.github.biezhi.excel.plus.exception.ConverterException;
-import io.github.biezhi.excel.plus.utils.StringUtils;
+import io.github.biezhi.excel.plus.util.StringUtil;
 
 import java.math.BigInteger;
 
@@ -32,7 +32,7 @@ public class BigIntConverter extends NumberConverter implements Converter<String
     public BigInteger stringToR(String value) throws ConverterException {
         try {
             value = replaceComma(value);
-            if (StringUtils.isEmpty(value)) {
+            if (StringUtil.isEmpty(value)) {
                 return null;
             }
             return new BigInteger(value);

@@ -16,7 +16,7 @@
 package io.github.biezhi.excel.plus.conveter;
 
 import io.github.biezhi.excel.plus.exception.ConverterException;
-import io.github.biezhi.excel.plus.utils.StringUtils;
+import io.github.biezhi.excel.plus.util.StringUtil;
 
 import java.math.BigDecimal;
 
@@ -32,7 +32,7 @@ public class DecimalConverter extends NumberConverter implements Converter<Strin
     public BigDecimal stringToR(String value) throws ConverterException {
         try {
             value = super.replaceComma(value);
-            if (StringUtils.isEmpty(value)) {
+            if (StringUtil.isEmpty(value)) {
                 return null;
             }
             return new BigDecimal(value);

@@ -17,7 +17,7 @@ package io.github.biezhi.excel.plus.reader;
 
 import io.github.biezhi.excel.plus.Reader;
 import io.github.biezhi.excel.plus.exception.ReaderException;
-import io.github.biezhi.excel.plus.utils.ExcelUtils;
+import io.github.biezhi.excel.plus.util.ExcelUtil;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 
@@ -36,17 +36,17 @@ import java.util.stream.Stream;
 public class ReaderFactory {
 
     public static <T> Stream<T> readByFile(Reader reader) {
-        if (ExcelUtils.isXLSX(reader.fromFile())) {
+        if (ExcelUtil.isXLSX(reader.fromFile())) {
             return new ReaderWith2007(null).readExcel(reader);
         } else {
-            if (ExcelUtils.isCSV(reader.fromFile())) {
+            if (ExcelUtil.isCSV(reader.fromFile())) {
                 try {
                     return new ReaderWithCSV(new FileInputStream(reader.fromFile())).readExcel(reader);
                 } catch (FileNotFoundException e) {
                     throw new ReaderException(reader.fromFile().getName() + " not found", e);
                 }
-            } else if (ExcelUtils.isXLS(reader.fromFile())) {
-                return new ReaderWith2003(ExcelUtils.create(reader.fromFile())).readExcel(reader);
+            } else if (ExcelUtil.isXLS(reader.fromFile())) {
+                return new ReaderWith2003(ExcelUtil.create(reader.fromFile())).readExcel(reader);
             } else {
                 throw new ReaderException(reader.fromFile().getName() + " is the wrong format");
             }
@@ -54,11 +54,11 @@ public class ReaderFactory {
     }
 
     public static <T> Stream<T> readByStream(Reader reader) {
-        if (ExcelUtils.isXLSX(reader.fromStream())) {
+        if (ExcelUtil.isXLSX(reader.fromStream())) {
             return new ReaderWith2007(null).readExcel(reader);
         } else {
-            if (ExcelUtils.isXLS(reader.fromStream())) {
-                return new ReaderWith2003(ExcelUtils.create(reader.fromStream())).readExcel(reader);
+            if (ExcelUtil.isXLS(reader.fromStream())) {
+                return new ReaderWith2003(ExcelUtil.create(reader.fromStream())).readExcel(reader);
             } else {
                 return new ReaderWithCSV(reader.fromStream()).readExcel(reader);
             }

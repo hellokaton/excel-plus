@@ -16,7 +16,7 @@
 package io.github.biezhi.excel.plus.conveter;
 
 import io.github.biezhi.excel.plus.exception.ConverterException;
-import io.github.biezhi.excel.plus.utils.StringUtils;
+import io.github.biezhi.excel.plus.util.StringUtil;
 
 /**
  * Double to string converter
@@ -30,7 +30,7 @@ public class DoubleConverter extends NumberConverter implements Converter<String
     public Double stringToR(String value) throws ConverterException {
         try {
             value = super.replaceComma(value);
-            if (StringUtils.isEmpty(value)) {
+            if (StringUtil.isEmpty(value)) {
                 return null;
             }
             return Double.parseDouble(value);

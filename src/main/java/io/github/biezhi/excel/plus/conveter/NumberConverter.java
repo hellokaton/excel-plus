@@ -15,12 +15,12 @@
  */
 package io.github.biezhi.excel.plus.conveter;
 
-import io.github.biezhi.excel.plus.utils.StringUtils;
+import io.github.biezhi.excel.plus.util.StringUtil;
 
 public abstract class NumberConverter  {
 
     String replaceComma(String value) {
-        if (StringUtils.isEmpty(value)) {
+        if (StringUtil.isEmpty(value)) {
             return null;
         }
         return value.replaceAll(",", "");

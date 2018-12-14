@@ -17,7 +17,7 @@ package io.github.biezhi.excel.plus.reader;
 
 import io.github.biezhi.excel.plus.Reader;
 import io.github.biezhi.excel.plus.exception.ReaderException;
-import io.github.biezhi.excel.plus.utils.StringUtils;
+import io.github.biezhi.excel.plus.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -48,7 +48,7 @@ public class ReaderWith2003 extends ReaderConverter implements ExcelReader {
         try {
             this.initFieldConverter(type.getDeclaredFields());
 
-            Sheet sheet = StringUtils.isNotEmpty(reader.sheetName()) ?
+            Sheet sheet = StringUtil.isNotEmpty(reader.sheetName()) ?
                     workbook.getSheet(reader.sheetName()) : workbook.getSheetAt(reader.sheetIndex());
 
             int startRow = reader.startRow();

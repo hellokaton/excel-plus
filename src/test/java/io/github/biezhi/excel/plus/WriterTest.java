@@ -1,10 +1,12 @@
 package io.github.biezhi.excel.plus;
 
 import io.github.biezhi.excel.plus.exception.WriterException;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
 import java.io.File;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * {@link Writer} Test
@@ -18,21 +20,21 @@ public class WriterTest extends BaseTest {
     public void testCreate() {
         Writer writer = Writer.create();
 
-        Assert.assertNotNull(writer);
+        assertNotNull(writer);
 
-        Assert.assertNull(writer.rows());
-        Assert.assertNull(writer.titleStyle());
-        Assert.assertNull(writer.headerStyle());
-        Assert.assertNull(writer.cellStyle());
-        Assert.assertNull(writer.sheetConsumer());
-        Assert.assertNull(writer.headerTitle());
+        assertNull(writer.rows());
+        assertNull(writer.titleStyle());
+        assertNull(writer.headerStyle());
+        assertNull(writer.cellStyle());
+        assertNull(writer.sheetConsumer());
+        assertNull(writer.headerTitle());
 
 
-        Assert.assertEquals(0, writer.startRow());
-        Assert.assertEquals(100, writer.bufferSize());
-        Assert.assertEquals("Sheet0", writer.sheet());
+        assertEquals(0, writer.startRow());
+        assertEquals(100, writer.bufferSize());
+        assertEquals("Sheet0", writer.sheet());
 
-        Assert.assertFalse(writer.isRaw());
+        assertFalse(writer.isRaw());
     }
 
 
@@ -46,21 +48,23 @@ public class WriterTest extends BaseTest {
                 .headerTitle("Test Title")
                 .to(new File("test_create_args.xlsx"));
 
-        Assert.assertNotNull(writer);
+        assertNotNull(writer);
 
-        Assert.assertNotNull(writer.rows());
-        Assert.assertNotNull(writer.cellStyle());
-        Assert.assertNotNull(writer.headerTitle());
+        assertNotNull(writer.rows());
+        assertNotNull(writer.cellStyle());
+        assertNotNull(writer.headerTitle());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testStartRowError() {
-        Writer.create().start(-1);
+        Executable e = () -> Writer.create().start(-1);
+        assertThrows(IllegalArgumentException.class, e);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testSheetNameError() {
-        Writer.create().sheet(null);
+        Executable e = () -> Writer.create().sheet(null);
+        assertThrows(IllegalArgumentException.class, e);
     }
 
 }

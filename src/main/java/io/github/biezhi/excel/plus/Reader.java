@@ -17,7 +17,7 @@ package io.github.biezhi.excel.plus;
 
 import io.github.biezhi.excel.plus.exception.ReaderException;
 import io.github.biezhi.excel.plus.reader.ReaderFactory;
-import io.github.biezhi.excel.plus.utils.StringUtils;
+import io.github.biezhi.excel.plus.util.StringUtil;
 
 import java.io.File;
 import java.io.InputStream;
@@ -145,7 +145,7 @@ public class Reader<T> {
      * @return
      */
     public Reader<T> sheet(String sheetName) {
-        if (StringUtils.isEmpty(sheetName)) {
+        if (StringUtil.isEmpty(sheetName)) {
             throw new IllegalArgumentException("sheet cannot be empty");
         }
         this.sheetName = sheetName;

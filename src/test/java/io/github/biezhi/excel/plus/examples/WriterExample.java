@@ -11,7 +11,8 @@ import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -106,7 +107,7 @@ public class WriterExample extends BaseTest {
         deleteTempFile(fileName);
     }
 
-    @Test
+    @Disabled
     public void testWriteByTemplate() throws WriterException {
         String fileName = "sample_custom_with_template.xlsx";
 

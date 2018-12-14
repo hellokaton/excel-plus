@@ -13,16 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.biezhi.excel.plus.utils;
+package io.github.biezhi.excel.plus.util;
 
 import lombok.experimental.UtilityClass;
 
 /**
+ * StringUtil
+ *
  * @author biezhi
  * @date 2018-12-12
  */
 @UtilityClass
-public class StringUtils {
+public class StringUtil {
 
     public static boolean isNotEmpty(String value) {
         return null != value && !value.isEmpty();
