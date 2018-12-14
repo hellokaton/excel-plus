@@ -2,10 +2,12 @@ package io.github.biezhi.excel.plus;
 
 import io.github.biezhi.excel.plus.exception.ReaderException;
 import io.github.biezhi.excel.plus.model.Sample;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
 import java.io.File;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * {@link Reader} Test
@@ -19,15 +21,15 @@ public class ReaderTest extends BaseTest {
     public void testCreate() {
         Reader reader = Reader.create(null);
 
-        Assert.assertNotNull(reader);
+        assertNotNull(reader);
 
-        Assert.assertNull(reader.modelType());
-        Assert.assertNull(reader.fromFile());
-        Assert.assertNull(reader.fromStream());
-        Assert.assertNull(reader.sheetName());
+        assertNull(reader.modelType());
+        assertNull(reader.fromFile());
+        assertNull(reader.fromStream());
+        assertNull(reader.sheetName());
 
-        Assert.assertEquals(2, reader.startRow());
-        Assert.assertEquals(0, reader.sheetIndex());
+        assertEquals(2, reader.startRow());
+        assertEquals(0, reader.sheetIndex());
 
     }
 
@@ -35,13 +37,14 @@ public class ReaderTest extends BaseTest {
     public void testCreateByFile() {
         Reader reader = Reader.create(Sample.class, new File(classPath() + "/SampleData.xlsx"));
 
-        Assert.assertNotNull(reader);
-        Assert.assertNotNull(reader.fromFile());
+        assertNotNull(reader);
+        assertNotNull(reader.fromFile());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testCreateByFileNotExist() {
-        Reader.create(null, new File("abc.xlsx"));
+        Executable e = () -> Reader.create(null, new File("abc.xlsx"));
+        assertThrows(IllegalArgumentException.class, e);
     }
 
     @Test
@@ -53,31 +56,35 @@ public class ReaderTest extends BaseTest {
                 .start(1)
                 .sheet("SalesOrders");
 
-        Assert.assertNotNull(reader.fromFile());
+        assertNotNull(reader.fromFile());
 
-        Assert.assertEquals(1, reader.startRow());
-        Assert.assertEquals(1, reader.sheetIndex());
-        Assert.assertEquals("SalesOrders", reader.sheetName());
+        assertEquals(1, reader.startRow());
+        assertEquals(1, reader.sheetIndex());
+        assertEquals("SalesOrders", reader.sheetName());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testStartRowError() {
-        Reader.create(null).start(-1);
+        Executable e = () -> Reader.create(null).start(-1);
+        assertThrows(IllegalArgumentException.class, e);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testSheetIndexError() {
-        Reader.create(null).sheet(-1);
+        Executable e = () -> Reader.create(null).sheet(-1);
+        assertThrows(IllegalArgumentException.class, e);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testSheetNameError() {
-        Reader.create(null).sheet(null);
+        Executable e = () -> Reader.create(null).sheet(null);
+        assertThrows(IllegalArgumentException.class, e);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testModelTypeError() throws ReaderException {
-        Reader.create(null).asList();
+        Executable e = () -> Reader.create(null).asList();
+        assertThrows(IllegalArgumentException.class, e);
     }
 
 }

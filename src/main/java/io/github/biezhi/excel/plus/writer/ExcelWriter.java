@@ -20,7 +20,7 @@ import io.github.biezhi.excel.plus.Writer;
 import io.github.biezhi.excel.plus.annotation.ExcelColumn;
 import io.github.biezhi.excel.plus.conveter.*;
 import io.github.biezhi.excel.plus.exception.WriterException;
-import io.github.biezhi.excel.plus.utils.StringUtils;
+import io.github.biezhi.excel.plus.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -109,7 +109,7 @@ public abstract class ExcelWriter {
             int colRowIndex = 0;
             // write title
             String title = writer.headerTitle();
-            if (StringUtils.isNotEmpty(title)) {
+            if (StringUtil.isNotEmpty(title)) {
                 Integer maxColIndex = columns.stream()
                         .map(ExcelColumn::index)
                         .max(comparingInt(Integer::intValue))
@@ -208,7 +208,7 @@ public abstract class ExcelWriter {
             ConverterCache.addConvert(convert);
             return convert.toString(value);
         } else {
-            if (StringUtils.isNotEmpty(column.datePattern())) {
+            if (StringUtil.isNotEmpty(column.datePattern())) {
                 String content = "";
                 if (Date.class.equals(field.getType())) {
                     content = new DateConverter(column.datePattern()).toString((Date) value);

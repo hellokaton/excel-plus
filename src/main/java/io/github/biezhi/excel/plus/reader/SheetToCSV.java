@@ -15,7 +15,7 @@
  */
 package io.github.biezhi.excel.plus.reader;
 
-import io.github.biezhi.excel.plus.utils.ExcelUtils;
+import io.github.biezhi.excel.plus.util.ExcelUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.ss.util.CellAddress;
@@ -68,11 +68,7 @@ public class SheetToCSV<T> extends ReaderConverter implements XSSFSheetXMLHandle
         if (currentRow < startRow) {
             return;
         }
-        try {
-            row = ExcelUtils.newInstance(type);
-        } catch (InstantiationException | IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
+        row = ExcelUtil.newInstance(type);
     }
 
     @Override

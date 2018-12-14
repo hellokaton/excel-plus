@@ -7,8 +7,10 @@ import io.github.biezhi.excel.plus.model.Financial;
 import io.github.biezhi.excel.plus.model.PerformanceTestModel;
 import io.github.biezhi.excel.plus.model.Sample;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
 import java.math.BigDecimal;
@@ -61,9 +63,9 @@ public class ReaderExample extends BaseTest {
                 .start(1)
                 .asList();
 
-        Assert.assertEquals(43, samples.size());
-        Assert.assertEquals(new BigDecimal("189.05"), samples.get(0).getAmount());
-        Assert.assertEquals(new BigDecimal("139.72"), samples.get(samples.size() - 1).getAmount());
+        assertEquals(43, samples.size());
+        assertEquals(new BigDecimal("189.05"), samples.get(0).getAmount());
+        assertEquals(new BigDecimal("139.72"), samples.get(samples.size() - 1).getAmount());
     }
 
     @Test
@@ -74,9 +76,9 @@ public class ReaderExample extends BaseTest {
                 .start(1)
                 .asList();
 
-        Assert.assertEquals(43, samples.size());
-        Assert.assertEquals(new BigDecimal("189.05"), samples.get(0).getAmount());
-        Assert.assertEquals(new BigDecimal("139.72"), samples.get(samples.size() - 1).getAmount());
+        assertEquals(43, samples.size());
+        assertEquals(new BigDecimal("189.05"), samples.get(0).getAmount());
+        assertEquals(new BigDecimal("139.72"), samples.get(samples.size() - 1).getAmount());
     }
 
     @Test
@@ -89,9 +91,9 @@ public class ReaderExample extends BaseTest {
                 .filter(sample -> sample.getAmount().intValue() > 1000)
                 .collect(toList());
 
-        Assert.assertEquals(6, samples.size());
-        Assert.assertEquals(new BigDecimal("1619.19"), samples.get(0).getAmount());
-        Assert.assertEquals(new BigDecimal("1879.06"), samples.get(samples.size() - 1).getAmount());
+        assertEquals(6, samples.size());
+        assertEquals(new BigDecimal("1619.19"), samples.get(0).getAmount());
+        assertEquals(new BigDecimal("1879.06"), samples.get(samples.size() - 1).getAmount());
     }
 
     @Test
@@ -104,9 +106,9 @@ public class ReaderExample extends BaseTest {
                 .filter(sample -> sample.getAmount().intValue() > 1000)
                 .collect(toList());
 
-        Assert.assertEquals(6, samples.size());
-        Assert.assertEquals(new BigDecimal("1619.19"), samples.get(0).getAmount());
-        Assert.assertEquals(new BigDecimal("1879.06"), samples.get(samples.size() - 1).getAmount());
+        assertEquals(6, samples.size());
+        assertEquals(new BigDecimal("1619.19"), samples.get(0).getAmount());
+        assertEquals(new BigDecimal("1879.06"), samples.get(samples.size() - 1).getAmount());
     }
 
 }

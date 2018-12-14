@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.biezhi.excel.plus.utils;
+package io.github.biezhi.excel.plus.util;
 
-import io.github.biezhi.excel.plus.enums.ExcelType;
 import io.github.biezhi.excel.plus.exception.ReaderException;
 import lombok.experimental.UtilityClass;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -34,10 +33,14 @@ import java.io.InputStream;
  * @date 2018-12-11
  */
 @UtilityClass
-public class ExcelUtils {
+public class ExcelUtil {
 
-    public static <T> T newInstance(Class<T> type) throws IllegalAccessException, InstantiationException {
-        return type.newInstance();
+    public static <T> T newInstance(Class<T> type) {
+        try {
+            return type.newInstance();
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public static Workbook create(File file) throws ReaderException {
@@ -56,17 +59,6 @@ public class ExcelUtils {
         }
     }
 
-    public static ExcelType getType(String fileName) {
-        String ext = getFileExtension(fileName);
-        if (ext.toUpperCase().equals(ExcelType.XLSX.name())) {
-            return ExcelType.XLSX;
-        }
-        if (ext.toUpperCase().equals(ExcelType.XLS.name())) {
-            return ExcelType.XLS;
-        }
-        throw new RuntimeException("");
-    }
-
     public static String getFileExtension(String fileName) {
         int lastIndexOf = fileName.lastIndexOf(".");
         if (lastIndexOf == -1) {
@@ -76,16 +68,25 @@ public class ExcelUtils {
     }
 
     public static boolean isXLSX(File file) {
+        if(null == file || !file.exists()){
+            return false;
+        }
         String ext = getFileExtension(file.getName());
         return ext.toUpperCase().equals("XLSX");
     }
 
     public static boolean isXLS(File file) {
+        if(null == file || !file.exists()){
+            return false;
+        }
         String ext = getFileExtension(file.getName());
         return ext.toUpperCase().equals("XLS");
     }
 
     public static boolean isCSV(File file) {
+        if(null == file || !file.exists()){
+            return false;
+        }
         String ext = getFileExtension(file.getName());
         return ext.toUpperCase().equals("CSV");
     }
