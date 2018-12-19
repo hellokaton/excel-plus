@@ -51,6 +51,9 @@ public class WriterWithCSV extends ExcelWriter {
         try (OutputStreamWriter osWriter =
                      new OutputStreamWriter(outputStream, writer.charset())) {
 
+
+            osWriter.write('\ufeff');
+
             for (String[] csvLine : csvLines) {
                 writeLine(osWriter, csvLine);
             }
