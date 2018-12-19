@@ -8,7 +8,7 @@ Easier to read and generate an excel file, supports `XLSX`、`XLS`、`CSV`.
 
 [![](https://img.shields.io/travis/biezhi/excel-plus.svg)](https://travis-ci.org/biezhi/excel-plus)
 [![Javadocs](http://javadoc.io/badge/io.github.biezhi/excel-plus.svg)](http://javadoc.io/doc/io.github.biezhi/excel-plus)
-[![](https://img.shields.io/maven-central/v/io.github.biezhi/excel-plus.svg)](https://mvnrepository.com/artifact/io.github.biezhi/excel-plus)
+[![](https://img.shields.io/maven-central/v/io.github.biezhi/excel-plus.svg)](https://search.maven.org/search?q=excel-plus)
 [![](https://img.shields.io/badge/license-Apache2-FF0080.svg)](https://github.com/biezhi/excel-plus/blob/master/LICENSE)
 
 [![codecov](https://codecov.io/gh/biezhi/excel-plus/branch/master/graph/badge.svg)](https://codecov.io/gh/biezhi/excel-plus)
