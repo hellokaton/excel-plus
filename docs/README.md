@@ -118,6 +118,20 @@ Writer.create()
 
 # 进阶使用
 
+读取 Excel 文档通过 `Reader` API 来完成，你只需要创建一个 Reader 对象，就可以读取文档了。
+
+> 导入包的时候注意是 `io.github.biezhi.excel.plus.Reader`
+
+## 创建 Reader
+
+创建 Reader 的方式可以通过构造函数或者工厂方法，我们建议你这样使用：
+
+```java
+Reader.create(Sample.class);
+```
+
+这里是 `Sample.class` 是一个 Java 中的类型，它和 Excel 的行进行绑定，通过 `@ExcelColumn` 来表示列关系。
+
 ## 读取指定的 Sheet
 
 有些时候在一个 Excel 文档中有多个 Sheet，默认这个库会读取第一个，也就是 `index` 为 0 的 Sheet。
@@ -166,7 +180,7 @@ Reader.create(Sample.class)
       .from(YOU_INPUT_STREAM)
 ```
 
-## 读取过滤
+## 读取结果过滤
 
 有时候我们需要对读取的行数据做一下过滤，这时候就可以使用 `filter` 函数来筛选出合适的数据项。
 
@@ -180,6 +194,59 @@ List<Sample> samples = Reader.create(Sample.class)
                 .collect(toList());
 
 ```
+
+## 读取 CSV 文档
+
+为了方便，我们也支持直接读取一份 CSV 文档，使用方式和前面没有差异，只是在 `from` 的时候文件名不同了而已。
+
+---
+
+写入一份 Excel 文档通过使用 `Writer` API 来完成，创建一个 Writer 对象就可以操作 Excel 写入了。
+
+> 导入包的时候注意是 `io.github.biezhi.excel.plus.Writer`
+
+## 创建 Writer
+
+你可以通过使用构造函数的方式或者工厂方法来创建一个 Writer 对象，下面的方式更简洁：
+
+```java
+Writer.create();
+```
+
+默认情况下创建的 Writer 对象会写入一个 `XLSX` 格式的 Excel 文档，如果你要写入一份 `XLS` 或者 `CSV` 文档的话可以修改入参
+
+```java
+Writer.create(ExcelType.XLS);
+Writer.create(ExcelType.CSV);
+```
+
+## 自定义写入 Sheet
+
+默认写入一份 Excel 文档的 Sheet 名称是 `Sheet0`，如果你在意这个名字的话可以修改它。
+
+```java
+Writer.create().sheet("my_sheet");
+```
+
+## 设置标题
+
+设置标题是一个可选项，如果你想在写入 Excel 的时候加入一个大标题，如 “2018 年 5 月 书籍 TOP 10”。
+
+```java
+Writer.create().headerTitle("2018 年 5 月 书籍 TOP 10");
+```
+
+该标题在 Excel 文档生成后显示在第一行，自动合并为一列。
+
+## 从指定行开始写入
+
+这一选项不建议使用，默认是通过是否设置标题来计算得出的，如果你愿意中间空一些行再写入的话可以设置。
+
+```java
+Writer.create().start(4);
+```
+
+这将从索引为 4 的行开始写入。
 
 ## 自定义写入样式
 
@@ -212,9 +279,10 @@ Writer.create()
         .to(new File(fileName));
 ```
 
-## 浏览器下载
+## 通过 Servlet 下载
 
-为了方便我们将数据库查询的数据直接输出到浏览器弹出下载，`excel-plus` 也做了一点 _手脚_ 让你一行代码就可以搞定。
+为了方便我们将查询的数据直接输出到浏览器弹出下载，`excel-plus` 也做了一点 _手脚_ 让你一行代码就可以搞定。
+如果你使用的是基于 `servlet` 的应用可以使用如下方式。
 
 ```java
 Writer.create()
@@ -224,7 +292,7 @@ Writer.create()
 
 只需要将 `HttpServletResponse` 对象传入，并输入导出的文件名称，其他的都见鬼去吧。
 
-## 模板导出
+## 使用模板导出
 
 有时候我们需要导出的 Excel 表格样式比较复杂，可以事先设置好一个模板表格，数据为空，
 由程序向模板中填入数据，然后导出即可，这样就满足了美观的需求。
