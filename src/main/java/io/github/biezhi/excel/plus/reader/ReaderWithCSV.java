@@ -25,7 +25,6 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
-import java.nio.charset.StandardCharsets;
 import java.util.stream.Stream;
 
 /**
@@ -60,12 +59,12 @@ public class ReaderWithCSV extends ReaderConverter implements ExcelReader {
         String line;
 
         try (BufferedReader br = new BufferedReader(
-                new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+                new InputStreamReader(inputStream, reader.charset()))) {
 
             int pos = 0;
 
             while ((line = br.readLine()) != null) {
-                if (pos < startRow) {
+                if (pos++ < startRow) {
                     continue;
                 }
                 Object instance = type.newInstance();
@@ -86,7 +85,6 @@ public class ReaderWithCSV extends ReaderConverter implements ExcelReader {
                     }
                 }
                 builder.add((T) instance);
-                pos++;
             }
             return builder.build();
         } catch (Exception e) {

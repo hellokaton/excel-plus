@@ -49,7 +49,7 @@ public class WriterWithCSV extends ExcelWriter {
         this.parseCSVLines(rows);
 
         try (OutputStreamWriter osWriter =
-                     new OutputStreamWriter(outputStream, StandardCharsets.UTF_8)) {
+                     new OutputStreamWriter(outputStream, writer.charset())) {
 
             for (String[] csvLine : csvLines) {
                 writeLine(osWriter, csvLine);
