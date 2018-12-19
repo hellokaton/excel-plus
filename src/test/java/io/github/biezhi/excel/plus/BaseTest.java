@@ -33,9 +33,9 @@ public class BaseTest {
     protected List<Sample> buildData() {
         List<Sample> samples = new ArrayList<>();
         samples.add(new Sample(LocalDate.now(), "hello01", 101));
-        samples.add(new Sample(LocalDate.now(), "hello02", 102));
-        samples.add(new Sample(LocalDate.now(), "hello03", 103));
-        samples.add(new Sample(LocalDate.now(), "hello04", 104));
+        samples.add(new Sample(LocalDate.now(), "数据项02", 102));
+        samples.add(new Sample(LocalDate.now(), "数据项03", 103));
+        samples.add(new Sample(LocalDate.now(), "数据项04", 104));
         samples.add(new Sample(LocalDate.now(), "hello05", 105));
         return samples;
     }

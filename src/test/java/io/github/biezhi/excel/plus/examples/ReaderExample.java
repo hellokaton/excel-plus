@@ -114,11 +114,17 @@ public class ReaderExample extends BaseTest {
 
     @Test
     public void testRead111(){
-        List<AAA> aaas = Reader.create(AAA.class)
-                .from(new File(classPath() + "/111.csv"))
-                .start(1)
+//        List<AAA> aaas = Reader.create(AAA.class)
+//                .from(new File(classPath() + "/111.csv"))
+//                .start(1)
+//                .charset(StandardCharsets.ISO_8859_1)
+//                .asList();
+//        System.out.println(aaas);
+
+        List<Sample> samples = Reader.create(Sample.class)
+                .from(new File("write_as_csv.csv"))
                 .asList();
-        System.out.println(aaas);
+        System.out.println(samples);
     }
 
 }

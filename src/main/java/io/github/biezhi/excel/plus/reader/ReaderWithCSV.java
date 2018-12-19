@@ -74,6 +74,9 @@ public class ReaderWithCSV extends ReaderConverter implements ExcelReader {
                 for (Field field : fieldIndexes.values()) {
                     ExcelColumn column = field.getAnnotation(ExcelColumn.class);
                     try {
+                        if (csvLine.length < (column.index() + 1)) {
+                            continue;
+                        }
                         Object    cellValue = csvLine[column.index()];
                         Converter converter = fieldConverters.get(field);
                         if (null != converter) {
