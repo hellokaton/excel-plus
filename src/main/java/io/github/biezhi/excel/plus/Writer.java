@@ -29,6 +29,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -98,6 +100,8 @@ public class Writer {
     private BiConsumer<Workbook, CellStyle> cellStyle;
 
     private Consumer<Sheet> sheetConsumer;
+
+    private Charset charset = StandardCharsets.UTF_8;
 
     public static Writer create() {
         return new Writer(ExcelType.XLSX);
@@ -247,6 +251,11 @@ public class Writer {
         return this;
     }
 
+    public Writer charset(Charset charset){
+        this.charset = charset;
+        return this;
+    }
+
     /**
      * Write an Excel document to a file
      *
@@ -324,6 +333,10 @@ public class Writer {
 
     public boolean isRaw() {
         return withRaw;
+    }
+
+    public Charset charset(){
+        return this.charset;
     }
 
 }

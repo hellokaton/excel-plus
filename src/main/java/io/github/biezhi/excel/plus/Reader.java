@@ -21,6 +21,8 @@ import io.github.biezhi.excel.plus.util.StringUtil;
 
 import java.io.File;
 import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -68,6 +70,8 @@ public class Reader<T> {
      * Read a excel row from a InputStream
      */
     private InputStream fromStream;
+
+    private Charset charset = StandardCharsets.UTF_8;
 
     public Reader(Class<T> modelType) {
         this.modelType = modelType;
@@ -152,6 +156,11 @@ public class Reader<T> {
         return this;
     }
 
+    public Reader<T> charset(Charset charset){
+        this.charset = charset;
+        return this;
+    }
+
     /**
      * Return the read result as a Stream
      *
@@ -207,6 +216,10 @@ public class Reader<T> {
 
     public int startRow() {
         return this.startRow;
+    }
+
+    public Charset charset(){
+        return this.charset;
     }
 
 }
