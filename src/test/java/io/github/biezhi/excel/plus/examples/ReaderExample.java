@@ -3,6 +3,7 @@ package io.github.biezhi.excel.plus.examples;
 import io.github.biezhi.excel.plus.BaseTest;
 import io.github.biezhi.excel.plus.Reader;
 import io.github.biezhi.excel.plus.exception.ReaderException;
+import io.github.biezhi.excel.plus.model.Book;
 import io.github.biezhi.excel.plus.model.Financial;
 import io.github.biezhi.excel.plus.model.PerformanceTestModel;
 import io.github.biezhi.excel.plus.model.Sample;
@@ -107,6 +108,17 @@ public class ReaderExample extends BaseTest {
         assertEquals(6, samples.size());
         assertEquals(new BigDecimal("1619.19"), samples.get(0).getAmount());
         assertEquals(new BigDecimal("1879.06"), samples.get(samples.size() - 1).getAmount());
+    }
+
+    @Test
+    public void testReadCSV() {
+        List<Book> books = Reader.create(Book.class)
+                .from(new File(classPath() + "/book.csv"))
+                .start(0)
+                .asList();
+
+        log.info("{}", books);
+        assertEquals(5, books.size());
     }
 
 }
