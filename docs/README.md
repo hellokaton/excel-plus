@@ -118,6 +118,54 @@ Writer.create()
 
 # 进阶使用
 
+## 读取指定的 Sheet
+
+有些时候在一个 Excel 文档中有多个 Sheet，默认这个库会读取第一个，也就是 `index` 为 0 的 Sheet。
+如果你想读取其他的 `excel-plus` 提供了 API 帮助你。
+
+```java
+Reader.create(Sample.class)
+      .from(new File("SampleData.xlsx"))
+      .sheet(1)
+```
+
+这样会读取 `index` 为 1 的 Sheet，如果你想按名称读取可以参考如下代码
+
+```java
+Reader.create(Sample.class)
+      .from(new File("SampleData.xlsx"))
+      .sheet("sheetName")
+```
+
+## 从指定行开始读取
+
+默认情况，`Reader` 会从索引为 2 的行开始读取，有些时候我们的表格并非有表头或者标题，所以需要重新设置开始读取的行。
+这里设置的是一个索引值，假设 Excel 中只有 2 行数据，没有其他的，那么可以这样设置：
+
+```java
+Reader.create(Sample.class)
+      .from(new File("SampleData.xlsx"))
+      .start(0)
+```
+
+如果数据行上面有一行列头显示，我们就可以从索引为 1 的行开始读取
+
+```java
+Reader.create(Sample.class)
+      .from(new File("SampleData.xlsx"))
+      .start(1)
+```
+
+## 从 InputStream 读取
+
+大多数情况下 Excel 以文件的形式存在，在某些特殊情况下可能是一个 `InputStream`，`excel-plus` 也支持从流中读取文档数据。
+但你要记住，`File` 参数形式的效率会更高，因为内部的一些判断和 POI 本身的机制导致。
+
+```java
+Reader.create(Sample.class)
+      .from(YOU_INPUT_STREAM)
+```
+
 ## 读取过滤
 
 有时候我们需要对读取的行数据做一下过滤，这时候就可以使用 `filter` 函数来筛选出合适的数据项。
