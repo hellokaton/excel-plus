@@ -139,7 +139,7 @@ public class WriterExample extends BaseTest {
                 .withRows(buildData())
                 .to(new File(fileName));
 
-//        deleteTempFile(fileName);
+        deleteTempFile(fileName);
     }
 
     @Test
