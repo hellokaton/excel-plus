@@ -3,17 +3,14 @@ package io.github.biezhi.excel.plus.examples;
 import io.github.biezhi.excel.plus.BaseTest;
 import io.github.biezhi.excel.plus.Reader;
 import io.github.biezhi.excel.plus.exception.ReaderException;
-import io.github.biezhi.excel.plus.model.AAA;
 import io.github.biezhi.excel.plus.model.Financial;
 import io.github.biezhi.excel.plus.model.PerformanceTestModel;
 import io.github.biezhi.excel.plus.model.Sample;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
-import sun.nio.cs.ext.GBK;
 
 import java.io.File;
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
@@ -110,21 +107,6 @@ public class ReaderExample extends BaseTest {
         assertEquals(6, samples.size());
         assertEquals(new BigDecimal("1619.19"), samples.get(0).getAmount());
         assertEquals(new BigDecimal("1879.06"), samples.get(samples.size() - 1).getAmount());
-    }
-
-    @Test
-    public void testRead111(){
-//        List<AAA> aaas = Reader.create(AAA.class)
-//                .from(new File(classPath() + "/111.csv"))
-//                .start(1)
-//                .charset(StandardCharsets.ISO_8859_1)
-//                .asList();
-//        System.out.println(aaas);
-
-        List<Sample> samples = Reader.create(Sample.class)
-                .from(new File("write_as_csv.csv"))
-                .asList();
-        System.out.println(samples);
     }
 
 }
