@@ -49,49 +49,49 @@ public class ReaderWithCSV extends ReaderConverter implements ExcelReader {
         try {
             this.initFieldConverter(type.getDeclaredFields());
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new ReaderException(e);
         }
 
-        int startRow = reader.startRow();
-
         Stream.Builder<T> builder = Stream.builder();
-
-        String line;
 
         try (BufferedReader br = new BufferedReader(
                 new InputStreamReader(inputStream, reader.charset()))) {
 
-            int pos = 0;
+            int startRow = reader.startRow();
 
+            int    pos  = 0;
+            String line = "";
             while ((line = br.readLine()) != null) {
                 if (pos++ < startRow) {
                     continue;
                 }
-                Object instance = type.newInstance();
-
-                String[] csvLine = line.split(",");
-
-                for (Field field : fieldIndexes.values()) {
-                    ExcelColumn column = field.getAnnotation(ExcelColumn.class);
-                    try {
-                        if (csvLine.length < (column.index() + 1)) {
-                            continue;
-                        }
-                        Object    cellValue = csvLine[column.index()];
-                        Converter converter = fieldConverters.get(field);
-                        if (null != converter) {
-                            cellValue = converter.stringToR(csvLine[column.index()]);
-                        }
-                        field.set(instance, cellValue);
-                    } catch (Exception e) {
-                        log.error("write value {} to field {} failed", csvLine[column.index()], field.getName(), e);
-                    }
-                }
+                Object   instance = type.newInstance();
+                String[] csvLine  = line.split(",");
+                this.csvLineToInstance(instance, csvLine);
                 builder.add((T) instance);
             }
             return builder.build();
         } catch (Exception e) {
             throw new ReaderException(e);
+        }
+    }
+
+    private void csvLineToInstance(Object instance, String[] csvLine) {
+        for (Field field : fieldIndexes.values()) {
+            ExcelColumn column = field.getAnnotation(ExcelColumn.class);
+            try {
+                if (csvLine.length < (column.index() + 1)) {
+                    continue;
+                }
+                Object    cellValue = csvLine[column.index()];
+                Converter converter = fieldConverters.get(field);
+                if (null != converter) {
+                    cellValue = converter.stringToR(csvLine[column.index()]);
+                }
+                field.set(instance, cellValue);
+            } catch (Exception e) {
+                log.error("write value {} to field {} failed", csvLine[column.index()], field.getName(), e);
+            }
         }
     }
 

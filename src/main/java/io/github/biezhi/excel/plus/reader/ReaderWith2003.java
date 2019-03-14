@@ -51,9 +51,7 @@ public class ReaderWith2003 extends ReaderConverter implements ExcelReader {
         Stream.Builder<T> builder = Stream.builder();
         try {
             this.initFieldConverter(type.getDeclaredFields());
-
-            Sheet sheet = StringUtil.isNotEmpty(reader.sheetName()) ?
-                    workbook.getSheet(reader.sheetName()) : workbook.getSheetAt(reader.sheetIndex());
+            Sheet sheet = getSheet(reader);
 
             int startRow = reader.startRow();
             int totalRow = sheet.getPhysicalNumberOfRows();
@@ -79,31 +77,37 @@ public class ReaderWith2003 extends ReaderConverter implements ExcelReader {
         }
     }
 
+    public Sheet getSheet(Reader reader) {
+        return StringUtil.isNotEmpty(reader.sheetName()) ?
+                workbook.getSheet(reader.sheetName()) : workbook.getSheetAt(reader.sheetIndex());
+    }
+
     public Object getCellValue(Field field, Cell cell) throws ConverterException {
-        Converter converter    = fieldConverters.get(field);
-        String    cellRawValue = null;
-        if (null != converter) {
-            if (cell.getCellType() == CellType.NUMERIC) {
-                if (isDateType(field.getType())) {
-                    Date javaDate = DateUtil.getJavaDate(cell.getNumericCellValue());
-                    if (field.getType().equals(Date.class)) {
-                        return javaDate;
-                    } else if (field.getType().equals(LocalDate.class)) {
-                        return javaDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-                    } else if (field.getType().equals(LocalDateTime.class)) {
-                        return javaDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-                    }
-                    return null;
-                }
-                cellRawValue = cell.getNumericCellValue() + "";
-            } else {
-                cellRawValue = cell.getStringCellValue();
-            }
+        Converter<String, ?> converter = fieldConverters.get(field);
+
+        if (null == converter) {
+            return cell.getStringCellValue();
         }
-        return converter.stringToR(cellRawValue);
+        if (cell.getCellType() != CellType.NUMERIC) {
+            return converter.stringToR(cell.getStringCellValue());
+        }
+        if (isDateType(field.getType())) {
+            Date javaDate = DateUtil.getJavaDate(cell.getNumericCellValue());
+            if (field.getType().equals(Date.class)) {
+                return javaDate;
+            } else if (field.getType().equals(LocalDate.class)) {
+                return javaDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            } else if (field.getType().equals(LocalDateTime.class)) {
+                return javaDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+            }
+            return null;
+        } else {
+            return converter.stringToR(cell.getNumericCellValue() + "");
+        }
     }
 
     private boolean isDateType(Class<?> type) {
         return Date.class.equals(type) || LocalDate.class.equals(type) || LocalDateTime.class.equals(type);
     }
+
 }

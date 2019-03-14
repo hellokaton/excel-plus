@@ -2,18 +2,18 @@ package io.github.biezhi.excel.plus.examples;
 
 import io.github.biezhi.excel.plus.BaseTest;
 import io.github.biezhi.excel.plus.Reader;
+import io.github.biezhi.excel.plus.types.Result;
 import io.github.biezhi.excel.plus.exception.ReaderException;
-import io.github.biezhi.excel.plus.model.AAA;
+import io.github.biezhi.excel.plus.model.Book;
 import io.github.biezhi.excel.plus.model.Financial;
 import io.github.biezhi.excel.plus.model.PerformanceTestModel;
 import io.github.biezhi.excel.plus.model.Sample;
+import io.github.biezhi.excel.plus.types.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
-import sun.nio.cs.ext.GBK;
 
 import java.io.File;
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
@@ -99,32 +99,38 @@ public class ReaderExample extends BaseTest {
 
     @Test
     public void testReadAndValid() throws ReaderException {
-        List<Sample> samples = Reader.create(Sample.class)
+        Result<Sample> result = Reader.create(Sample.class)
                 .from(new File(classPath() + "/SampleData.xlsx"))
                 .sheet("SalesOrders")
                 .start(1)
-                .asStream()
-                .filter(sample -> sample.getAmount().intValue() > 1000)
-                .collect(toList());
+                .asResult()
+                .valid((rowNum, item) -> {
+                    if (item.getAmount().intValue() > 1000) {
+                        return Valid.error(String.format("第 %d 行金额超过 1000", rowNum));
+                    }
+                    return Valid.ok();
+                });
 
-        assertEquals(6, samples.size());
-        assertEquals(new BigDecimal("1619.19"), samples.get(0).getAmount());
-        assertEquals(new BigDecimal("1879.06"), samples.get(samples.size() - 1).getAmount());
+        log.info("rows size: {}", result.count());
+        log.info("success rows size: {}", result.successCount());
+        log.info("errorMessages: {}", result.errorMessages());
+
+        assertEquals(6, result.errorCount());
+        assertEquals(37, result.successCount());
+
+        assertEquals(new BigDecimal("189.05"), result.successRows().get(0).getAmount());
+        assertEquals(new BigDecimal("1619.19"), result.errorRows().get(0).getAmount());
     }
 
     @Test
-    public void testRead111(){
-//        List<AAA> aaas = Reader.create(AAA.class)
-//                .from(new File(classPath() + "/111.csv"))
-//                .start(1)
-//                .charset(StandardCharsets.ISO_8859_1)
-//                .asList();
-//        System.out.println(aaas);
-
-        List<Sample> samples = Reader.create(Sample.class)
-                .from(new File("write_as_csv.csv"))
+    public void testReadCSV() {
+        List<Book> books = Reader.create(Book.class)
+                .from(new File(classPath() + "/book.csv"))
+                .start(0)
                 .asList();
-        System.out.println(samples);
+
+        log.info("{}", books);
+        assertEquals(5, books.size());
     }
 
 }
