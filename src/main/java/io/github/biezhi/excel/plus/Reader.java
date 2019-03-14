@@ -17,6 +17,7 @@ package io.github.biezhi.excel.plus;
 
 import io.github.biezhi.excel.plus.exception.ReaderException;
 import io.github.biezhi.excel.plus.reader.ReaderFactory;
+import io.github.biezhi.excel.plus.types.Result;
 import io.github.biezhi.excel.plus.util.StringUtil;
 
 import java.io.File;
@@ -192,6 +193,10 @@ public class Reader<T> {
     public List<T> asList() throws ReaderException {
         Stream<T> stream = this.asStream();
         return stream.collect(toList());
+    }
+
+    public Result<T> asResult() throws ReaderException {
+        return new Result<>(asList());
     }
 
     public InputStream fromStream() {

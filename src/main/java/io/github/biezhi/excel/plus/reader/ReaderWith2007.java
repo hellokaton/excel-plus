@@ -49,7 +49,7 @@ import java.util.stream.Stream;
 public class ReaderWith2007 implements ExcelReader {
 
     public ReaderWith2007(Workbook workbook) {
-        //
+        // ignore
     }
 
     public <T> Stream<T> readExcel(Reader reader) throws ReaderException {
