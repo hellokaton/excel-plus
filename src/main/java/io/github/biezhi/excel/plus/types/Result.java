@@ -61,7 +61,7 @@ public class Result<T> {
     }
 
     public boolean isValid() {
-        return atomicError.get() > 0;
+        return Integer.valueOf(rows.size()).equals(atomicSuccess.get());
     }
 
     public int count() {
