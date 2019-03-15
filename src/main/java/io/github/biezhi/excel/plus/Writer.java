@@ -17,6 +17,7 @@ package io.github.biezhi.excel.plus;
 
 import io.github.biezhi.excel.plus.enums.ExcelType;
 import io.github.biezhi.excel.plus.exception.WriterException;
+import io.github.biezhi.excel.plus.types.StyleConsumer;
 import io.github.biezhi.excel.plus.util.StringUtil;
 import io.github.biezhi.excel.plus.writer.WriterWith2003;
 import io.github.biezhi.excel.plus.writer.WriterWith2007;
@@ -32,7 +33,6 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
@@ -87,17 +87,17 @@ public class Writer {
     /**
      * Custom title style
      */
-    private BiConsumer<Workbook, CellStyle> titleStyle;
+    private StyleConsumer<Workbook, CellStyle> titleStyle;
 
     /**
      * Custom column header style
      */
-    private BiConsumer<Workbook, CellStyle> headerStyle;
+    private StyleConsumer<Workbook, CellStyle> headerStyle;
 
     /**
      * Custom row column style
      */
-    private BiConsumer<Workbook, CellStyle> cellStyle;
+    private StyleConsumer<Workbook, CellStyle> cellStyle;
 
     private Consumer<Sheet> sheetConsumer;
 
@@ -173,7 +173,7 @@ public class Writer {
      * @param titleStyle title style consumer
      * @return Writer
      */
-    public Writer titleStyle(BiConsumer<Workbook, CellStyle> titleStyle) {
+    public Writer titleStyle(StyleConsumer<Workbook, CellStyle> titleStyle) {
         this.titleStyle = titleStyle;
         return this;
     }
@@ -185,7 +185,7 @@ public class Writer {
      * @param headerStyle header style consumer
      * @return Writer
      */
-    public Writer headerStyle(BiConsumer<Workbook, CellStyle> headerStyle) {
+    public Writer headerStyle(StyleConsumer<Workbook, CellStyle> headerStyle) {
         this.headerStyle = headerStyle;
         return this;
     }
@@ -197,7 +197,7 @@ public class Writer {
      * @param cellStyle row style consumer
      * @return Writer
      */
-    public Writer cellStyle(BiConsumer<Workbook, CellStyle> cellStyle) {
+    public Writer cellStyle(StyleConsumer<Workbook, CellStyle> cellStyle) {
         this.cellStyle = cellStyle;
         return this;
     }
@@ -251,7 +251,7 @@ public class Writer {
         return this;
     }
 
-    public Writer charset(Charset charset){
+    public Writer charset(Charset charset) {
         this.charset = charset;
         return this;
     }
@@ -299,15 +299,15 @@ public class Writer {
         return this.sheetName;
     }
 
-    public BiConsumer<Workbook, CellStyle> titleStyle() {
+    public StyleConsumer<Workbook, CellStyle> titleStyle() {
         return this.titleStyle;
     }
 
-    public BiConsumer<Workbook, CellStyle> headerStyle() {
+    public StyleConsumer<Workbook, CellStyle> headerStyle() {
         return this.headerStyle;
     }
 
-    public BiConsumer<Workbook, CellStyle> cellStyle() {
+    public StyleConsumer<Workbook, CellStyle> cellStyle() {
         return this.cellStyle;
     }
 
@@ -335,7 +335,7 @@ public class Writer {
         return withRaw;
     }
 
-    public Charset charset(){
+    public Charset charset() {
         return this.charset;
     }
 

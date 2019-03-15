@@ -47,7 +47,7 @@ public abstract class ExcelWriter {
     private Map<Integer, Field> fieldIndexes;
     private List<ExcelColumn>   columns;
 
-    Workbook workbook;
+    Workbook     workbook;
     OutputStream outputStream;
 
     ExcelWriter(OutputStream outputStream) {
@@ -66,7 +66,7 @@ public abstract class ExcelWriter {
      * 4. write row
      * 5. write to OutputStream
      *
-     * @param writer   excel-plus writer
+     * @param writer excel-plus writer
      * @throws WriterException
      */
     void writeSheet(Writer writer) throws WriterException {
@@ -78,13 +78,13 @@ public abstract class ExcelWriter {
         CellStyle columnStyle = Constant.defaultColumnStyle(workbook);
         CellStyle titleStyle  = Constant.defaultTitleStyle(workbook);
         if (null != writer.titleStyle()) {
-            writer.titleStyle().accept(workbook, titleStyle);
+            titleStyle = writer.titleStyle().accept(workbook, titleStyle);
         }
         if (null != writer.headerStyle()) {
-            writer.headerStyle().accept(workbook, headerStyle);
+            headerStyle = writer.headerStyle().accept(workbook, headerStyle);
         }
         if (null != writer.cellStyle()) {
-            writer.cellStyle().accept(workbook, columnStyle);
+            columnStyle = writer.cellStyle().accept(workbook, columnStyle);
         }
 
         if (writer.isRaw()) {
@@ -154,14 +154,15 @@ public abstract class ExcelWriter {
             if (i == 0) {
                 cell.setCellValue(title);
             }
-            cell.setCellStyle(cellStyle);
+            if (null != cellStyle) {
+                cell.setCellStyle(cellStyle);
+            }
         }
         sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, maxColIndex));
     }
 
     private void writeColumnNames(int rowIndex, CellStyle headerStyle) {
         Row rowHead = sheet.createRow(rowIndex);
-        rowHead.setHeightInPoints(30);
         for (ExcelColumn column : columns) {
             Cell cell = rowHead.createCell(column.index());
             if (null != headerStyle) {
@@ -190,7 +191,9 @@ public abstract class ExcelWriter {
             }
 
             Cell cell = row.createCell(index);
-            cell.setCellStyle(columnStyle);
+            if (null != columnStyle) {
+                cell.setCellStyle(columnStyle);
+            }
 
             String fieldValue = computeColumnContent(value, field);
             cell.setCellValue(fieldValue);
@@ -201,7 +204,6 @@ public abstract class ExcelWriter {
         if (field.getType().equals(String.class)) {
             return value.toString();
         }
-
         ExcelColumn column = field.getAnnotation(ExcelColumn.class);
         if (!NullConverter.class.equals(column.converter())) {
             Converter convert = column.converter().newInstance();
