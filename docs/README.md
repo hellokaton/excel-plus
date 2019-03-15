@@ -29,6 +29,7 @@
 - 支持过滤行数据
 - 支持数据类型转换
 - 支持自定义列样式
+- 支持读取时校验
 - 支持一行代码下载 Excel 文件
 - 支持 Excel 2003、2007、CSV 格式
 
@@ -43,17 +44,30 @@
 <dependency>
     <groupId>io.github.biezhi</groupId>
     <artifactId>excel-plus</artifactId>
-    <version>1.0.3</version>
+    <version>1.0.4</version>
 </dependency>
 ```
 
 也可以使用快照版本，最新的 bug 修复和功能更新都在这里
 
 ```xml
+<repositories>
+    <repository>
+        <id>snapshots-repo</id>
+        <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        <releases>
+            <enabled>false</enabled>
+        </releases>
+        <snapshots>
+            <enabled>true</enabled>
+        </snapshots>
+    </repository>
+</repositories>
+
 <dependency>
     <groupId>io.github.biezhi</groupId>
     <artifactId>excel-plus</artifactId>
-    <version>1.0.4-SNAPSHOT</version>
+    <version>1.0.5-SNAPSHOT</version>
 </dependency>
 ```
 

@@ -6,7 +6,7 @@
 
     <groupId>io.github.biezhi</groupId>
     <artifactId>excel-plus</artifactId>
-    <version>1.0.4-SNAPSHOT</version>
+    <version>1.0.5-SNAPSHOT</version>
     <name>excel-plus</name>
     <url>https://biezhi.github.io/excel-plus</url>
     <description>excel read and write framework</description>
