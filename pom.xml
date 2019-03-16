@@ -6,7 +6,7 @@
 
     <groupId>io.github.biezhi</groupId>
     <artifactId>excel-plus</artifactId>
-    <version>1.0.5-SNAPSHOT</version>
+    <version>1.0.6-SNAPSHOT</version>
     <name>excel-plus</name>
     <url>https://biezhi.github.io/excel-plus</url>
     <description>excel read and write framework</description>
@@ -38,6 +38,7 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>1.7.25</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.poi</groupId>
@@ -53,13 +54,13 @@
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
             <version>3.0.1</version>
-            <scope>provided</scope>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.16.18</version>
-            <scope>provided</scope>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>

@@ -44,7 +44,7 @@
 <dependency>
     <groupId>io.github.biezhi</groupId>
     <artifactId>excel-plus</artifactId>
-    <version>1.0.4</version>
+    <version>1.0.5</version>
 </dependency>
 ```
 
@@ -67,7 +67,7 @@
 <dependency>
     <groupId>io.github.biezhi</groupId>
     <artifactId>excel-plus</artifactId>
-    <version>1.0.5-SNAPSHOT</version>
+    <version>1.0.6-SNAPSHOT</version>
 </dependency>
 ```
 

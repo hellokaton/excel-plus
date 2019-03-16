@@ -67,18 +67,21 @@ public class WriterExample extends BaseTest {
                     font.setFontHeightInPoints((short) 40);
                     font.setColor(HSSFColor.HSSFColorPredefined.RED.getIndex());
                     style.setFont(font);
+                    return style;
                 })
                 .headerStyle((wb, style) -> {
                     Font font = wb.createFont();
                     font.setFontHeightInPoints((short) 20);
                     font.setColor(HSSFColor.HSSFColorPredefined.BLACK.getIndex());
                     style.setFont(font);
+                    return style;
                 })
                 .cellStyle((wb, style) -> {
                     Font font = wb.createFont();
                     font.setFontHeightInPoints((short) 20);
                     font.setColor(HSSFColor.HSSFColorPredefined.BLUE.getIndex());
                     style.setFont(font);
+                    return style;
                 })
                 .to(new File(fileName));
 
