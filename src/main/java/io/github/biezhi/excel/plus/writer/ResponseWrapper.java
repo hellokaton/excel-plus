@@ -15,13 +15,16 @@
  */
 package io.github.biezhi.excel.plus.writer;
 
-import io.github.biezhi.excel.plus.Writer;
 import io.github.biezhi.excel.plus.exception.WriterException;
 import io.github.biezhi.excel.plus.util.StringUtil;
 import lombok.experimental.UtilityClass;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+
+import static io.github.biezhi.excel.plus.Constant.XLSX_CONTENT_TYPE;
+import static io.github.biezhi.excel.plus.Constant.XLS_CONTENT_TYPE;
 
 /**
  * Used to wrap the HttpServletResponse and download file name
@@ -32,6 +35,16 @@ import java.io.OutputStream;
 @UtilityClass
 public class ResponseWrapper {
 
+    public static OutputStream createXLSX(HttpServletResponse servletResponse, String fileName) throws WriterException {
+        servletResponse.setContentType(XLSX_CONTENT_TYPE);
+        return create(servletResponse, fileName);
+    }
+
+    public static OutputStream createXLS(HttpServletResponse servletResponse, String fileName) throws WriterException {
+        servletResponse.setContentType(XLS_CONTENT_TYPE);
+        return create(servletResponse, fileName);
+    }
+
     public static OutputStream create(HttpServletResponse servletResponse, String fileName) throws WriterException {
         try {
             if (null == servletResponse) {
@@ -40,8 +53,7 @@ public class ResponseWrapper {
             if (StringUtil.isEmpty(fileName)) {
                 throw new WriterException("response file name not empty");
             }
-            servletResponse.setContentType("application/x-xls");
-            fileName = new String(fileName.getBytes("UTF-8"), "ISO8859-1");
+            fileName = new String(fileName.getBytes(StandardCharsets.UTF_8), "ISO8859-1");
             servletResponse.setHeader("Content-Disposition", "attachment; filename=" + fileName);
             return servletResponse.getOutputStream();
         } catch (Exception e) {
