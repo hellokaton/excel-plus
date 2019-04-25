@@ -44,7 +44,7 @@
 <dependency>
     <groupId>io.github.biezhi</groupId>
     <artifactId>excel-plus</artifactId>
-    <version>1.0.4</version>
+    <version>1.0.6</version>
 </dependency>
 ```
 
@@ -67,7 +67,7 @@
 <dependency>
     <groupId>io.github.biezhi</groupId>
     <artifactId>excel-plus</artifactId>
-    <version>1.0.5-SNAPSHOT</version>
+    <version>1.0.7-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -301,7 +301,7 @@ Writer.create()
 ```java
 Writer.create()
       ...
-      .to(ResponseWrapper.create(servletResponse, "xxx表格.xls"))
+      .to(ResponseWrapper.createXLSX(servletResponse, "xxx表格.xlsx"))
 ```
 
 只需要将 `HttpServletResponse` 对象传入，并输入导出的文件名称，其他的都见鬼去吧。

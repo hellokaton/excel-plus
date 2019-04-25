@@ -93,8 +93,6 @@ public class WriterTest extends BaseTest {
         Writer writer = Writer.create();
 
         writer.withRows(buildData())
-                .cellStyle((workbook, cellStyle) -> {
-                })
                 .headerTitle("Test Title")
                 .to(new File(fileName));
 
@@ -109,8 +107,7 @@ public class WriterTest extends BaseTest {
 
     @Test
     public void testCustomTitleStyle(){
-        Writer writer = Writer.create().titleStyle((wb, style) -> {
-        });
+        Writer writer = Writer.create();
 
         assertNotNull(writer);
         assertNotNull(writer.titleStyle());
@@ -118,8 +115,7 @@ public class WriterTest extends BaseTest {
 
     @Test
     public void testCustomHeaderStyle(){
-        Writer writer = Writer.create().headerStyle((wb, style) -> {
-        });
+        Writer writer = Writer.create();
 
         assertNotNull(writer);
         assertNotNull(writer.headerStyle());
