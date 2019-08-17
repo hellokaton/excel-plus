@@ -74,17 +74,17 @@ public abstract class ExcelWriter {
         this.sheet = workbook.createSheet(writer.sheetName());
 
         // setting styles
-        CellStyle headerStyle = Constant.defaultHeaderStyle(workbook);
-        CellStyle columnStyle = Constant.defaultColumnStyle(workbook);
-        CellStyle titleStyle  = Constant.defaultTitleStyle(workbook);
-        if (null != writer.titleStyle()) {
-            titleStyle = writer.titleStyle().accept(workbook, titleStyle);
-        }
+        CellStyle headerStyle = null;
+        CellStyle columnStyle = null;
+        CellStyle titleStyle  = null;
         if (null != writer.headerStyle()) {
-            headerStyle = writer.headerStyle().accept(workbook, headerStyle);
+            headerStyle = writer.headerStyle().accept(workbook, workbook.createCellStyle());
         }
         if (null != writer.cellStyle()) {
-            columnStyle = writer.cellStyle().accept(workbook, columnStyle);
+            columnStyle = writer.cellStyle().accept(workbook, workbook.createCellStyle());
+        }
+        if (null != writer.titleStyle()) {
+            titleStyle = writer.titleStyle().accept(workbook, workbook.createCellStyle());
         }
 
         if (writer.isRaw()) {
