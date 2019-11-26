@@ -103,6 +103,11 @@ public class Writer {
 
     private Charset charset = StandardCharsets.UTF_8;
 
+    /**
+     * if <code>true</code>, then bytes will be written to the end of the file rather than the beginning
+     */
+    private boolean isAppend = false;
+
     public static Writer create() {
         return new Writer(ExcelType.XLSX);
     }
@@ -256,6 +261,11 @@ public class Writer {
         return this;
     }
 
+    public Writer isAppend(boolean isAppend) {
+        this.isAppend = isAppend;
+        return this;
+    }
+
     /**
      * Write an Excel document to a file
      *
@@ -264,7 +274,7 @@ public class Writer {
      */
     public void to(File file) throws WriterException {
         try {
-            this.to(new FileOutputStream(file));
+            this.to(new FileOutputStream(file, isAppend));
         } catch (FileNotFoundException e) {
             throw new WriterException(e);
         }

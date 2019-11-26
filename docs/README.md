@@ -353,6 +353,7 @@ Writer.create()
 - `bufferSize(int)`：写入一个 XLSX 格式的文件时缓冲大小，默认为 100，建议不修改
 - `withRaw()`：自定义写入行，启用该配置后不会根据集合数据写 Excel
 - `createRow(int)`：`withRaw` 启用后可使用该 API，用于自定义创建 `Row` 和 `Cell`
+- `isAppend(boolean)`： 默认为false，设置为true文件写入将使用追加而不是覆盖
 - `to(File)`：写入 Excel 文档到文件
 - `to(OutputStream)`：写入 Excel 文档到 OutputStream
 
