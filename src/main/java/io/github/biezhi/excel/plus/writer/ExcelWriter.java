@@ -24,6 +24,7 @@ import io.github.biezhi.excel.plus.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 import java.io.OutputStream;
 import java.lang.reflect.Field;
@@ -42,12 +43,12 @@ import static java.util.Comparator.comparingInt;
 @Slf4j
 public abstract class ExcelWriter {
 
-    private int                 rowNum;
-    private Sheet               sheet;
+    private int rowNum;
+    private Sheet sheet;
     private Map<Integer, Field> fieldIndexes;
-    private List<ExcelColumn>   columns;
+    private List<ExcelColumn> columns;
 
-    Workbook     workbook;
+    Workbook workbook;
     OutputStream outputStream;
 
     ExcelWriter(OutputStream outputStream) {
@@ -76,7 +77,7 @@ public abstract class ExcelWriter {
         // setting styles
         CellStyle headerStyle = null;
         CellStyle columnStyle = null;
-        CellStyle titleStyle  = null;
+        CellStyle titleStyle = null;
         if (null != writer.headerStyle()) {
             headerStyle = writer.headerStyle().accept(workbook, workbook.createCellStyle());
         }
@@ -91,8 +92,8 @@ public abstract class ExcelWriter {
             writer.sheetConsumer().accept(sheet);
         } else {
             // compute the Filed to be written
-            Collection<?> rows   = writer.rows();
-            Field[]       fields = rows.iterator().next().getClass().getDeclaredFields();
+            Collection<?> rows = writer.rows();
+            Field[] fields = rows.iterator().next().getClass().getDeclaredFields();
 
             this.fieldIndexes = new HashMap<>(fields.length);
             this.columns = new ArrayList<>();
@@ -140,6 +141,9 @@ public abstract class ExcelWriter {
         // write to OutputStream
         try (OutputStream os = outputStream) {
             workbook.write(os);
+            if (workbook instanceof SXSSFWorkbook) {
+                ((SXSSFWorkbook) workbook).dispose();
+            }
         } catch (Exception e) {
             throw new WriterException("workbook write to OutputStream error", e);
         }
