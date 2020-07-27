@@ -1,5 +1,6 @@
 package io.github.biezhi.excel.plus;
 
+import io.github.biezhi.excel.plus.enums.ExcelType;
 import io.github.biezhi.excel.plus.exception.WriterException;
 import org.junit.Test;
 
@@ -159,6 +160,12 @@ public class WriterTest extends BaseTest {
         String fileName = "write_csv_test.csv";
         Writer.create().withRows(buildData()).to(new File(fileName));
         deleteTempFile(fileName);
+    }
+
+    @Test
+    public void testAppendWriteCSV() throws WriterException {
+        String fileName = "append_write_csv_test.csv";
+        Writer.create(ExcelType.CSV).withRows(buildData()).isAppend(true).to(new File(fileName));
     }
 
 }
