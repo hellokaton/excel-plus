@@ -62,6 +62,7 @@ public class SheetToCSV<T> extends ReaderConverter implements XSSFSheetXMLHandle
 
     @Override
     public void startRow(int rowNum) {
+        row = null;
         // Prepare for this row
         firstCellOfRow = true;
         currentRow = rowNum;
@@ -69,12 +70,14 @@ public class SheetToCSV<T> extends ReaderConverter implements XSSFSheetXMLHandle
         if (currentRow < startRow) {
             return;
         }
-        row = ExcelUtil.newInstance(type);
     }
 
     @Override
     public void endRow(int rowNum) {
         if (currentRow < startRow) {
+            return;
+        }
+        if(null == row){
             return;
         }
         rowsStream.add(row);
@@ -97,10 +100,15 @@ public class SheetToCSV<T> extends ReaderConverter implements XSSFSheetXMLHandle
             cellReference = new CellAddress(currentRow, currentCol).formatAsString();
         }
 
-        currentCol = (int) (new CellReference(cellReference)).getCol();
+        currentCol = (new CellReference(cellReference)).getCol();
 
         Field field = fieldIndexes.get(currentCol);
         if (null != field) {
+
+            if(row == null){
+                row = ExcelUtil.newInstance(type);
+            }
+
             try {
                 Object    cellValue = formattedValue;
                 Converter converter = fieldConverters.get(field);
