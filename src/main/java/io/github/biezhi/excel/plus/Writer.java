@@ -32,7 +32,10 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -49,6 +52,20 @@ public class Writer {
      * The name of the Sheet to be written to Excel. The default is Sheet0.
      */
     private String sheetName = Constant.DEFAULT_SHEET_NAME;
+
+    private List<String> sheetNames = new ArrayList<>(Collections.singleton(Constant.DEFAULT_SHEET_NAME));
+
+    public List<String> sheetNames() {
+        return this.sheetNames;
+    }
+
+    public void sheetNames(List<String> sheetNames) {
+        if (sheetNames.isEmpty()) {
+            throw new IllegalArgumentException("sheet cannot be empty");
+        }
+        this.sheetNames.clear();
+        this.sheetNames = sheetNames;
+    }
 
     /**
      * Store the row to be written
